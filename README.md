@@ -1,3 +1,6 @@
+# 🔍 PhonePe Forensics
+![](/assets/banner.png)
+
 <div align="center">
 
 <img src="https://img.shields.io/badge/Platform-iOS%20Forensics-blue?style=for-the-badge&logo=apple&logoColor=white" />
@@ -7,20 +10,6 @@
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge" />
 
-<br/><br/>
-
-```
-██████╗ ██╗  ██╗ ██████╗ ███╗   ██╗███████╗██████╗ ███████╗
-██╔══██╗██║  ██║██╔═══██╗████╗  ██║██╔════╝██╔══██╗██╔════╝
-██████╔╝███████║██║   ██║██╔██╗ ██║█████╗  ██████╔╝█████╗  
-██╔═══╝ ██╔══██║██║   ██║██║╚██╗██║██╔══╝  ██╔═══╝ ██╔══╝  
-██║     ██║  ██║╚██████╔╝██║ ╚████║███████╗██║     ███████╗
-╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝
-
-        iOS FORENSICS  ·  DFIR  ·  UPI FRAUD ANALYSIS
-```
-
-# 🔍 PhonePe iOS Forensics
 
 ### *The definitive open-source DFIR toolkit for PhonePe iOS evidence extraction, cross-database correlation, and UPI fraud investigation*
 
