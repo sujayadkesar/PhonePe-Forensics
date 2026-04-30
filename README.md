@@ -1077,22 +1077,7 @@ This tool is a **read-only forensic viewer**. It never writes to, modifies, or d
 | 🍪 Binary Cookie Format | [Satishb3 — Safari Binary Cookie Reader](http://www.securitylearn.net/2012/10/27/cookies-binarycookies-reader/) |
 | 📱 iOS DFIR Fundamentals | [SANS FOR585 — Smartphone Forensic Analysis](https://www.sans.org/cyber-security-courses/advanced-smartphone-mobile-device-forensics/) |
 
----
 
-## 👤 Author
-
-<div align="center">
-
-**Sujay Adkesar**
-*Digital Forensics Analyst*
-
-[![Twitter/X](https://img.shields.io/badge/Twitter-@SUJAY__ADKESAR-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/SUJAY_ADKESAR)
-[![Blog](https://img.shields.io/badge/Blog-thelocalh0st.com-orange?style=for-the-badge&logo=hashnode&logoColor=white)](https://thelocalh0st.com)
-[![GitHub](https://img.shields.io/badge/GitHub-thelocalh0st-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/thelocalh0st)
-
-</div>
-
----
 
 <div align="center">
 
@@ -1102,11 +1087,6 @@ This tool is a **read-only forensic viewer**. It never writes to, modifies, or d
 
 ---
 
-```
-"In Hindu mythology, Chitragupt records every human deed in his ledger.
- PhonePe named their behavioral audit database after him — deliberately.
- This tool reads that ledger."
-```
 
 <img src="https://img.shields.io/badge/Made%20for-Digital%20Forensics-red?style=for-the-badge&logo=target" />
 <img src="https://img.shields.io/badge/Built%20with-Python%20%2B%20Flask-blue?style=for-the-badge&logo=python" />
