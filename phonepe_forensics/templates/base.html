@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}PhonePe iOS Forensics{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark">
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">PP</div>
+    <div class="brand-text">
+      <div class="brand-title">PhonePe Forensics</div>
+      <div class="brand-sub">iOS Acquisition Analyser</div>
+    </div>
+  </div>
+
+  {% if case_loaded %}
+  <div class="case-card">
+    <div class="case-card-label">Active Case</div>
+    <div class="case-card-root" title="{{ case_root }}">{{ active_case_name or 'case' }}</div>
+    {% if subject_name %}<div class="muted small mono" style="margin-top:4px">{{ subject_name }} · {{ subject_upi or '—' }}</div>{% endif %}
+    <div class="case-card-stats">
+      <span><b>{{ nav_metrics.transactions }}</b> txn</span>
+      <span><b>{{ nav_metrics.messages }}</b> msg</span>
+      <span><b>{{ nav_metrics.contacts }}</b> contacts</span>
+      {% if nav_metrics.findings %}<span class="badge-warn"><b>{{ nav_metrics.findings }}</b> flags</span>{% endif %}
+    </div>
+    <a href="{{ url_for('page_cases') }}" class="muted small" style="margin-top:8px;display:inline-block">switch case →</a>
+  </div>
+  {% else %}
+  <div class="case-card" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.3)">
+    <div class="case-card-label" style="color:#fca5a5">No Active Case</div>
+    <a href="{{ url_for('page_cases') }}" class="btn primary" style="margin-top:8px;width:100%;justify-content:center">Open Case Manager</a>
+  </div>
+  {% endif %}
+
+  <nav class="nav">
+    <div class="nav-section">Cases</div>
+    <a href="{{ url_for('page_cases') }}" class="nav-item">⌂ All Cases</a>
+    <a href="{{ url_for('page_case_new') }}" class="nav-item">+ New Case</a>
+
+    {% if case_loaded %}
+    <div class="nav-section">Overview</div>
+    <a href="{{ url_for('page_dashboard') }}" class="nav-item">▣ Dashboard</a>
+    <a href="{{ url_for('page_timeline') }}" class="nav-item">≡ Unified Timeline</a>
+    <a href="{{ url_for('page_hunt') }}" class="nav-item">⌖ Hunting (PPQL)</a>
+    <a href="{{ url_for('page_findings') }}" class="nav-item">⚑ Suspicious Signals</a>
+    <a href="{{ url_for('page_counterparty') }}" class="nav-item">⌕ Counterparty Lookup</a>
+
+    <div class="nav-section">Identity & Auth</div>
+    <a href="{{ url_for('page_identity') }}" class="nav-item">◉ Identity Profile</a>
+    <a href="{{ url_for('page_payment_infra') }}" class="nav-item">◫ Payment Infrastructure</a>
+    <a href="{{ url_for('page_audit') }}" class="nav-item">▤ Audit & Lifecycle</a>
+
+    <div class="nav-section">Financial</div>
+    <a href="{{ url_for('page_transactions') }}" class="nav-item">₹ Transactions</a>
+    <a href="{{ url_for('page_financial') }}" class="nav-item">◊ Rewards / MF / Vouchers</a>
+    <a href="{{ url_for('page_travel') }}" class="nav-item">→ Travel Journeys</a>
+
+    <div class="nav-section">Social</div>
+    <a href="{{ url_for('page_contacts') }}" class="nav-item">○ Contacts (Sampark)</a>
+    <a href="{{ url_for('page_chat') }}" class="nav-item">⌬ Chat & Groups (Burble)</a>
+    <a href="{{ url_for('page_social_graph') }}" class="nav-item">⌖ Social Graph</a>
+    <a href="{{ url_for('page_notifications') }}" class="nav-item">▫ Push / PubSub</a>
+
+    <div class="nav-section">Behaviour</div>
+    <a href="{{ url_for('page_analytics') }}" class="nav-item">▥ Analytics Events</a>
+    <a href="{{ url_for('page_search') }}" class="nav-item">⌕ App Search History</a>
+    <a href="{{ url_for('page_recommendations') }}" class="nav-item">▦ Recommendations</a>
+    <a href="{{ url_for('page_config') }}" class="nav-item">⚙ Config & Experiments</a>
+    <a href="{{ url_for('page_webkit') }}" class="nav-item">⌗ WebKit & Cookies</a>
+
+    <div class="nav-section">Media</div>
+    <a href="{{ url_for('page_media') }}" class="nav-item">◳ QR & Backgrounds & DPs</a>
+
+    <div class="nav-section">Raw Data</div>
+    <a href="{{ url_for('page_db_browser') }}" class="nav-item">▢ Database Inventory</a>
+    <a href="{{ url_for('page_db_sql') }}" class="nav-item">⏵ SQL Console</a>
+
+    <div class="nav-section">Reports</div>
+    <a href="{{ url_for('page_exports') }}" class="nav-item">↧ Exports</a>
+    {% endif %}
+
+    <div class="nav-section">Reference</div>
+    <a href="{{ url_for('page_research') }}" class="nav-item">📖 Research Document</a>
+  </nav>
+
+  <div class="footer">
+    <div>v1.0.0</div>
+    <div class="muted">Read-only forensic tool</div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>{% block heading %}{% endblock %}</h1>
+      <p class="muted">{% block subheading %}{% endblock %}</p>
+    </div>
+    <div class="topbar-actions">
+      {% block topbar_actions %}{% endblock %}
+    </div>
+  </header>
+  <div class="content">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        <div class="flash-stack">
+          {% for cat, m in msgs %}
+            <div class="flash flash-{{ cat }}">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

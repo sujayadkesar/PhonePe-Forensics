@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Hunting (PPQL) — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Hunting Dashboard{% endblock %}
+{% block subheading %}PhonePe Query Language — Splunk-style search across all forensic indexes.{% endblock %}
+
+{% block topbar_actions %}
+{% if result and not result.get('error') and result.get('rows') %}
+<a href="{{ url_for('export_hunt_csv') }}?q={{ query|urlencode }}" class="btn">↧ Export CSV</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="hunt-layout">
+
+  <!-- ===== Query bar ===== -->
+  <form method="get" action="{{ url_for('page_hunt') }}" id="hunt-form">
+    <div class="hunt-bar">
+      <textarea class="hunt-input" name="q" id="hunt-q" rows="3"
+                placeholder="transactions | where direction = &quot;OUT&quot; and amount_inr > 5000 | sort amount_inr desc | head 50 | table created_at_iso, counterparty, amount_inr, utr"
+                spellcheck="false">{{ query }}</textarea>
+      <button type="submit" class="btn primary hunt-run">▶ Run</button>
+    </div>
+  </form>
+
+  <div class="hunt-body">
+
+    <!-- ===== Results pane ===== -->
+    <div class="hunt-results">
+
+      {% if not query %}
+      <div class="empty-state" style="padding:60px 20px">
+        <div class="empty-icon" style="font-size:2rem">⌖</div>
+        <div class="empty-title">Write a PPQL query above</div>
+        <div class="empty-sub">See the reference panel on the right for indexes, fields, and example queries.</div>
+      </div>
+
+      {% elif result and result.get('error') %}
+      <div class="hunt-error">
+        <div class="hunt-error-label">Query error</div>
+        <div class="hunt-error-msg mono">{{ result.error }}</div>
+        <div class="muted small" style="margin-top:8px">Check the syntax reference in the right panel.</div>
+      </div>
+
+      {% elif result %}
+      <div class="hunt-result-meta">
+        <span class="mono">{{ result.count }} row{{ 's' if result.count != 1 else '' }}</span>
+        <span class="muted">from index <span class="mono">{{ result.index_used }}</span></span>
+        {% if result.is_aggregated %}<span class="badge-info">aggregated</span>{% endif %}
+        {% if result.count > 0 %}
+        <a href="{{ url_for('export_hunt_csv') }}?q={{ query|urlencode }}" class="muted small" style="margin-left:auto">↧ CSV</a>
+        {% endif %}
+      </div>
+
+      {% if result.rows %}
+      <div class="tbl-wrap-scroll">
+        <table class="hunt-table">
+          <thead>
+            <tr>
+              {% for col in result.columns %}
+              <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result.rows %}
+            <tr>
+              {% for col in result.columns %}
+              {% set v = row.get(col) %}
+              <td class="{% if v is number %}right mono{% elif col in ('created_at_iso','when_iso','created_at','updated_at') %}mono{% endif %}">
+                {% if v is none %}
+                  <span class="muted">—</span>
+                {% elif v is mapping %}
+                  <span class="mono small">{{ v.get('iso') or v.get('display') or v|string|truncate(60) }}</span>
+                {% elif v is iterable and v is not string %}
+                  <span class="muted small">{{ v|join(', ')|truncate(80) }}</span>
+                {% else %}
+                  {{ v|string|truncate(120) }}
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="empty-state" style="padding:40px 20px">
+        <div class="empty-title">No results</div>
+        <div class="empty-sub">The query ran successfully but returned 0 rows.</div>
+      </div>
+      {% endif %}
+
+      {% endif %}
+    </div>
+
+    <!-- ===== Help sidebar ===== -->
+    <div class="hunt-help">
+
+      <div class="hunt-help-section">
+        <div class="hunt-help-title">Syntax</div>
+        <div class="hunt-syntax-block">
+<pre class="mono small">search "UTR123"
+transactions | where amount_inr > 5000
+transactions
+  | where direction = "OUT"
+  | sort amount_inr desc
+  | head 50
+  | table created_at_iso, counterparty,
+          amount_inr, utr
+chat_messages
+  | where sender_phone_masked like "*9876"
+  | stats count by sender_name
+contacts | where on_phonepe = true | top 10 region
+findings | where severity = "HIGH"
+timeline | where source = "Burble"
+          | sort when_iso desc</pre>
+        </div>
+      </div>
+
+      <div class="hunt-help-section">
+        <div class="hunt-help-title">Operators</div>
+        <div class="hunt-op-grid">
+          <span class="mono">=  !=  &lt;  &lt;=  &gt;  &gt;=</span>
+          <span class="muted small">equality / range</span>
+          <span class="mono">like</span>
+          <span class="muted small">glob match (* ?)</span>
+          <span class="mono">matches</span>
+          <span class="muted small">regex search</span>
+          <span class="mono">contains</span>
+          <span class="muted small">substring</span>
+          <span class="mono">startswith</span>
+          <span class="muted small">prefix match</span>
+          <span class="mono">in [a,b,c]</span>
+          <span class="muted small">set membership</span>
+        </div>
+      </div>
+
+      <div class="hunt-help-section">
+        <div class="hunt-help-title">Pipe commands</div>
+        <div class="hunt-op-grid">
+          <span class="mono">where COND</span><span class="muted small">filter rows</span>
+          <span class="mono">sort F [asc|desc]</span><span class="muted small">order results</span>
+          <span class="mono">head N / tail N</span><span class="muted small">limit rows</span>
+          <span class="mono">table F1,F2,...</span><span class="muted small">select columns</span>
+          <span class="mono">stats count by F</span><span class="muted small">group-by count</span>
+          <span class="mono">stats sum(F) by G</span><span class="muted small">group-by sum</span>
+          <span class="mono">top N field</span><span class="muted small">most common values</span>
+          <span class="mono">dedup field</span><span class="muted small">deduplicate</span>
+          <span class="mono">rename F as G</span><span class="muted small">rename column</span>
+        </div>
+      </div>
+
+      <div class="hunt-help-section">
+        <div class="hunt-help-title">Indexes</div>
+        {% for idx in indexes_help %}
+        <div class="hunt-index-entry">
+          <div class="hunt-index-name" onclick="setQuery('{{ idx.name }}')">{{ idx.name }}</div>
+          <div class="muted small">{{ idx.description }}</div>
+          <div class="hunt-index-fields">
+            {% for f in idx.fields[:10] %}
+            <span class="hunt-field-chip" onclick="appendField('{{ f }}')">{{ f }}</span>
+            {% endfor %}
+            {% if idx.fields|length > 10 %}
+            <span class="muted small">+{{ idx.fields|length - 10 }} more</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+
+  </div><!-- .hunt-body -->
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setQuery(text) {
+  document.getElementById('hunt-q').value = text;
+  document.getElementById('hunt-q').focus();
+}
+function appendField(field) {
+  const ta = document.getElementById('hunt-q');
+  const v = ta.value.trim();
+  if (!v) { ta.value = field; return; }
+  if (v.includes('| table ')) {
+    ta.value = v + ', ' + field;
+  } else {
+    ta.value = v + '\n| table ' + field;
+  }
+  ta.focus();
+}
+// Ctrl+Enter to submit
+document.getElementById('hunt-q').addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    document.getElementById('hunt-form').submit();
+  }
+});
+</script>
+{% endblock %}

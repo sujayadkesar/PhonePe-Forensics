@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Forensic Dashboard{% endblock %}
+{% block subheading %}Snapshot of identity, money flow, social graph & device activity for the active acquisition.{% endblock %}
+{% block topbar_actions %}
+<a href="{{ url_for('page_exports') }}" class="btn primary">↧ Export Evidence</a>
+{% endblock %}
+
+{% block content %}
+
+<section class="identity-hero">
+  <h2>SUBJECT IDENTITY</h2>
+  <div class="row" style="justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div>
+      <div class="name">{{ identity.registered_name or 'Unknown subject' }}</div>
+      <div class="upi">{{ identity.upi_id or '—' }}</div>
+      {% if transactions_summary.self_account_holders %}
+        <div class="muted small" style="margin-top:6px">
+          Bank holder: <span class="mono">{{ transactions_summary.self_account_holders|join(', ') }}</span>
+        </div>
+      {% endif %}
+      {% if transactions_summary.self_phones %}
+        <div class="muted small">Phone: <span class="mono">{{ transactions_summary.self_phones|join(', ') }}</span></div>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      {% if identity.location_hints %}
+        {% set loc = identity.location_hints[0] %}
+        <span class="tag accent">📍 {{ loc.state }} · {{ loc.pincode }}</span>
+        <span class="muted mono small">{{ loc.lat }}, {{ loc.lng or '?' }}</span>
+      {% endif %}
+      <span class="tag info">{{ dashboard.metrics.supported_banks }} banks indexed</span>
+    </div>
+  </div>
+</section>
+
+<div class="metric-grid">
+  <div class="metric accent">
+    <div class="mlabel">Transactions</div>
+    <div class="mvalue">{{ dashboard.metrics.transactions }}</div>
+    <div class="msub">{{ dashboard.earliest_txn|ts }} → {{ dashboard.latest_txn|ts }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Total Received</div>
+    <div class="mvalue pos">{{ dashboard.metrics.transactions_in|inr }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Total Sent</div>
+    <div class="mvalue neg">{{ dashboard.metrics.transactions_out|inr }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Net Flow</div>
+    <div class="mvalue {% if (dashboard.metrics.transactions_in - dashboard.metrics.transactions_out) > 0 %}pos{% else %}neg{% endif %}">
+      {{ (dashboard.metrics.transactions_in - dashboard.metrics.transactions_out)|inr }}
+    </div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Chat Groups</div>
+    <div class="mvalue">{{ dashboard.metrics.groups }}</div>
+    <div class="msub">{{ dashboard.metrics.messages }} messages</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Phonebook</div>
+    <div class="mvalue">{{ dashboard.metrics.phonebook_contacts }}</div>
+    <div class="msub">{{ dashboard.metrics.phonepe_contacts }} on PhonePe</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Behavioral Events</div>
+    <div class="mvalue">{{ dashboard.metrics.kn_events }}</div>
+    <div class="msub">KN analytics queue</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Findings</div>
+    <div class="mvalue {% if dashboard.findings_count %}neg{% endif %}">{{ dashboard.findings_count }}</div>
+    <div class="msub">heuristic flags</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Money Flow by Year</div>
+    {% set yearly_in = transactions_summary.yearly_received_inr or {} %}
+    {% set yearly_out = transactions_summary.yearly_sent_inr or {} %}
+    {% if yearly_in or yearly_out %}
+    <div class="tbl-wrap-scroll">
+    <table>
+      <thead><tr><th>Year</th><th class="right">Received</th><th class="right">Sent</th><th class="right">Net</th></tr></thead>
+      <tbody>
+        {% set years = (yearly_in.keys()|list + yearly_out.keys()|list)|unique|list|sort %}
+        {% for y in years %}
+          {% set ri = yearly_in.get(y, 0) %}
+          {% set ro = yearly_out.get(y, 0) %}
+          <tr>
+            <td class="mono">{{ y }}</td>
+            <td class="right amount-pos">{{ ri|inr }}</td>
+            <td class="right amount-neg">{{ ro|inr }}</td>
+            <td class="right {% if ri-ro > 0 %}amount-pos{% else %}amount-neg{% endif %}">{{ (ri-ro)|inr }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}<p class="muted">No transaction data.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">Top Counterparties</div>
+    {% if dashboard.top_counterparties %}
+    <table>
+      <thead><tr><th>Name / Phone</th><th class="right">Txn count</th></tr></thead>
+      <tbody>
+        {% for name, count in dashboard.top_counterparties[:12] %}
+          <tr>
+            <td><a href="{{ url_for('page_counterparty', q=name) }}">{{ name }}</a></td>
+            <td class="right mono">{{ count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No counterparties yet.</p>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Recent Activity Timeline</div>
+    <a href="{{ url_for('page_timeline') }}" class="muted small">View all →</a>
+  </div>
+  <div class="timeline">
+    {% for ev in timeline[:30] %}
+      <div class="timeline-event" data-source="{{ ev.source }}">
+        <div class="timeline-time">{{ ev.when_iso }} · <span class="tag">{{ ev.source }}</span></div>
+        <div class="timeline-title">{{ ev.title }}</div>
+        {% if ev.detail and ev.detail|length > 0 %}
+          <div class="timeline-detail">
+            {% for k, v in ev.detail.items() if v %}
+              <span class="muted">{{ k }}:</span> <span class="mono">{{ v|string|truncate(80) }}</span>{% if not loop.last %} · {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if findings %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Suspicious signals (top {{ findings|length }} of {{ findings|length }})</div>
+  {% for f in findings[:6] %}
+    <div class="finding {{ f.severity }}">
+      <div class="finding-meta">{{ f.severity }} · {{ f.category }}</div>
+      <div class="finding-title">{{ f.title }}</div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

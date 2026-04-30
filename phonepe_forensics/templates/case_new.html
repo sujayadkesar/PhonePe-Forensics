@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}New Case — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Create New Case{% endblock %}
+{% block subheading %}Register an iOS acquisition for forensic analysis. You will need the three PhonePe container directories.{% endblock %}
+
+{% block content %}
+
+<div class="wizard-wrap">
+
+  <!-- ---- guidance card ---- -->
+  <div class="card" style="margin-bottom:20px;border-left:3px solid var(--accent)">
+    <div class="card-title" style="margin-bottom:10px">📂 Where to find the evidence folders</div>
+    <p class="muted small" style="margin-bottom:10px">
+      An iOS full-filesystem extraction (e.g. via Cellebrite / GrayKey / checkm8 / AFC2) produces one
+      directory per app container. The three PhonePe containers are always named:
+    </p>
+    <div class="guide-paths">
+      <div class="guide-path">
+        <div class="guide-path-name">AppDomain-com.phonepe.PhonePeApp</div>
+        <div class="muted small">Main app sandbox — SQLite transaction database, Preferences, Cookies, WebKit cache</div>
+        <div class="muted small mono" style="margin-top:2px">Typical location: private/var/mobile/Containers/Data/Application/&lt;UUID&gt;/</div>
+      </div>
+      <div class="guide-path">
+        <div class="guide-path-name">AppDomainGroup-group.com.phonepe.PhonePeApp</div>
+        <div class="muted small">Shared group container — Chat (Burble), Contacts (SamparkV2), P2P events</div>
+        <div class="muted small mono" style="margin-top:2px">Typical location: private/var/mobile/Containers/Shared/AppGroup/&lt;UUID&gt;/</div>
+      </div>
+      <div class="guide-path">
+        <div class="guide-path-name">AppDomainGroup-group.com.phonepe.shared</div>
+        <div class="muted small">Cross-app shared session — auth tokens, device fingerprint, config state</div>
+        <div class="muted small mono" style="margin-top:2px">Typical location: private/var/mobile/Containers/Shared/AppGroup/&lt;UUID&gt;/</div>
+      </div>
+    </div>
+    <p class="muted small" style="margin-top:10px">
+      <b>Tip:</b> In Cellebrite PA the containers appear under
+      <span class="mono">iOS &gt; Databases &gt; App Databases</span>. In a raw FS dump they appear
+      as top-level directories in the extraction root — just point "Single root folder" at that directory.
+    </p>
+  </div>
+
+  <!-- ---- form ---- -->
+  <form method="post" action="{{ url_for('page_case_new') }}" id="new-case-form">
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px">Case Details</div>
+
+      <div class="form-row">
+        <label class="form-label">Case Name <span class="req">*</span></label>
+        <input class="form-input" type="text" name="name" value="{{ form.get('name','') }}"
+               placeholder="e.g. Suresh Kumar — FIR 123/2025" required>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Investigator (optional)</label>
+        <input class="form-input" type="text" name="investigator" value="{{ form.get('investigator','') }}"
+               placeholder="Your name / badge number">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-input" name="notes" rows="2"
+                  placeholder="Case reference, court file number, device serial...">{{ form.get('notes','') }}</textarea>
+      </div>
+    </div>
+
+    <!-- ---- mode selector ---- -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title" style="margin-bottom:16px">Evidence Folders</div>
+
+      <div class="wizard-mode-tabs" id="mode-tabs">
+        <label class="wizard-mode-tab {% if form.get('mode','single_root') == 'single_root' %}active{% endif %}">
+          <input type="radio" name="mode" value="single_root"
+                 {% if form.get('mode','single_root') == 'single_root' %}checked{% endif %}
+                 onchange="switchMode('single_root')">
+          Single root folder
+          <span class="muted small" style="display:block;font-weight:400">Parent directory that contains all three AppDomain* sub-folders</span>
+        </label>
+        <label class="wizard-mode-tab {% if form.get('mode') == 'three_paths' %}active{% endif %}">
+          <input type="radio" name="mode" value="three_paths"
+                 {% if form.get('mode') == 'three_paths' %}checked{% endif %}
+                 onchange="switchMode('three_paths')">
+          Three separate folders
+          <span class="muted small" style="display:block;font-weight:400">Specify each container directory individually</span>
+        </label>
+      </div>
+
+      <!-- single root -->
+      <div id="pane-single_root" class="wizard-pane {% if form.get('mode') == 'three_paths' %}hidden{% endif %}">
+        <div class="form-row" style="margin-top:16px">
+          <label class="form-label">Root directory (contains all three AppDomain* folders)</label>
+          <div class="path-row">
+            <input class="form-input mono path-input" type="text" name="single_root"
+                   id="inp-single_root"
+                   value="{{ form.get('single_root','') }}"
+                   placeholder="e.g. C:\Evidence\Case123\extraction_root">
+            <button type="button" class="btn" onclick="validatePath('single_root')">Validate</button>
+          </div>
+          <div id="hint-single_root" class="path-hint muted small"></div>
+        </div>
+      </div>
+
+      <!-- three paths -->
+      <div id="pane-three_paths" class="wizard-pane {% if form.get('mode','single_root') != 'three_paths' %}hidden{% endif %}">
+        <div class="form-row" style="margin-top:16px">
+          <label class="form-label">AppDomain-com.phonepe.PhonePeApp <span class="req">*</span></label>
+          <div class="path-row">
+            <input class="form-input mono path-input" type="text" name="app_domain"
+                   id="inp-app_domain"
+                   value="{{ form.get('app_domain','') }}"
+                   placeholder="Path to AppDomain-com.phonepe.PhonePeApp folder">
+            <button type="button" class="btn" onclick="validatePath('app_domain')">Validate</button>
+          </div>
+          <div id="hint-app_domain" class="path-hint muted small"></div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">AppDomainGroup-group.com.phonepe.PhonePeApp (optional but recommended)</label>
+          <div class="path-row">
+            <input class="form-input mono path-input" type="text" name="group_app"
+                   id="inp-group_app"
+                   value="{{ form.get('group_app','') }}"
+                   placeholder="Path to AppDomainGroup-group.com.phonepe.PhonePeApp folder">
+            <button type="button" class="btn" onclick="validatePath('group_app')">Validate</button>
+          </div>
+          <div id="hint-group_app" class="path-hint muted small"></div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">AppDomainGroup-group.com.phonepe.shared (optional)</label>
+          <div class="path-row">
+            <input class="form-input mono path-input" type="text" name="group_shared"
+                   id="inp-group_shared"
+                   value="{{ form.get('group_shared','') }}"
+                   placeholder="Path to AppDomainGroup-group.com.phonepe.shared folder">
+            <button type="button" class="btn" onclick="validatePath('group_shared')">Validate</button>
+          </div>
+          <div id="hint-group_shared" class="path-hint muted small"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+      <button type="submit" class="btn primary" style="min-width:160px">Create Case →</button>
+      <a href="{{ url_for('page_cases') }}" class="btn">Cancel</a>
+      <span class="muted small">Case is registered immediately. You will process evidence on the next screen.</span>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchMode(mode) {
+  document.getElementById('pane-single_root').classList.toggle('hidden', mode !== 'single_root');
+  document.getElementById('pane-three_paths').classList.toggle('hidden', mode !== 'three_paths');
+  document.querySelectorAll('.wizard-mode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.wizard-mode-tab input').forEach(inp => {
+    if (inp.value === mode) inp.closest('.wizard-mode-tab').classList.add('active');
+  });
+}
+
+async function validatePath(field) {
+  const inp = document.getElementById('inp-' + field);
+  const hint = document.getElementById('hint-' + field);
+  if (!inp || !inp.value.trim()) { hint.textContent = 'Enter a path first.'; return; }
+  hint.textContent = 'Checking...';
+  try {
+    const r = await fetch('/cases/browse-test', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: inp.value.trim()})
+    });
+    const d = await r.json();
+    if (!d.ok) { hint.textContent = '✗ ' + d.error; hint.style.color = 'var(--danger)'; return; }
+    let msg = '✓ Directory found.';
+    if (field === 'single_root') {
+      const checks = [];
+      if (d.has_app_domain)   checks.push('AppDomain ✓');
+      if (d.has_group_app)    checks.push('GroupApp ✓');
+      if (d.has_group_shared) checks.push('GroupShared ✓');
+      if (checks.length) msg += '  ' + checks.join('  ');
+      if (!d.has_app_domain)  msg += '  ⚠ AppDomain-com.phonepe.PhonePeApp not found in this folder.';
+    }
+    const preview = d.listing && d.listing.slice(0,6).join(', ') + (d.listing.length > 6 ? '…' : '');
+    if (preview) msg += `  Contents: ${preview}`;
+    hint.textContent = msg;
+    hint.style.color = d.has_app_domain || field !== 'single_root' ? 'var(--success)' : 'var(--warn)';
+  } catch(e) {
+    hint.textContent = 'Validation request failed: ' + e;
+    hint.style.color = 'var(--danger)';
+  }
+}
+</script>
+{% endblock %}

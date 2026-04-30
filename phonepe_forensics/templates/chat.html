@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Chat — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Chat & Groups (Burble){% endblock %}
+{% block subheading %}{{ chat.summary.group_count }} groups · {{ chat.summary.message_count }} messages · {{ chat.summary.payment_cards }} payment-info cards.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Groups</div><div class="mvalue">{{ chat.summary.group_count }}</div></div>
+  <div class="metric"><div class="mlabel">Messages</div><div class="mvalue">{{ chat.summary.message_count }}</div></div>
+  <div class="metric"><div class="mlabel">Payment Cards</div><div class="mvalue pos">{{ chat.summary.payment_cards }}</div><div class="msub">{{ chat.summary.total_payment_inr|inr }}</div></div>
+  <div class="metric"><div class="mlabel">Text Messages</div><div class="mvalue">{{ chat.summary.text_messages }}</div></div>
+  <div class="metric"><div class="mlabel">Image Attachments</div><div class="mvalue">{{ chat.summary.image_attachments }}</div></div>
+  <div class="metric"><div class="mlabel">Money Requests</div><div class="mvalue">{{ chat.summary.money_requests }}</div></div>
+  <div class="metric"><div class="mlabel">Shared Bank Disclosures</div><div class="mvalue">{{ chat.summary.shared_account_disclosures }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Groups (P2P conversations)</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search counterparty name…"
+           data-filter-input data-filter-target="#groupTable" data-filter-counter="#grpCount">
+    <span class="muted small" id="grpCount" style="margin-left:auto">{{ chat.groups|length }} / {{ chat.groups|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:520px;overflow-y:auto">
+  <table id="groupTable">
+    <thead><tr><th>Counterparty</th><th>Type</th><th>Active</th><th>Members</th><th>Created</th><th>Updated</th><th>Group ID</th></tr></thead>
+    <tbody>
+      {% for g in chat.groups %}
+      <tr>
+        <td><a href="{{ url_for('page_chat_group', group_id=g.group_id) }}">{{ g.name or '—' }}</a></td>
+        <td>{{ g.type or g.subsystem or '—' }}</td>
+        <td>{{ g.active|yes_no }}</td>
+        <td class="mono right">{{ g.member_count or '' }}</td>
+        <td class="mono small">{{ g.created_at|ts }}</td>
+        <td class="mono small">{{ g.updated_at|ts }}</td>
+        <td class="mono small">{{ g.group_id|truncate(20) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% if chat.shared_contacts %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Shared Bank Account Disclosures</div>
+  <p class="muted small">Bank account details shared as P2P chat attachments — high-value forensic evidence.</p>
+  <table>
+    <thead><tr><th>Holder</th><th>Account #</th><th>Bank</th><th>IFSC</th><th>VPA</th><th>Phone</th></tr></thead>
+    <tbody>
+      {% for s in chat.shared_contacts %}
+      <tr>
+        <td>{{ s.account_holder or s.name or '—' }}</td>
+        <td class="mono">{{ s.account_number or '—' }}</td>
+        <td>{{ s.bank_name or '—' }}</td>
+        <td class="mono">{{ s.ifsc or '—' }}</td>
+        <td class="mono">{{ s.vpa or '—' }}</td>
+        <td class="mono">{{ s.phone or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">All Messages ({{ chat.messages|length }})</div>
+    <a href="{{ url_for('export_chat_messages_csv') }}?q={{ q|urlencode }}&type={{ type_filter|urlencode }}" class="btn">↧ Export CSV</a>
+  </div>
+  <form method="get" class="filter-bar">
+    <input type="text" name="q" value="{{ q or '' }}" placeholder="Search content, sender, group, txn ID, UTR…">
+    <select name="type">
+      <option value="">Type: any</option>
+      <option value="PAYMENT_INFO_CARD" {% if type_filter=='PAYMENT_INFO_CARD' %}selected{% endif %}>PAYMENT_INFO_CARD</option>
+      <option value="TEXT_MESSAGE" {% if type_filter=='TEXT_MESSAGE' %}selected{% endif %}>TEXT_MESSAGE</option>
+      <option value="IMAGE_ATTACHMENT" {% if type_filter=='IMAGE_ATTACHMENT' %}selected{% endif %}>IMAGE_ATTACHMENT</option>
+      <option value="REWARD_GIFT_CARD" {% if type_filter=='REWARD_GIFT_CARD' %}selected{% endif %}>REWARD_GIFT_CARD</option>
+    </select>
+    <button type="submit" class="btn">Apply</button>
+    {% if q or type_filter %}
+    <a href="{{ url_for('page_chat') }}" class="btn subtle">Clear</a>
+    {% endif %}
+    <span class="muted small" style="margin-left:auto">
+      {{ chat.messages_filtered|length if chat.messages_filtered is defined else chat.messages|length }} / {{ total_messages }}
+    </span>
+  </form>
+  <div class="tbl-wrap-scroll" style="max-height:600px;overflow-y:auto">
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Dir</th>
+        <th>From / To</th>
+        <th>Group</th>
+        <th>Type</th>
+        <th class="right">Amount</th>
+        <th>State</th>
+        <th>UTR</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in (chat.messages_filtered if chat.messages_filtered is defined else chat.messages) %}
+      {% set is_out = m.direction == 'OUT' %}
+      {% set is_in  = m.direction == 'IN' %}
+      <tr class="msg-row {% if is_out %}out{% elif is_in %}in{% endif %}">
+        <td class="mono small">{{ m.created_at|ts }}</td>
+        <td>
+          {% if is_out %}<span class="dir-pill out">↑ Sent</span>
+          {% elif is_in %}<span class="dir-pill in">↓ Recv</span>
+          {% else %}<span class="dir-pill unk">?</span>{% endif %}
+        </td>
+        <td>
+          {% if is_out %}
+            <span class="muted small">You →</span> <b>{{ m.other_party_name or m.receiver_name or '—' }}</b>
+            {% if m.other_party_phone %}<br><span class="mono small muted">{{ m.other_party_phone }}</span>{% endif %}
+          {% elif is_in %}
+            <b>{{ m.other_party_name or m.sender_name or '—' }}</b> <span class="muted small">→ You</span>
+            {% if m.other_party_phone %}<br><span class="mono small muted">{{ m.other_party_phone }}</span>{% endif %}
+          {% else %}
+            {{ m.sender_name or '—' }}
+            {% if m.receiver_name %}<span class="muted small"> → {{ m.receiver_name }}</span>{% endif %}
+          {% endif %}
+        </td>
+        <td class="small"><a href="{{ url_for('page_chat_group', group_id=m.thread_id) }}">{{ (m.group_name or m.thread_id or '')|truncate(20) }}</a></td>
+        <td><span class="tag">{{ m.type }}</span></td>
+        <td class="right">
+          {% if m.amount_inr %}
+            <span class="amount-{% if is_out %}neg{% else %}pos{% endif %}">{{ m.amount_inr|inr }}</span>
+          {% endif %}
+        </td>
+        <td>{% if m.state %}<span class="tag {{ m.state|lower }}">{{ m.state }}</span>{% endif %}</td>
+        <td class="mono small">{{ m.utr or '—' }}</td>
+        <td class="small">{{ (m.text_message or m.note or m.gift_message or '')|truncate(70) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<style>
+.dir-pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.04em; }
+.dir-pill.out { background:rgba(139,92,246,.18); color:#c4b5fd; }
+.dir-pill.in  { background:rgba(52,211,153,.16); color:var(--success); }
+.dir-pill.unk { background:rgba(255,255,255,.06); color:var(--text-4); }
+tr.msg-row.out td { border-left:2px solid rgba(139,92,246,.35); }
+tr.msg-row.in  td { border-left:2px solid rgba(52,211,153,.30); }
+</style>
+
+{% endblock %}

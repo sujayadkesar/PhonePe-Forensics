@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Identity — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Identity Profile{% endblock %}
+{% block subheading %}Subject account, registered VPAs, devices, persistent identifiers and login sessions.{% endblock %}
+
+{% block content %}
+
+<section class="identity-hero">
+  <h2>SUBJECT</h2>
+  <div class="name">{{ identity.registered_name or 'Unknown subject' }}</div>
+  <div class="upi">{{ identity.upi_id or '—' }}</div>
+  <div class="muted small" style="margin-top:6px">
+    {% if txn_summary.self_account_holders %}Bank holder: <span class="mono">{{ txn_summary.self_account_holders|join(', ') }}</span>{% endif %}
+    {% if txn_summary.self_phones %} · Phone: <span class="mono">{{ txn_summary.self_phones|join(', ') }}</span>{% endif %}
+  </div>
+</section>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-title">Registered UPI VPAs</div>
+    {% set vpas = txn_summary.self_vpas or [] %}
+    {% if vpas %}
+      <div class="row">
+        {% for v in vpas %}<span class="tag accent mono">{{ v }}</span>{% endfor %}
+      </div>
+      <p class="muted small" style="margin-top:10px">
+        {{ vpas|length }} distinct UPI handles linked to this account
+        ({% set psps = [] %}{% for v in vpas %}{% set _ = psps.append(v.split('@')[-1]) %}{% endfor %}
+        PSPs: {{ psps|unique|join(', ') }}).
+      </p>
+    {% else %}<p class="muted">No VPA evidence in transactions.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">Bank Account (self)</div>
+    {% set masked = txn_summary.self_account_masked or [] %}
+    {% if payment_infra.linked_accounts %}
+    <table>
+      <thead><tr><th>Holder</th><th>Account #</th><th>Alias</th><th>Type</th><th>Primary</th></tr></thead>
+      <tbody>
+      {% for a in payment_infra.linked_accounts %}
+        <tr>
+          <td>{{ a.account_holder or '—' }}</td>
+          <td class="mono">{{ a.account_no_masked or '—' }}</td>
+          <td class="mono">{{ a.account_alias or '—' }}</td>
+          <td>{{ a.account_type or '—' }}</td>
+          <td>{{ a.is_primary|yes_no }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% elif masked %}
+      {% for m in masked %}<span class="tag mono">{{ m }}</span>{% endfor %}
+    {% else %}<p class="muted">No linked bank account record.</p>{% endif %}
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Device & Persistent Identifiers</div>
+    <div class="kv">
+      {% for k, v in identity.device_identifiers.items() %}
+        <b>{{ k }}</b>
+        <span class="mono">{{ v|string|truncate(120) if v is not mapping and v is not iterable or v is string else v|tojson|truncate(180) }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Auth & Session Tokens</div>
+    <div class="kv">
+      {% for k, v in identity.tokens.items() %}<b>{{ k }}</b><span class="mono">{{ v|string|truncate(120) }}</span>{% endfor %}
+      {% for k, v in identity.sessions.items() %}<b>{{ k }}</b><span>{{ v|ts if v is mapping else v }}</span>{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Location Hints</div>
+    {% if identity.location_hints %}
+    <table>
+      <thead><tr><th>Source</th><th>Lat</th><th>Lng</th><th>Pincode</th><th>State</th></tr></thead>
+      <tbody>
+      {% for l in identity.location_hints %}
+        <tr>
+          <td>{{ l.source }}</td>
+          <td class="mono">{{ l.lat or '—' }}</td>
+          <td class="mono">{{ l.lng or '—' }}</td>
+          <td class="mono">{{ l.pincode or '—' }}</td>
+          <td>{{ l.state or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No location data found.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">Phone Numbers Associated</div>
+    {% if identity.phones_seen %}
+      <div class="row">
+        {% for p in identity.phones_seen %}<span class="tag mono">{{ p }}</span>{% endfor %}
+      </div>
+    {% else %}<p class="muted">No phones detected in plists.</p>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Feature Flags (Chimera Quick)</div>
+  {% if identity.feature_flags %}
+  <div class="tbl-wrap-scroll" style="max-height:340px;overflow-y:auto">
+    <table>
+      <thead><tr><th>Flag</th><th>Value</th></tr></thead>
+      <tbody>
+      {% for k, v in identity.feature_flags.items() %}
+        <tr><td class="mono">{{ k }}</td><td class="mono">{{ v|string|truncate(120) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="muted">No feature flags cached.</p>{% endif %}
+</div>
+
+{% if audit and audit.consent_user %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Consent Subject (Privacy)</div>
+  <div class="kv">
+    <b>User ID</b><span class="mono">{{ audit.consent_user.user_id }}</span>
+    <b>Phone</b><span class="mono">{{ audit.consent_user.phone }}</span>
+    <b>Device fingerprint</b><span class="mono">{{ audit.consent_user.device_fingerprint }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Timeline — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Unified Timeline{% endblock %}
+{% block subheading %}{{ events|length }} chronologically merged events from every evidence database.{% endblock %}
+{% block topbar_actions %}
+<a href="?limit=500" class="btn subtle">Top 500</a>
+<a href="?limit=2000" class="btn subtle">Top 2000</a>
+<a href="?limit=10000" class="btn subtle">All</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter by source / title / detail…"
+           data-filter-input data-filter-target="#tlTable" data-filter-counter="#tlCount">
+    <select data-filter-select data-filter-target="#tlTable" data-filter-column="1">
+      <option value="">Source: any</option>
+      <option value="TransactionsStore">Transactions</option>
+      <option value="Burble">Chat</option>
+      <option value="PubSubCore">Push topics</option>
+      <option value="KN-Analytics">KN events</option>
+      <option value="Foxtrot-Queue">Foxtrot queue</option>
+      <option value="AuthFoxtrot">Auth events</option>
+      <option value="Rewards">Rewards</option>
+      <option value="CentralSyncManager">Sync activity</option>
+      <option value="Maximus">Recommendations</option>
+      <option value="AppSearch">Search</option>
+      <option value="WebKit">WebKit</option>
+      <option value="Yatra">Travel</option>
+    </select>
+    <span class="muted small" id="tlCount" style="margin-left:auto">{{ events|length }} / {{ events|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:74vh;overflow-y:auto">
+    <table id="tlTable">
+      <thead><tr><th>When</th><th>Source</th><th>Kind</th><th>Title</th><th class="right">Amount</th><th>Link</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+          <tr>
+            <td class="mono small">{{ e.when_iso }}</td>
+            <td><span class="tag">{{ e.source }}</span></td>
+            <td class="mono small">{{ e.kind }}</td>
+            <td>{{ e.title }}</td>
+            <td class="right">{% if e.amount_inr %}<span class="amount-pos">{{ e.amount_inr|inr }}</span>{% endif %}</td>
+            <td class="mono small">
+              {% if e.link_id %}
+                {% if e.source == 'TransactionsStore' %}
+                  <a href="{{ url_for('page_transaction_detail', txn_id=e.link_id) }}">{{ e.link_id|truncate(20) }}</a>
+                {% else %}
+                  {{ e.link_id|truncate(20) }}
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

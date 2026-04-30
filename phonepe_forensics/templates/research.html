@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Research Document — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Research Document{% endblock %}
+{% block subheading %}PhD-level reference covering every database, table, column and forensic artifact in a PhonePe iOS acquisition.{% endblock %}
+
+{% block content %}
+
+<div class="research-layout">
+
+  <!-- table of contents -->
+  <nav class="research-toc">
+    <div class="research-toc-title">Contents</div>
+    {% for slug, title in toc %}
+    <a href="{{ url_for('page_research_section', slug=slug) }}" class="research-toc-item">{{ title }}</a>
+    {% endfor %}
+  </nav>
+
+  <!-- section cards -->
+  <div class="research-main">
+
+    <div class="card" style="margin-bottom:20px;border-left:3px solid var(--accent)">
+      <p style="margin:0;line-height:1.7">
+        This document describes every artifact extracted from a PhonePe iOS full-filesystem acquisition.
+        Click any section to read the full analysis, forensic value assessment, schema notes and example PPQL queries.
+        Use the <a href="{{ url_for('page_hunt') }}">Hunting Dashboard</a> to run queries live against loaded evidence.
+      </p>
+    </div>
+
+    <div class="research-section-grid">
+      {% for section in sections %}
+      <a href="{{ url_for('page_research_section', slug=section.slug) }}" class="research-section-card">
+        <div class="research-section-number">{{ loop.index }}</div>
+        <div class="research-section-info">
+          <div class="research-section-title">{{ section.title }}</div>
+          {% if section.intro %}
+          <div class="research-section-intro muted small">{{ section.intro|truncate(160) }}</div>
+          {% endif %}
+          {% if section.blocks %}
+          <div class="muted small" style="margin-top:6px">{{ section.blocks|length }} section{{ 's' if section.blocks|length != 1 }}</div>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

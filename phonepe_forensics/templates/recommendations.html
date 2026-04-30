@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Recommendations — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Recommendations (Maximus){% endblock %}
+{% block subheading %}On-device personalised product recommendations and the user signals they generate.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Products tracked</div><div class="mvalue">{{ recs.summary.product_count }}</div></div>
+  <div class="metric"><div class="mlabel">Recommendations</div><div class="mvalue">{{ recs.summary.recommendation_count }}</div></div>
+  <div class="metric"><div class="mlabel">Signals</div><div class="mvalue">{{ recs.summary.signal_count }}</div></div>
+</div>
+
+{% if recs.products %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Products</div>
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Namespace</th><th>Preferred size</th></tr></thead>
+    <tbody>
+    {% for p in recs.products %}
+      <tr><td class="mono small">{{ p.product_id }}</td><td>{{ p.name }}</td><td>{{ p.namespace }}</td><td>{{ p.preferred_size }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if recs.recommendations %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Items recommended</div>
+  <table>
+    <thead><tr><th>Item ID</th><th class="right">Rank</th><th>Expiry</th><th>Product PK</th></tr></thead>
+    <tbody>
+    {% for r in recs.recommendations %}
+      <tr>
+        <td class="mono small">{{ r.item_id }}</td>
+        <td class="right mono">{{ r.rank }}</td>
+        <td class="mono small">{{ r.expiry|ts }}</td>
+        <td class="mono">{{ r.product_pk }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if recs.signals %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">User signals captured</div>
+  <table>
+    <thead><tr><th>Signal type</th><th>When</th><th>Synced</th><th>Recommendation PK</th></tr></thead>
+    <tbody>
+    {% for s in recs.signals %}
+      <tr>
+        <td><span class="tag">{{ s.signal_type }}</span></td>
+        <td class="mono small">{{ s.timestamp|ts }}</td>
+        <td>{{ s.synced|yes_no }}</td>
+        <td class="mono">{{ s.recommendation_pk }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

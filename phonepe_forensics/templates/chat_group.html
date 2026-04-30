@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{{ group.name }} — Chat — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Chat with {{ group.name }}{% endblock %}
+{% block subheading %}Group {{ group.group_id }} · {{ group.member_count or '?' }} members · {{ messages|length }} messages.{% endblock %}
+{% block topbar_actions %}
+<a href="{{ url_for('export_chat_csv', group_id=group.group_id) }}" class="btn">↧ Export this thread (CSV)</a>
+<a href="{{ url_for('page_chat') }}" class="btn">← All Groups</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="kv">
+    <b>Group ID</b><span class="mono">{{ group.group_id }}</span>
+    <b>Type</b><span>{{ group.type or group.subsystem or '—' }}</span>
+    <b>Subscription</b><span>{{ group.subscription or '—' }}</span>
+    <b>Active</b><span>{{ group.active|yes_no }}</span>
+    <b>Created</b><span>{{ group.created_at|ts }}</span>
+    <b>Updated</b><span>{{ group.updated_at|ts }}</span>
+    <b>Visibility</b><span>{{ group.visibility or '—' }}</span>
+  </div>
+</div>
+
+{% if members %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Participants ({{ members|length }})</div>
+  <table>
+    <thead><tr><th>Display name</th><th>Phone (masked)</th><th>Role</th><th>State</th><th>PhonePe user</th><th>Added</th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr>
+        <td><b>{{ m.display_name or '—' }}</b></td>
+        <td class="mono">{{ m.masked_phone or '—' }}</td>
+        <td><span class="tag {{ (m.role or '')|lower }}">{{ m.role }}</span></td>
+        <td>{{ m.state or '—' }}</td>
+        <td>{{ m.phonepe_user|yes_no }}</td>
+        <td class="mono small">{{ m.added_on|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Conversation</div>
+  {% if messages %}
+  <div class="chat-stream">
+    {% for m in messages %}
+      {% set is_self = (m.sender_is_self == true) or (m.direction == 'OUT') %}
+      <div class="bubble-row {% if is_self %}me{% else %}them{% endif %}">
+        <div class="bubble {% if is_self %}me{% else %}them{% endif %}">
+          <div class="bubble-meta">
+            {% if is_self %}
+              <b>You</b>
+              {% if m.receiver_name %}<span class="muted small">→ {{ m.receiver_name }}</span>{% endif %}
+            {% else %}
+              <b>{{ m.sender_name or m.other_party_name or group.name or 'Unknown' }}</b>
+              {% if m.sender_phone_masked %}<span class="mono small">{{ m.sender_phone_masked }}</span>{% endif %}
+              <span class="muted small">→ You</span>
+            {% endif %}
+          </div>
+          <div class="bubble-body">
+            {% if m.type == 'PAYMENT_INFO_CARD' %}
+              <div class="payment-card">
+                <div class="pcard-amount">{{ m.amount_inr|inr }}</div>
+                <div class="pcard-state">
+                  {% if m.state %}<span class="tag {{ m.state|lower }}">{{ m.state }}</span>{% endif %}
+                  {% if m.instrument %}<span class="tag">{{ m.instrument }}</span>{% endif %}
+                  <span class="dir-pill {% if is_self %}out{% else %}in{% endif %}">{% if is_self %}↑ Sent{% else %}↓ Received{% endif %}</span>
+                </div>
+                {% if m.transaction_id %}
+                  <div class="pcard-line">Txn <a href="{{ url_for('page_transaction_detail', txn_id=m.transaction_id) }}" class="mono small">{{ m.transaction_id }}</a></div>
+                {% endif %}
+                {% if m.utr %}<div class="pcard-line">UTR <span class="mono small">{{ m.utr }}</span></div>{% endif %}
+                {% if m.note %}<div class="pcard-line">Note: <i>{{ m.note }}</i></div>{% endif %}
+              </div>
+            {% elif m.type == 'TEXT_MESSAGE' %}
+              <div class="text-msg">{{ m.text_message or m.note or '—' }}</div>
+            {% elif m.type == 'IMAGE_ATTACHMENT' %}
+              <div class="text-msg muted">📷 Image attachment</div>
+              {% if m.preview_url %}<img src="{{ m.preview_url }}" style="max-width:240px;margin-top:6px;border-radius:6px">{% endif %}
+            {% elif m.type == 'GIFT_RECEIVED' or 'GIFT' in (m.type or '') or 'REWARD' in (m.type or '') %}
+              <div class="text-msg">🎁 {{ m.gift_message or m.text_message or m.reward_type or m.type }}</div>
+            {% else %}
+              <div class="text-msg muted">{{ m.text_message or m.note or m.type }}</div>
+            {% endif %}
+          </div>
+          <div class="bubble-time">{{ m.created_at|ts }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">No messages.</p>
+  {% endif %}
+</div>
+
+<style>
+.chat-stream { display:flex; flex-direction:column; gap:8px; padding:8px 0 16px; }
+.bubble-row { display:flex; }
+.bubble-row.me { justify-content:flex-end; }
+.bubble-row.them { justify-content:flex-start; }
+.bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.bubble.me {
+  background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(109,40,217,0.10));
+  border-color: rgba(139,92,246,0.35);
+  border-bottom-right-radius: 4px;
+}
+.bubble.them {
+  background: var(--bg-2);
+  border-bottom-left-radius: 4px;
+}
+.bubble-meta { font-size:11px; color:var(--text-3); margin-bottom:6px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.bubble-meta b { color:var(--text-1); }
+.bubble-body { font-size:13px; color:var(--text-1); line-height:1.5; }
+.bubble-time { font-size:10px; color:var(--text-4); margin-top:6px; font-family:var(--mono); }
+.text-msg { white-space:pre-wrap; word-break:break-word; }
+.payment-card { padding:8px 10px; background:rgba(255,255,255,0.04); border-radius:8px; }
+.pcard-amount { font-family:var(--mono); font-size:18px; font-weight:700; color:var(--success); }
+.pcard-state { margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; }
+.pcard-line { margin-top:6px; font-size:12px; color:var(--text-2); }
+</style>
+
+{% endblock %}

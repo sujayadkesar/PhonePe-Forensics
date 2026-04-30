@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Push / PubSub — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Push & PubSub Topics{% endblock %}
+{% block subheading %}{{ notifications.summary.topic_count }} topics tracked by Bullhorn (PhonePe's real-time pub-sub).{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Topics</div><div class="mvalue">{{ notifications.summary.topic_count }}</div></div>
+  {% for k, v in (notifications.summary.subsystem_breakdown or {}).items() %}
+    <div class="metric"><div class="mlabel">{{ k }}</div><div class="mvalue">{{ v }}</div><div class="msub">subsystem</div></div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">All Topics</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search topic ID, subsystem…"
+           data-filter-input data-filter-target="#topicTable" data-filter-counter="#topicCount">
+    <span class="muted small" id="topicCount" style="margin-left:auto">{{ notifications.topics|length }} / {{ notifications.topics|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow-y:auto">
+  <table id="topicTable">
+    <thead><tr><th>Topic ID</th><th>Subsystem</th><th>Subscription</th><th>Storage</th><th class="right">Raw msgs</th><th>Last sync</th><th>Created</th></tr></thead>
+    <tbody>
+    {% for t in notifications.topics %}
+      <tr>
+        <td class="mono small">{{ t.topic_id|truncate(40) }}</td>
+        <td><span class="tag">{{ t.subsystem }}</span></td>
+        <td>{{ t.subscription_status or '—' }}</td>
+        <td>{{ t.storage_type or '—' }}</td>
+        <td class="right mono">{{ t.raw_message_count }}</td>
+        <td class="mono small">{{ t.last_sync|ts }}</td>
+        <td class="mono small">{{ t.created_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

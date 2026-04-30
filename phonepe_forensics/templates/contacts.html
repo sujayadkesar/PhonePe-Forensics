@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Contacts — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Contacts (Sampark){% endblock %}
+{% block subheading %}{{ contacts.summary.cyclops_total }} PhonePe contacts · {{ contacts.summary.phonebook_total }} phonebook entries · {{ contacts.summary.external_image_count }} cached profile pictures.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">PhonePe contacts</div><div class="mvalue">{{ contacts.summary.cyclops_total }}</div></div>
+  <div class="metric"><div class="mlabel">Phonebook entries</div><div class="mvalue">{{ contacts.summary.phonebook_total }}</div></div>
+  <div class="metric"><div class="mlabel">On PhonePe</div><div class="mvalue pos">{{ contacts.summary.on_phonepe_count }}</div></div>
+  <div class="metric"><div class="mlabel">External VPAs known</div><div class="mvalue">{{ contacts.summary.has_external_vpa_count }}</div></div>
+  <div class="metric"><div class="mlabel">Deleted contacts</div><div class="mvalue">{{ contacts.summary.deleted_contacts }}</div></div>
+  <div class="metric"><div class="mlabel">Cached profile pics</div><div class="mvalue">{{ contacts.summary.external_image_count }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">PhonePe verified contacts (Cyclops)</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search name, phone, VPA…"
+           data-filter-input data-filter-target="#cyclopsTable" data-filter-counter="#cycCount">
+    <select data-filter-select data-filter-target="#cyclopsTable" data-filter-column="3">
+      <option value="">UPI state: any</option>
+      <option value="ENABLED">ENABLED</option>
+      <option value="DISABLED">DISABLED</option>
+    </select>
+    <span class="muted small" id="cycCount" style="margin-left:auto">{{ contacts.cyclops_contacts|length }} / {{ contacts.cyclops_contacts|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll">
+  <table id="cyclopsTable">
+    <thead><tr><th>Name</th><th>Phone</th><th>VPA</th><th>UPI state</th><th>Region</th><th>Last synced</th></tr></thead>
+    <tbody>
+      {% for c in contacts.cyclops_contacts %}
+      <tr>
+        <td>
+          <a href="{{ url_for('page_counterparty', q=c.verified_name or c.phone) }}">
+            {{ c.verified_name or c.external_vpa_name or '—' }}
+          </a>
+        </td>
+        <td class="mono">{{ c.phone or '—' }}</td>
+        <td class="mono">{{ c.external_vpa or '—' }}</td>
+        <td>{% if c.upi_state %}<span class="tag {{ c.upi_state|lower }}">{{ c.upi_state }}</span>{% endif %}</td>
+        <td>{{ c.region or '—' }}</td>
+        <td class="mono small">{{ c.last_synced|ts }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Device Phonebook (full names + DPs)</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search name or number…"
+           data-filter-input data-filter-target="#pbTable" data-filter-counter="#pbCount">
+    <select data-filter-select data-filter-target="#pbTable" data-filter-column="3">
+      <option value="">Image: any</option>
+      <option value="Yes">With image</option>
+    </select>
+    <span class="muted small" id="pbCount" style="margin-left:auto">{{ contacts.phonebook_contacts|length }} / {{ contacts.phonebook_contacts|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:520px;overflow-y:auto">
+  <table id="pbTable">
+    <thead><tr><th>Name</th><th>Phone</th><th>Country</th><th>Has image</th><th>Image size</th><th>Created</th><th>Deleted</th></tr></thead>
+    <tbody>
+      {% for c in contacts.phonebook_contacts %}
+      <tr>
+        <td>{{ c.full_name or '—' }}</td>
+        <td class="mono">{{ c.normalized or c.raw_number or '—' }}</td>
+        <td>{{ c.country_code or '—' }}</td>
+        <td>{{ c.has_image|yes_no }}</td>
+        <td class="mono small">{{ c.image_size or '' }}</td>
+        <td class="mono small">{{ c.creation_time|ts }}</td>
+        <td>{{ c.deleted|yes_no }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% if contacts.external_data and contacts.external_data.images %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Cached Profile Pictures (._SamparkV2_SUPPORT/_EXTERNAL_DATA)</div>
+  <p class="muted small">{{ contacts.external_data.image_count }} JPEG/PNG blobs stored alongside SamparkV2 SQLite.</p>
+  <div class="gallery">
+    {% for img in contacts.external_data.images[:240] %}
+      <div class="gallery-item">
+        <img src="{{ url_for('api_file', p=img.path) }}" alt="{{ img.name }}" loading="lazy">
+        <div class="gallery-label">{{ img.name|truncate(28) }}<br>{{ img.size }} B</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

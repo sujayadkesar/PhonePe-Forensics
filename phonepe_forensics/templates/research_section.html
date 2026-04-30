@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }} — Research Document{% endblock %}
+{% block heading %}{{ section.title }}{% endblock %}
+{% block subheading %}PhonePe iOS forensics reference{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('page_research') }}" class="btn">← All Sections</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="research-layout">
+
+  <!-- sidebar ToC -->
+  <nav class="research-toc">
+    <div class="research-toc-title">Contents</div>
+    {% for slug, title in toc %}
+    <a href="{{ url_for('page_research_section', slug=slug) }}"
+       class="research-toc-item {% if slug == section.slug %}active{% endif %}">{{ title }}</a>
+    {% endfor %}
+  </nav>
+
+  <!-- main content -->
+  <div class="research-main">
+
+    {% if section.intro %}
+    <div class="research-intro">{{ section.intro }}</div>
+    {% endif %}
+
+    {% for block in section.blocks %}
+    <div class="research-block">
+
+      {% if block.heading %}
+      <h3 class="research-block-heading">{{ block.heading }}</h3>
+      {% endif %}
+
+      {% if block.body %}
+      <p class="research-block-body">{{ block.body }}</p>
+      {% endif %}
+
+      {% if block.list %}
+      <ul class="research-list">
+        {% for item in block.list %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if block.rows %}
+      <div class="tbl-wrap-scroll" style="margin-top:12px">
+        <table class="research-table">
+          <thead>
+            <tr>
+              <th>Artifact / Table</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>What We Read</th>
+              <th>Forensic Value</th>
+              {% if block.rows[0].get('sample_query') %}<th>Sample Query</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in block.rows %}
+            <tr>
+              <td class="mono small">{{ row.name }}</td>
+              <td><span class="tag">{{ row.kind }}</span></td>
+              <td class="mono small muted">{{ row.location }}</td>
+              <td class="small">{{ row.what_we_read }}</td>
+              <td class="small">{{ row.forensic_value }}</td>
+              {% if block.rows[0].get('sample_query') %}
+              <td>
+                {% if row.sample_query %}
+                <code class="mono small research-query"
+                      onclick="copyQuery(this)"
+                      title="Click to copy">{{ row.sample_query }}</code>
+                {% else %}—{% endif %}
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if block.ppql_examples %}
+      <div class="research-ppql-block">
+        <div class="research-ppql-label">PPQL Examples</div>
+        {% for ex in block.ppql_examples %}
+        <div class="research-ppql-example">
+          <pre class="mono small research-query" onclick="openHunt(this)" title="Click to open in Hunting Dashboard">{{ ex }}</pre>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if block.note %}
+      <div class="research-note">{{ block.note }}</div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+    <!-- prev / next navigation -->
+    <div class="research-nav">
+      {% set ns = namespace(prev=none, next=none, found=false) %}
+      {% for slug, title in toc %}
+        {% if ns.found and ns.next is none %}
+          {% set ns.next = (slug, title) %}
+        {% endif %}
+        {% if slug == section.slug %}
+          {% set ns.found = true %}
+        {% endif %}
+        {% if not ns.found %}
+          {% set ns.prev = (slug, title) %}
+        {% endif %}
+      {% endfor %}
+
+      <div>
+        {% if ns.prev %}
+        <a href="{{ url_for('page_research_section', slug=ns.prev[0]) }}" class="btn">← {{ ns.prev[1] }}</a>
+        {% endif %}
+      </div>
+      <div>
+        {% if ns.next %}
+        <a href="{{ url_for('page_research_section', slug=ns.next[0]) }}" class="btn primary">{{ ns.next[1] }} →</a>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyQuery(el) {
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    const orig = el.title;
+    el.title = 'Copied!';
+    setTimeout(() => el.title = orig, 1500);
+  });
+}
+function openHunt(el) {
+  const q = encodeURIComponent(el.textContent.trim());
+  window.location.href = '/hunt?q=' + q;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Audit & Lifecycle — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Audit & Lifecycle{% endblock %}
+{% block subheading %}Sync history, consent records, background tasks and on-device ML model state.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Ledger syncs</div><div class="mvalue">{{ audit.summary.ledger_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">Central syncs</div><div class="mvalue">{{ audit.summary.central_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">BG sync items</div><div class="mvalue">{{ audit.summary.bg_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">Consents</div><div class="mvalue">{{ audit.summary.consent_count }}</div></div>
+</div>
+
+{% if audit.consent_user %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Consent Subject</div>
+  <div class="kv">
+    <b>User ID</b><span class="mono">{{ audit.consent_user.user_id }}</span>
+    <b>Phone</b><span class="mono">{{ audit.consent_user.phone }}</span>
+    <b>Device fingerprint</b><span class="mono">{{ audit.consent_user.device_fingerprint }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% if audit.consents %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Consent Acceptances</div>
+  <table>
+    <thead><tr><th>State</th><th>Destination</th><th>Subject ID</th><th>End time</th></tr></thead>
+    <tbody>
+    {% for c in audit.consents %}
+      <tr>
+        <td><span class="tag">{{ c.state }}</span></td>
+        <td>{{ c.destination }}</td>
+        <td class="mono small">{{ c.subject_id }}</td>
+        <td class="mono small">{{ c.end_time|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if audit.consent_definitions %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Consent Definitions</div>
+  <table>
+    <thead><tr><th>Definition</th><th>Use case</th><th>Data source</th><th>Mapping ID</th></tr></thead>
+    <tbody>
+    {% for d in audit.consent_definitions %}
+      <tr>
+        <td>{{ d.definition }}</td>
+        <td>{{ d.use_case }}</td>
+        <td>{{ d.data_source }}</td>
+        <td class="mono small">{{ d.mapping_id }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if audit.cassini_models %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">On-device ML Models (Cassini)</div>
+  <table>
+    <thead><tr><th>Name</th><th>ID</th><th>Local state</th><th>Server state</th><th>Checksum</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for m in audit.cassini_models %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td class="mono small">{{ m.id }}</td>
+        <td><span class="tag">{{ m.local_state }}</span></td>
+        <td>{{ m.server_state }}</td>
+        <td class="mono small">{{ m.checksum }}</td>
+        <td class="mono small">{{ m.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Central Sync history</div>
+    <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>System</th><th>Key</th><th>Type</th><th>Status</th><th>Last attempt</th><th>Last completed</th></tr></thead>
+      <tbody>
+      {% for s in audit.central_sync %}
+        <tr>
+          <td>{{ s.system }}</td>
+          <td class="mono small">{{ s.key }}</td>
+          <td class="small">{{ s.type }}</td>
+          <td><span class="tag">{{ s.status }}</span></td>
+          <td class="mono small">{{ s.last_attempt|ts }}</td>
+          <td class="mono small">{{ s.last_completed|ts }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Background Sync items</div>
+    <table>
+      <thead><tr><th>Identifier</th><th>Last sync</th></tr></thead>
+      <tbody>
+      {% for s in audit.bg_sync_items %}
+        <tr><td class="mono small">{{ s.identifier }}</td><td class="mono small">{{ s.last_sync|ts }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="divider"></div>
+    <div class="card-title">Ledger Sync (Chronicle)</div>
+    <div class="tbl-wrap-scroll" style="max-height:36vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>Ledger ID</th><th>Balance</th><th>Expense</th><th>Last sync</th></tr></thead>
+      <tbody>
+      {% for l in audit.ledger_sync %}
+        <tr>
+          <td class="mono small">{{ l.ledger_id|truncate(28) }}</td>
+          <td>{{ l.balance_status }}</td>
+          <td>{{ l.expense_status }}</td>
+          <td class="mono small">{{ l.last_balance_sync|ts }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
