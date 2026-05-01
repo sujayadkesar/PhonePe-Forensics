@@ -31,19 +31,23 @@
 ---
 ## How it looks! <br>
 ### Forensics Dashboard
-<BR>
+<br>
+
 ![](/assets/forensics-dashboard.png)
 <br>
 ### Counterparty lookup 
-<BR>
+<br>
+
 ![](/assets/counterparty-lookup.png)
 <br>
 ### Transaction Ledger 
-<BR>
+<br>
+
 ![](/assets/transaction-ledger.png)
 <br>
 ### Splunk like Hunting Dashboard 
-<BR>
+<br>
+
 ![](/assets/hunting-dashboard.png)
 
 
