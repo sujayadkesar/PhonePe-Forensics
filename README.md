@@ -29,6 +29,13 @@
 </div>
 
 ---
+## How it looks! 
+
+![](/assets/forensics-dashboard.png)
+![](/assets/counterparty-lookup.png)
+![](/assets/transaction-ledger.png)
+![](/assets/hunting-dashboard.png)
+
 
 ## 📋 Table of Contents
 
@@ -431,6 +438,7 @@ Events inside pending batches include geolocation coordinates: `{"latitude": 17.
 **Dash** (`Dash-Events.sqlite`): Screen load latencies — implicitly prove specific screens were rendered at specific timestamps.
 
 ---
+
 
 ### 💰 `extract_financial`
 
