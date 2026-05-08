@@ -30,6 +30,11 @@ def build_unified_timeline(case_data: Dict[str, Any], limit: int = 5000) -> List
     for t in case_data.get("transactions", {}).get("transactions", []):
         ts = t.get("created_at")
         if not ts:
+            # Fall back to the timestamp encoded in the global payment ID
+            emb = t.get("id_embedded_ts") or {}
+            if emb.get("embedded_epoch_ms"):
+                ts = {"epoch_ms": emb["embedded_epoch_ms"], "iso": emb.get("embedded_iso", "")}
+        if not ts:
             continue
         events.append({
             "when_ms": ts["epoch_ms"],
