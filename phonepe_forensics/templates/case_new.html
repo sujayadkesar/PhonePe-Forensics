@@ -93,6 +93,7 @@
                    id="inp-single_root"
                    value="{{ form.get('single_root','') }}"
                    placeholder="e.g. C:\Evidence\Case123\extraction_root">
+            <button type="button" class="btn" onclick="browseFolder('single_root')">Browse…</button>
             <button type="button" class="btn" onclick="validatePath('single_root')">Validate</button>
           </div>
           <div id="hint-single_root" class="path-hint muted small"></div>
@@ -108,6 +109,7 @@
                    id="inp-app_domain"
                    value="{{ form.get('app_domain','') }}"
                    placeholder="Path to AppDomain-com.phonepe.PhonePeApp folder">
+            <button type="button" class="btn" onclick="browseFolder('app_domain')">Browse…</button>
             <button type="button" class="btn" onclick="validatePath('app_domain')">Validate</button>
           </div>
           <div id="hint-app_domain" class="path-hint muted small"></div>
@@ -120,6 +122,7 @@
                    id="inp-group_app"
                    value="{{ form.get('group_app','') }}"
                    placeholder="Path to AppDomainGroup-group.com.phonepe.PhonePeApp folder">
+            <button type="button" class="btn" onclick="browseFolder('group_app')">Browse…</button>
             <button type="button" class="btn" onclick="validatePath('group_app')">Validate</button>
           </div>
           <div id="hint-group_app" class="path-hint muted small"></div>
@@ -132,6 +135,7 @@
                    id="inp-group_shared"
                    value="{{ form.get('group_shared','') }}"
                    placeholder="Path to AppDomainGroup-group.com.phonepe.shared folder">
+            <button type="button" class="btn" onclick="browseFolder('group_shared')">Browse…</button>
             <button type="button" class="btn" onclick="validatePath('group_shared')">Validate</button>
           </div>
           <div id="hint-group_shared" class="path-hint muted small"></div>
@@ -159,6 +163,29 @@ function switchMode(mode) {
   document.querySelectorAll('.wizard-mode-tab input').forEach(inp => {
     if (inp.value === mode) inp.closest('.wizard-mode-tab').classList.add('active');
   });
+}
+
+
+async function browseFolder(field) {
+  const inp = document.getElementById('inp-' + field);
+  const hint = document.getElementById('hint-' + field);
+  if (hint) { hint.textContent = 'Opening folder picker…'; hint.style.color = 'var(--text-3)'; }
+  try {
+    const initial = inp && inp.value.trim() ? inp.value.trim() : '';
+    const r = await fetch('/cases/browse-folder', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({initial})
+    });
+    const d = await r.json();
+    if (d.cancelled) { if (hint) hint.textContent = ''; return; }
+    if (!d.ok) { if (hint) { hint.textContent = '✗ ' + d.error; hint.style.color = 'var(--danger)'; } return; }
+    if (inp) inp.value = d.path;
+    if (hint) hint.textContent = '';
+    validatePath(field);
+  } catch(e) {
+    if (hint) { hint.textContent = 'Browse failed: ' + e; hint.style.color = 'var(--danger)'; }
+  }
 }
 
 async function validatePath(field) {

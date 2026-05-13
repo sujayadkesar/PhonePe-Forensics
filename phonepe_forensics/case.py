@@ -162,8 +162,10 @@ class Case:
     # ---- derived views (lazy) ----
     def timeline(self, limit: int = 5000) -> List[Dict[str, Any]]:
         if self._timeline is None:
-            self._timeline = build_unified_timeline(self.data, limit=limit)
-        return self._timeline
+            # Build without a cap so a dashboard call (limit=30) does not
+            # poison subsequent timeline-page calls (limit=1500, 10000...).
+            self._timeline = build_unified_timeline(self.data, limit=999_999)
+        return self._timeline[:limit]
 
     def social_graph(self) -> Dict[str, Any]:
         if self._social_graph is None:

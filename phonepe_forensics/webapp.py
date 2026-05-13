@@ -260,6 +260,25 @@ def api_case_validate():
     })
 
 
+
+
+@app.route("/cases/browse-folder", methods=["POST"])
+def api_browse_folder():
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        root = tk.Tk()
+        root.withdraw()
+        root.wm_attributes("-topmost", True)
+        initial = (request.json or {}).get("initial", os.path.expanduser("~"))
+        folder = filedialog.askdirectory(parent=root, initialdir=initial, title="Select Evidence Folder")
+        root.destroy()
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)})
+    if not folder:
+        return jsonify({"ok": False, "cancelled": True})
+    return jsonify({"ok": True, "path": os.path.normpath(folder)})
+
 # ---------------------------------------------------------------------------
 # Pages (require active case)
 # ---------------------------------------------------------------------------

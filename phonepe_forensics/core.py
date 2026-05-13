@@ -79,8 +79,8 @@ def normalize_timestamp(value: Any) -> Optional[Dict[str, Any]]:
         return None
     return {
         "epoch_ms": int(epoch_s * 1000),
-        "iso": dt.isoformat(),
-        "display": dt.strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "iso": dt.strftime("%Y-%m-%d %H:%M:%S"),
+        "display": dt.strftime("%Y-%m-%d %H:%M:%S"),
         "source": source,
     }
 
@@ -231,7 +231,7 @@ def flatten_plist(value: Any, prefix: str = "", out: Optional[Dict[str, Any]] = 
         except Exception:
             out[prefix] = f"<bytes:{len(value)}>"
     elif isinstance(value, datetime):
-        out[prefix] = value.isoformat()
+        out[prefix] = value.strftime("%Y-%m-%d %H:%M:%S")
     else:
         out[prefix] = value
     return out
@@ -316,8 +316,8 @@ class BinaryCookieReader:
             "path": _safe_cstr(path_off),
             "value": _safe_cstr(value_off),
             "flags": flag_names,
-            "expiry_iso": _to_dt(expiry + APPLE_EPOCH_OFFSET).isoformat() if NSDATE_REASONABLE_MIN < expiry < NSDATE_REASONABLE_MAX else None,
-            "creation_iso": _to_dt(creation + APPLE_EPOCH_OFFSET).isoformat() if NSDATE_REASONABLE_MIN < creation < NSDATE_REASONABLE_MAX else None,
+            "expiry_iso": _to_dt(expiry + APPLE_EPOCH_OFFSET).strftime("%Y-%m-%d %H:%M:%S") if NSDATE_REASONABLE_MIN < expiry < NSDATE_REASONABLE_MAX else None,
+            "creation_iso": _to_dt(creation + APPLE_EPOCH_OFFSET).strftime("%Y-%m-%d %H:%M:%S") if NSDATE_REASONABLE_MIN < creation < NSDATE_REASONABLE_MAX else None,
             "expiry_epoch": expiry,
             "creation_epoch": creation,
         })
@@ -461,7 +461,7 @@ def decode_txn_id(txn_id: Optional[str]) -> Optional[Dict[str, Any]]:
     except ValueError:
         return None
     return {
-        "embedded_iso": dt.isoformat(),
+        "embedded_iso": dt.strftime("%Y-%m-%d %H:%M:%S"),
         "embedded_epoch_ms": int(dt.timestamp() * 1000),
         "year": year,
         "month": mm,
