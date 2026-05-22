@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Mandates & Collect Requests — PhonePe Forensics{% endblock %}
+{% block heading %}Mandates · Collect Requests · Refunds{% endblock %}
+{% block subheading %}Autopay setups (mandates), inbound collect requests, and merchant refunds — surfaced from `ZTRANSACTIONENTITY` rows the upstream extractor skipped because they aren't direct payments.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric accent">
+    <div class="mlabel">Total records</div>
+    <div class="mvalue">{{ mandates|length }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Autopay mandates</div>
+    <div class="mvalue">{{ mandates|selectattr('entity_type','equalto','RECEIVED_MANDATE_CREATE_REQUEST')|list|length + mandates|selectattr('entity_type','equalto','SERVICE_MANDATE_CREATE')|list|length }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Collect requests</div>
+    <div class="mvalue">{{ mandates|selectattr('entity_type','equalto','USER_TO_USER_RECEIVED_REQUEST')|list|length }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Refunds (merchant)</div>
+    <div class="mvalue">{{ refunds|length }}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">All non-payment records ({{ mandates|length }})</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Date (IST)</th>
+        <th>Type</th>
+        <th>State</th>
+        <th>Counterparty</th>
+        <th class="right">Amount</th>
+        <th>Primary ID</th>
+        <th>Raw</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in mandates %}
+        <tr {% if m.is_merchant_refund %}style="background:rgba(245,158,11,0.06)"{% endif %}>
+          <td class="mono">{{ m.datetime_ist }}</td>
+          <td><span class="tag {% if 'MANDATE' in m.entity_type %}accent{% elif 'REQUEST' in m.entity_type %}info{% else %}med{% endif %}">{{ m.entity_type }}</span></td>
+          <td>{{ m.state }}</td>
+          <td>{{ m.name }}{% if m.is_merchant_refund %} <span class="tag med">refund</span>{% endif %}</td>
+          <td class="right amount">{{ '%.2f'|format(m.amount_inr) }}</td>
+          <td class="mono small">{{ m.primary_id }}</td>
+          <td><a href="{{ url_for('page_raw_record', source='mandate', row_pk=m.primary_id) }}" class="btn" style="padding:2px 8px;font-size:11px">{}</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if refunds %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Refunds ({{ refunds|length }})</div>
+  <table>
+    <thead><tr><th>Date</th><th>Kind</th><th>From</th><th class="right">Amount</th><th>ID</th></tr></thead>
+    <tbody>
+      {% for r in refunds %}
+        <tr>
+          <td class="mono">{{ r.datetime_ist }}</td>
+          <td>{{ r.kind }}</td>
+          <td>{{ r.counterparty }}</td>
+          <td class="right amount">{{ '%.2f'|format(r.amount_inr) }}</td>
+          <td class="mono small">{{ r.primary_id }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

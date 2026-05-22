@@ -3,6 +3,9 @@
 {% block heading %}Forensic Dashboard{% endblock %}
 {% block subheading %}Snapshot of identity, money flow, social graph & device activity for the active acquisition.{% endblock %}
 {% block topbar_actions %}
+{% if dashboard.v2.available %}
+<a href="{{ url_for('page_export_offline_html') }}" class="btn">↧ Offline HTML</a>
+{% endif %}
 <a href="{{ url_for('page_exports') }}" class="btn primary">↧ Export Evidence</a>
 {% endblock %}
 
@@ -34,11 +37,25 @@
   </div>
 </section>
 
+{% if dashboard.v2.available and dashboard.v2.retention_days %}
+<div class="card" style="margin:10px 0 14px;padding:10px 14px;border-left:3px solid #f59e0b;background:rgba(245,158,11,0.05)">
+  <span class="muted small">⏳ TransactionsStore covers the last <b>{{ dashboard.v2.retention_days }} days</b>
+  (~{{ '%.1f' % (dashboard.v2.retention_days / 30) }} months) per <span class="mono">ZUSER.ZDURATIONOFDOWNLOADINDAYS</span>.
+  Earlier history is recovered via Burble chat-card mining.</span>
+</div>
+{% endif %}
+
 <div class="metric-grid">
   <div class="metric accent">
     <div class="mlabel">Transactions</div>
     <div class="mvalue">{{ dashboard.metrics.transactions }}</div>
-    <div class="msub">{{ dashboard.earliest_txn|ts }} → {{ dashboard.latest_txn|ts }}</div>
+    <div class="msub">
+      {% if dashboard.v2.available and dashboard.v2.coverage %}
+        union: TxnStore {{ dashboard.v2.coverage.txnstore_payments }} · Burble-only {{ dashboard.v2.coverage.burble_only }} · overlap {{ dashboard.v2.coverage.overlap }}
+      {% else %}
+        {{ dashboard.earliest_txn|ts }} → {{ dashboard.latest_txn|ts }}
+      {% endif %}
+    </div>
   </div>
   <div class="metric">
     <div class="mlabel">Total Received</div>
@@ -76,40 +93,170 @@
   </div>
 </div>
 
-<div class="grid grid-2" style="margin-top:18px">
-  <div class="card">
-    <div class="card-title">Money Flow by Year</div>
-    {% set yearly_in = transactions_summary.yearly_received_inr or {} %}
-    {% set yearly_out = transactions_summary.yearly_sent_inr or {} %}
-    {% if yearly_in or yearly_out %}
-    <div class="tbl-wrap-scroll">
-    <table>
-      <thead><tr><th>Year</th><th class="right">Received</th><th class="right">Sent</th><th class="right">Net</th></tr></thead>
-      <tbody>
-        {% set years = (yearly_in.keys()|list + yearly_out.keys()|list)|unique|list|sort %}
-        {% for y in years %}
-          {% set ri = yearly_in.get(y, 0) %}
-          {% set ro = yearly_out.get(y, 0) %}
-          <tr>
-            <td class="mono">{{ y }}</td>
-            <td class="right amount-pos">{{ ri|inr }}</td>
-            <td class="right amount-neg">{{ ro|inr }}</td>
-            <td class="right {% if ri-ro > 0 %}amount-pos{% else %}amount-neg{% endif %}">{{ (ri-ro)|inr }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    </div>
-    {% else %}<p class="muted">No transaction data.</p>{% endif %}
+{% if dashboard.v2.available %}
+<div class="metric-grid" style="margin-top:14px">
+  <div class="metric">
+    <div class="mlabel">QR / Scan payments</div>
+    <div class="mvalue">{{ dashboard.v2.qr_scan_count }}</div>
+    <div class="msub">NPCI codes 01/02/04/05 (gallery + camera + bharat-QR)</div>
   </div>
+  <div class="metric">
+    <div class="mlabel">UPI Intent</div>
+    <div class="mvalue">{{ dashboard.v2.intent_count }}</div>
+    <div class="msub">context.initiationMode=INTENT (deeplink calls)</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Failed payments</div>
+    <div class="mvalue {% if dashboard.v2.failures_count %}neg{% endif %}">{{ dashboard.v2.failures_count }}</div>
+    <div class="msub">{{ dashboard.v2.failures_count - dashboard.v2.failures_chat_only }} from TxnStore · {{ dashboard.v2.failures_chat_only }} chat-only</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Refunds</div>
+    <div class="mvalue">{{ dashboard.v2.refunds_count }}</div>
+    <div class="msub">incoming with from.type=MERCHANT</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Mandates / requests</div>
+    <div class="mvalue">{{ dashboard.v2.mandates_count }}</div>
+    <div class="msub">autopay + collect requests + enrichment · <a href="{{ url_for('page_v2_mandates') }}">view →</a></div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Raw records</div>
+    <div class="mvalue">{{ dashboard.metrics.transactions + dashboard.v2.mandates_count }}</div>
+    <div class="msub"><a href="{{ url_for('page_v2_raw_records') }}">browse decoded + provenance →</a></div>
+  </div>
+</div>
 
-  <div class="card">
+{% if dashboard.v2.owner_vpas %}
+<div class="card" style="margin-top:14px">
+  <div class="card-title">Owner VPA fan-out
+    <span class="muted small" style="float:right">
+      {% set pp_count = dashboard.v2.owner_vpas|selectattr('is_phonepe_psp')|list|length %}
+      {{ pp_count }} on PhonePe-PSP · {{ dashboard.v2.owner_vpas|length - pp_count }} on other apps · same BARB account
+    </span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+    {% for v in dashboard.v2.owner_vpas %}
+      <span class="tag mono {% if v.is_phonepe_psp %}info{% else %}med{% endif %}"
+            title="psp={{ v.psp }} bank_id={{ v.bank_id or '?' }} ifsc={{ v.ifsc or '?' }}">{{ v.vpa }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if dashboard.v2.by_app %}
+<div class="card" style="margin-top:14px">
+  <div class="card-title">App attribution (sender + receiver)
+    <span class="muted small" style="float:right">authoritative from ConfigManagerKeyStore.tpapKeyMap (no inference)</span>
+  </div>
+  <table>
+    <thead><tr><th>App</th><th class="right">Count</th></tr></thead>
+    <tbody>
+      {% for app, n in (dashboard.v2.by_app.items() | sort(attribute=1, reverse=true)) %}
+        <tr>
+          <td>{{ app }}</td>
+          <td class="right mono">{{ n }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Money Flow by Year</div>
+  {% set yearly_in = transactions_summary.yearly_received_inr or {} %}
+  {% set yearly_out = transactions_summary.yearly_sent_inr or {} %}
+  {% if yearly_in or yearly_out %}
+  <table>
+    <thead><tr><th>Year</th><th class="right">Received</th><th class="right">Sent</th><th class="right">Net</th></tr></thead>
+    <tbody>
+      {% set years = (yearly_in.keys()|list + yearly_out.keys()|list)|unique|list|sort %}
+      {% for y in years %}
+        {% set ri = yearly_in.get(y, 0) %}
+        {% set ro = yearly_out.get(y, 0) %}
+        <tr>
+          <td class="mono">{{ y }}</td>
+          <td class="right amount-pos" style="white-space:nowrap">{{ ri|inr }}</td>
+          <td class="right amount-neg" style="white-space:nowrap">{{ ro|inr }}</td>
+          <td class="right {% if ri-ro > 0 %}amount-pos{% else %}amount-neg{% endif %}" style="white-space:nowrap">{{ (ri-ro)|inr }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No transaction data.</p>{% endif %}
+</div>
+
+<div class="card" style="margin-top:18px">
+  {% set received = transactions_summary.top_counterparties_received %}
+  {% set sent = transactions_summary.top_counterparties_sent %}
+  {% if received or sent %}
+    <div class="card-title">Top Counterparties · ranked by total amount</div>
+    <div class="muted small" style="margin-bottom:10px">Grouped by stable identifier (PhonePe userId / phone / VPA) — not by name. Top 20 each side.</div>
+    <div class="cp-split">
+      <div>
+        <div class="cp-head" style="color:var(--success)">↓ Received from ({{ received|length }})</div>
+        {% if received %}
+        <table class="cp-table">
+          <thead><tr><th>#</th><th>Counterparty</th><th>Type</th><th class="right">Txns</th><th class="right">Total ₹</th></tr></thead>
+          <tbody>
+            {% for c in received[:20] %}
+              <tr>
+                <td class="mono muted">{{ loop.index }}</td>
+                <td>
+                  <a href="{{ url_for('page_v2_counterparty', cluster_id=c.cluster_id) }}" title="{{ c.name }}">{{ c.name }}</a>
+                  {% set idline = [] %}
+                  {% for i in c.identifiers %}
+                    {% if i.startswith('ph:') %}{% set _ = idline.append(i[3:]) %}
+                    {% elif i.startswith('vpa:') %}{% set _ = idline.append(i[4:]) %}{% endif %}
+                  {% endfor %}
+                  {% if idline %}<div class="muted mono" style="font-size:10px">{{ idline|join(' · ') }}</div>{% endif %}
+                </td>
+                <td><span class="tag {% if c.kind == 'Merchant' %}accent{% else %}info{% endif %}" style="font-size:9px">{{ c.kind }}</span></td>
+                <td class="right mono">{{ c.count }}</td>
+                <td class="right amount-pos" style="white-space:nowrap">{{ c.amount_inr|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<p class="muted small">No incoming counterparties.</p>{% endif %}
+      </div>
+      <div>
+        <div class="cp-head" style="color:#f87171">↑ Sent to ({{ sent|length }})</div>
+        {% if sent %}
+        <table class="cp-table">
+          <thead><tr><th>#</th><th>Counterparty</th><th>Type</th><th class="right">Txns</th><th class="right">Total ₹</th></tr></thead>
+          <tbody>
+            {% for c in sent[:20] %}
+              <tr>
+                <td class="mono muted">{{ loop.index }}</td>
+                <td>
+                  <a href="{{ url_for('page_v2_counterparty', cluster_id=c.cluster_id) }}" title="{{ c.name }}">{{ c.name }}</a>
+                  {% set idline = [] %}
+                  {% for i in c.identifiers %}
+                    {% if i.startswith('ph:') %}{% set _ = idline.append(i[3:]) %}
+                    {% elif i.startswith('vpa:') %}{% set _ = idline.append(i[4:]) %}{% endif %}
+                  {% endfor %}
+                  {% if idline %}<div class="muted mono" style="font-size:10px">{{ idline|join(' · ') }}</div>{% endif %}
+                </td>
+                <td><span class="tag {% if c.kind == 'Merchant' %}accent{% else %}info{% endif %}" style="font-size:9px">{{ c.kind }}</span></td>
+                <td class="right mono">{{ c.count }}</td>
+                <td class="right amount-neg" style="white-space:nowrap">{{ c.amount_inr|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<p class="muted small">No outgoing counterparties.</p>{% endif %}
+      </div>
+    </div>
+  {% else %}
     <div class="card-title">Top Counterparties</div>
     {% if dashboard.top_counterparties %}
     <table>
       <thead><tr><th>Name / Phone</th><th class="right">Txn count</th></tr></thead>
       <tbody>
-        {% for name, count in dashboard.top_counterparties[:12] %}
+        {% for name, count in dashboard.top_counterparties[:20] %}
           <tr>
             <td><a href="{{ url_for('page_counterparty', q=name) }}">{{ name }}</a></td>
             <td class="right mono">{{ count }}</td>
@@ -118,8 +265,18 @@
       </tbody>
     </table>
     {% else %}<p class="muted">No counterparties yet.</p>{% endif %}
-  </div>
+  {% endif %}
 </div>
+
+<style>
+.cp-split { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media (max-width:1100px){ .cp-split { grid-template-columns:1fr; } }
+.cp-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; }
+.cp-table { width:100%; table-layout:auto; }
+.cp-table th, .cp-table td { padding:7px 9px; }
+.cp-table td:nth-child(2) a { white-space:normal; word-break:break-word; }
+.cp-table td:nth-child(2) { min-width:170px; }
+</style>
 
 <div class="card" style="margin-top:18px">
   <div class="card-row">

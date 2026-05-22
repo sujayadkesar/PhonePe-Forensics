@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Raw Records — PhonePe Forensics{% endblock %}
+{% block heading %}Raw Records · Forensic Provenance{% endblock %}
+{% block subheading %}Every record carries its source-DB path, table, row PK, SHA-256 of the source blob, decode path, and tool version. Click any row to view the decoded JSON with the full provenance envelope.{% endblock %}
+
+{% block content %}
+
+<div class="card" style="margin-bottom:18px;padding:14px 18px">
+  <div class="row" style="gap:14px;flex-wrap:wrap;align-items:center">
+    <input id="rrq" placeholder="Search by ID, counterparty, or any field..." style="flex:1;min-width:280px">
+    <select id="rrkind"><option value="">All kinds</option><option>payment</option><option>mandate_or_request</option></select>
+    <select id="rrdb"><option value="">All source DBs</option></select>
+    <span class="muted small" style="margin-left:auto">Showing <b id="rrshown">{{ rows|length }}</b> of <b>{{ rows|length }}</b></span>
+  </div>
+</div>
+
+<div class="card">
+  <table id="rrtable">
+    <thead>
+      <tr>
+        <th>Kind</th>
+        <th>Source DB</th>
+        <th>Table</th>
+        <th>Row PK</th>
+        <th>ID</th>
+        <th>Date (IST)</th>
+        <th>Summary</th>
+        <th>Raw</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr data-kind="{{ r.kind }}" data-db="{{ r.source_db or '' }}">
+          <td><span class="tag {% if r.kind == 'payment' %}info{% else %}accent{% endif %}">{{ r.kind }}</span></td>
+          <td class="mono small">{{ r.source_db }}</td>
+          <td class="mono small">{{ r.source_table }}</td>
+          <td class="mono">{{ r.source_row_pk or '' }}</td>
+          <td class="mono small">{{ r.id }}</td>
+          <td class="mono small">{{ r.datetime_ist }}</td>
+          <td>{{ r.summary }}</td>
+          <td><a href="{{ r.url }}" class="btn raw-link" style="padding:2px 8px;font-size:11px">{}</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Raw modal -->
+<div id="raw-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100" onclick="if(event.target.id=='raw-modal')document.getElementById('raw-modal').style.display='none'">
+  <div style="background:#161b22;border:1px solid #2a3142;border-radius:10px;max-width:90vw;max-height:88vh;width:900px;display:flex;flex-direction:column;overflow:hidden">
+    <h3 style="padding:14px 18px;border-bottom:1px solid #2a3142;font-size:14px">
+      <span id="rm-title">Raw record</span>
+      <span style="float:right;cursor:pointer;color:#9aa3b2" onclick="document.getElementById('raw-modal').style.display='none'">×</span>
+    </h3>
+    <div id="rm-body" style="padding:14px 18px;overflow:auto;flex:1"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Build source-DB filter from data attrs
+  const dbs = new Set();
+  document.querySelectorAll('#rrtable tbody tr').forEach(tr => {
+    const d = tr.dataset.db; if(d) dbs.add(d);
+  });
+  const dbSel = document.getElementById('rrdb');
+  [...dbs].sort().forEach(d => {
+    const o = document.createElement('option'); o.value = d; o.textContent = d;
+    dbSel.appendChild(o);
+  });
+
+  function apply(){
+    const q = (document.getElementById('rrq').value||'').toLowerCase();
+    const kind = document.getElementById('rrkind').value;
+    const db = dbSel.value;
+    let shown = 0;
+    document.querySelectorAll('#rrtable tbody tr').forEach(tr => {
+      const txt = tr.innerText.toLowerCase();
+      const okQ = !q || txt.indexOf(q) >= 0;
+      const okK = !kind || tr.dataset.kind === kind;
+      const okD = !db || tr.dataset.db === db;
+      const ok = okQ && okK && okD;
+      tr.style.display = ok ? '' : 'none';
+      if(ok) shown++;
+    });
+    document.getElementById('rrshown').textContent = shown;
+  }
+  ['rrq','rrkind','rrdb'].forEach(id => document.getElementById(id).addEventListener('input', apply));
+
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  // Hijack raw-link clicks to open in modal instead of navigating
+  document.querySelectorAll('.raw-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      fetch(a.href).then(r => r.json()).then(data => {
+        const prov = Object.entries(data.provenance || {}).map(([k,v]) =>
+          `<div><b style="color:#9aa3b2;display:inline-block;min-width:160px;font-weight:500">${escapeHtml(k)}</b><span style="font-family:ui-monospace,monospace;font-size:11px;color:#e5e7eb;word-break:break-all">${escapeHtml(String(v==null?'':v))}</span></div>`
+        ).join('');
+        document.getElementById('rm-title').textContent = (data.kind || 'record') + ' · ' + (data.summary?.primary_id || data.summary?.id || '');
+        document.getElementById('rm-body').innerHTML =
+          '<div style="background:#0f1217;padding:12px;border-radius:6px;margin-bottom:10px">' + prov + '</div>' +
+          '<pre style="background:#0f1217;padding:12px;border-radius:6px;font-size:11px;font-family:ui-monospace,monospace;overflow:auto;max-height:60vh">' +
+          escapeHtml(JSON.stringify(data.decoded, null, 2)) + '</pre>';
+        document.getElementById('raw-modal').style.display = 'flex';
+      });
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') document.getElementById('raw-modal').style.display = 'none';
+  });
+})();
+</script>
+
+{% endblock %}

@@ -1,13 +1,64 @@
 {% extends "base.html" %}
 {% block title %}{{ group.name }} — Chat — PhonePe iOS Forensics{% endblock %}
-{% block heading %}Chat with {{ group.name }}{% endblock %}
-{% block subheading %}Group {{ group.group_id }} · {{ group.member_count or '?' }} members · {{ messages|length }} messages.{% endblock %}
+{% block heading %}
+{% if group.v2_other_party_phone %}<img class="zoomable" data-caption="{{ group.v2_display_name or group.name }}" src="{{ url_for('page_v2_avatar', phone=group.v2_other_party_phone) }}"
+     onerror="this.style.display='none'"
+     style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;background:var(--bg-2)">{% endif %}Chat with {{ group.v2_display_name or group.name or '(unnamed conversation)' }}{% endblock %}
+{% block subheading %}Group {{ group.group_id }} · {{ members|length or group.member_count or '?' }} participants · {{ messages|length }} messages.{% if group.v2_other_party_phone %} · <span class="mono small">{{ group.v2_other_party_phone }}</span>{% endif %}{% endblock %}
 {% block topbar_actions %}
-<a href="{{ url_for('export_chat_csv', group_id=group.group_id) }}" class="btn">↧ Export this thread (CSV)</a>
+<a href="{{ url_for('export_chat_group_csv', group_id=group.group_id) }}" class="btn">↧ Export this thread (CSV)</a>
 <a href="{{ url_for('page_chat') }}" class="btn">← All Groups</a>
 {% endblock %}
 
 {% block content %}
+
+{# Generic recursive renderer — turns any decoded chat payload (dict / list /
+   scalar) into a readable key→value tree. One renderer for every card type,
+   so no field of any record is ever dropped. #}
+{% macro render_payload(obj) %}
+  {%- if obj is mapping -%}
+    {%- if obj -%}
+      <div class="kvt">
+      {%- for k, v in obj.items() -%}
+        <div class="kvt-row">
+          <span class="kvt-key">{{ k }}</span>
+          {%- if v is mapping or (v is iterable and v is not string) -%}
+            <div class="kvt-nest">{{ render_payload(v) }}</div>
+          {%- else -%}
+            <span class="kvt-val">{{ v if v is not none else '—' }}</span>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+      </div>
+    {%- else -%}<span class="kvt-val muted">(empty)</span>{%- endif -%}
+  {%- elif obj is iterable and obj is not string -%}
+    {%- if obj -%}
+      <div class="kvt">
+      {%- for item in obj -%}<div class="kvt-row">{{ render_payload(item) }}</div>{%- endfor -%}
+      </div>
+    {%- else -%}<span class="kvt-val muted">(empty)</span>{%- endif -%}
+  {%- else -%}
+    <span class="kvt-val">{{ obj if obj is not none else '—' }}</span>
+  {%- endif -%}
+{% endmacro %}
+
+{% if messages|length == 0 %}
+<div class="card" style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #f59e0b;background:rgba(245,158,11,0.05)">
+  <div class="card-title" style="margin-bottom:4px">⚠ Empty conversation — group shell, no message content</div>
+  <span class="muted small">
+    This P2P group and its participant records exist in Burble, but it holds
+    <b>zero messages</b> — no message or payment content is present for it in
+    this acquisition.
+    {% if group.restore_completed == 0 %}Its chat restore is marked
+    <b>incomplete</b> (<span class="mono">ZGROUPCLIENTMETA.ZRESTORECOMPLETED = 0</span>).{% endif %}
+    Recorded facts: the group and its {{ members|length }} participant(s) exist.
+    Not recorded: any messages. The cause is not determinable from this
+    acquisition — it could be a contact that was synced but never
+    messaged/transacted, or a conversation whose history was not captured.
+    The tool does not assume which.
+  </span>
+</div>
+{% endif %}
 
 <div class="card">
   <div class="kv">
@@ -18,8 +69,60 @@
     <b>Created</b><span>{{ group.created_at|ts }}</span>
     <b>Updated</b><span>{{ group.updated_at|ts }}</span>
     <b>Visibility</b><span>{{ group.visibility or '—' }}</span>
+    <b>Chat restore</b><span>
+      {% if group.restore_completed == 1 %}<span class="tag completed">Completed</span>
+      {% elif group.restore_completed == 0 %}<span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Incomplete</span>
+      {% else %}<span class="muted">—</span>{% endif %}
+    </span>
   </div>
 </div>
+
+{% if counterparty %}
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Counterparty Identity</div>
+    {% if counterparty.cluster_id %}
+    <a href="{{ url_for('page_v2_counterparty', cluster_id=counterparty.cluster_id) }}" class="btn">Full profile →</a>
+    {% endif %}
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;margin:10px 0 4px">
+    {% set _cp = counterparty.phones[0] if counterparty.phones else (group.v2_other_party_phone or '') %}
+    <span class="dp dp-lg" data-initials="{{ (counterparty.display_name or '?')[:2]|upper }}">
+      {% if _cp %}<img class="zoomable" data-caption="{{ counterparty.display_name }}"
+        src="{{ url_for('page_v2_avatar', phone=_cp) }}" onerror="this.remove()" loading="lazy">{% endif %}
+    </span>
+    <div>
+      <div style="font-size:17px;font-weight:700">{{ counterparty.display_name }}</div>
+      <div class="muted small">{{ 'Merchant' if counterparty.is_merchant else 'Personal counterparty' }} · resolved from {{ counterparty.source }}</div>
+    </div>
+  </div>
+  <div class="kv">
+    <b>Bank / verified name</b>
+    <span class="plain">{% if counterparty.names_verified %}{{ counterparty.names_verified|join(', ') }}
+      {% elif counterparty.names_cbs %}{{ counterparty.names_cbs|join(', ') }}
+      {% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>CBS name (bank record)</b>
+    <span class="plain">{% if counterparty.names_cbs %}{{ counterparty.names_cbs|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>Saved contact name</b>
+    <span class="plain">{% if counterparty.names_saved %}<b style="color:var(--accent)">{{ counterparty.names_saved|join(', ') }}</b>
+      <span class="muted small">(subject's own phonebook label)</span>
+      {% else %}<span class="muted">— (not in device phonebook)</span>{% endif %}</span>
+    <b>PhonePe display name</b>
+    <span class="plain">{% if counterparty.names_display %}{{ counterparty.names_display|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>Phone(s)</b>
+    <span class="mono">{% if counterparty.phones %}{{ counterparty.phones|join(', ') }}{% endif %}
+      {% if counterparty.masked_phones %}{% if counterparty.phones %} · {% endif %}{{ counterparty.masked_phones|join(', ') }}
+        <span class="muted small">(masked — last 4 only)</span>{% endif %}
+      {% if not counterparty.phones and not counterparty.masked_phones %}<span class="muted">—</span>{% endif %}</span>
+    <b>UPI ID / VPA(s)</b>
+    <span class="mono">{% if counterparty.vpas %}{{ counterparty.vpas|join(', ') }}{% else %}<span class="muted">— (no VPA disclosed in the message feed)</span>{% endif %}</span>
+    <b>PhonePe userId</b>
+    <span class="mono small">{% if counterparty.user_ids %}{{ counterparty.user_ids|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>Connect id(s)</b>
+    <span class="mono small">{% if counterparty.connect_ids %}{{ counterparty.connect_ids|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+  </div>
+</div>
+{% endif %}
 
 {% if members %}
 <div class="card" style="margin-top:18px">
@@ -29,8 +132,12 @@
     <tbody>
     {% for m in members %}
       <tr>
-        <td><b>{{ m.display_name or '—' }}</b></td>
-        <td class="mono">{{ m.masked_phone or '—' }}</td>
+        <td><b>{{ m.v2_display_name or m.display_name or '—' }}</b></td>
+        <td class="mono">
+          {% if m.v2_full_phone %}{{ m.v2_full_phone }}
+          {% elif m.masked_phone %}{{ m.masked_phone }} <span class="muted small" title="chat retained only the last 4 digits — full number not recoverable">masked</span>
+          {% else %}—{% endif %}
+        </td>
         <td><span class="tag {{ (m.role or '')|lower }}">{{ m.role }}</span></td>
         <td>{{ m.state or '—' }}</td>
         <td>{{ m.phonepe_user|yes_no }}</td>
@@ -48,17 +155,25 @@
   <div class="chat-stream">
     {% for m in messages %}
       {% set is_self = (m.sender_is_self == true) or (m.direction == 'OUT') %}
+      {% set v2 = m.v2 or {} %}
       <div class="bubble-row {% if is_self %}me{% else %}them{% endif %}">
+        {% if not is_self and group.v2_other_party_phone %}
+          <img src="{{ url_for('page_v2_avatar', phone=group.v2_other_party_phone) }}"
+               onerror="this.style.display='none'"
+               data-caption="{{ group.v2_display_name or group.name }}"
+               class="bubble-avatar zoomable">
+        {% endif %}
         <div class="bubble {% if is_self %}me{% else %}them{% endif %}">
           <div class="bubble-meta">
             {% if is_self %}
               <b>You</b>
               {% if m.receiver_name %}<span class="muted small">→ {{ m.receiver_name }}</span>{% endif %}
             {% else %}
-              <b>{{ m.sender_name or m.other_party_name or group.name or 'Unknown' }}</b>
-              {% if m.sender_phone_masked %}<span class="mono small">{{ m.sender_phone_masked }}</span>{% endif %}
+              <b>{{ m.v2_other_party_display or m.sender_name or m.other_party_name or group.v2_display_name or group.name or 'Unknown' }}</b>
+              {% if m.v2_other_party_phone or m.sender_phone_masked %}<span class="mono small">{{ m.v2_other_party_phone or m.sender_phone_masked }}</span>{% endif %}
               <span class="muted small">→ You</span>
             {% endif %}
+            {% if v2.data_source == 'burble_only' %}<span class="tag med small" style="font-size:9px">Chat-only · pre-450d</span>{% endif %}
           </div>
           <div class="bubble-body">
             {% if m.type == 'PAYMENT_INFO_CARD' %}
@@ -66,13 +181,59 @@
                 <div class="pcard-amount">{{ m.amount_inr|inr }}</div>
                 <div class="pcard-state">
                   {% if m.state %}<span class="tag {{ m.state|lower }}">{{ m.state }}</span>{% endif %}
-                  {% if m.instrument %}<span class="tag">{{ m.instrument }}</span>{% endif %}
+                  {% if v2.classification %}<span class="tag {% if v2.classification == 'MERCHANT' %}accent{% elif v2.classification == 'PEER_TO_PEER' %}info{% elif v2.classification == 'MANDATE' %}med{% endif %}">{{ v2.classification }}</span>{% endif %}
+                  {% if v2.is_qr_scan %}<span class="tag med">QR</span>{% endif %}
+                  {% if v2.is_intent %}<span class="tag info">INTENT</span>{% endif %}
+                  {% if v2.is_refund %}<span class="tag med">REFUND</span>{% endif %}
+                  {% if v2.payment_initiation and v2.payment_initiation != 'DEFAULT' %}<span class="tag">{{ v2.payment_initiation }}</span>{% endif %}
                   <span class="dir-pill {% if is_self %}out{% else %}in{% endif %}">{% if is_self %}↑ Sent{% else %}↓ Received{% endif %}</span>
                 </div>
+
+                {# --- Routing rail: owner-side ↔ counterparty-side --- #}
+                {% if v2.owner_vpa or v2.counterparty_vpa %}
+                <div class="routing-rail">
+                  <div class="rail-leg {% if is_self %}sender{% else %}receiver{% endif %}">
+                    <div class="rail-label">Owner side {% if is_self %}(sent from){% else %}(received on){% endif %}</div>
+                    <div class="rail-vpa mono small">{{ v2.owner_vpa or '—' }}</div>
+                    <div class="rail-app">
+                      {% if v2.owner_app_icon %}<img src="{{ url_for('page_v2_app_icon', icon_id=v2.owner_app_icon) }}" onerror="this.style.display='none'" class="rail-app-icon">{% endif %}
+                      <span>{{ v2.owner_app or 'Unknown' }}</span>
+                      {% if v2.owner_on_phonepe %}<span class="tag info small" style="font-size:9px">PhonePe-PSP</span>
+                      {% elif v2.owner_psp %}<span class="tag med small" style="font-size:9px">third-party PSP · @{{ v2.owner_psp }}</span>{% endif %}
+                    </div>
+                  </div>
+                  <div class="rail-arrow">{% if is_self %}→{% else %}←{% endif %}</div>
+                  <div class="rail-leg {% if is_self %}receiver{% else %}sender{% endif %}">
+                    <div class="rail-label">Counterparty {% if is_self %}(paid to){% else %}(sent from){% endif %}</div>
+                    <div class="rail-vpa mono small">{{ v2.counterparty_vpa or '—' }}</div>
+                    {% if v2.counterparty_phone or v2.counterparty_verified_name %}
+                    <div class="muted small" style="font-size:10px">
+                      {% if v2.counterparty_verified_name %}{{ v2.counterparty_verified_name }}{% endif %}
+                      {% if v2.counterparty_phone %}<span class="mono">{{ v2.counterparty_phone }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="rail-app">
+                      {% if v2.counterparty_app and v2.counterparty_app != 'No VPA' %}
+                        {% if v2.counterparty_app_icon %}<img src="{{ url_for('page_v2_app_icon', icon_id=v2.counterparty_app_icon) }}" onerror="this.style.display='none'" class="rail-app-icon">{% endif %}
+                        <span>{{ v2.counterparty_app }}</span>
+                      {% elif not is_self %}
+                        <span class="muted">PhonePe user · VPA not disclosed in feed</span>
+                      {% else %}
+                        <span class="muted">—</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+                {% if v2.bank_name %}<div class="pcard-line">Bank: {{ v2.bank_name }}{% if v2.merchant_subtype %} · <span class="muted small">{{ v2.merchant_subtype }}</span>{% endif %}</div>{% endif %}
                 {% if m.transaction_id %}
-                  <div class="pcard-line">Txn <a href="{{ url_for('page_transaction_detail', txn_id=m.transaction_id) }}" class="mono small">{{ m.transaction_id }}</a></div>
+                  <div class="pcard-line">Txn <a href="{{ url_for('page_transaction_detail', txn_id=m.transaction_id) }}" class="mono small">{{ m.transaction_id }}</a>
+                  · <a href="{{ url_for('page_raw_record', source='payment', row_pk=m.transaction_id) }}" class="mono small" target="_blank">{ } raw + provenance</a>
+                  </div>
                 {% endif %}
                 {% if m.utr %}<div class="pcard-line">UTR <span class="mono small">{{ m.utr }}</span></div>{% endif %}
+                {% if v2.failure_reason %}<div class="pcard-line muted small">Failure: {{ v2.failure_reason }}</div>{% endif %}
                 {% if m.note %}<div class="pcard-line">Note: <i>{{ m.note }}</i></div>{% endif %}
               </div>
             {% elif m.type == 'TEXT_MESSAGE' %}
@@ -80,10 +241,28 @@
             {% elif m.type == 'IMAGE_ATTACHMENT' %}
               <div class="text-msg muted">📷 Image attachment</div>
               {% if m.preview_url %}<img src="{{ m.preview_url }}" style="max-width:240px;margin-top:6px;border-radius:6px">{% endif %}
-            {% elif m.type == 'GIFT_RECEIVED' or 'GIFT' in (m.type or '') or 'REWARD' in (m.type or '') %}
+            {% elif 'GIFT' in (m.type or '') or 'REWARD' in (m.type or '') %}
               <div class="text-msg">🎁 {{ m.gift_message or m.text_message or m.reward_type or m.type }}</div>
             {% else %}
-              <div class="text-msg muted">{{ m.text_message or m.note or m.type }}</div>
+              {# CONTACT / TRANSACTION_RECEIPT / any unrecognised card —
+                 render the generically-decoded payload so no field is lost #}
+              <div class="generic-card">
+                <div class="gcard-type">{{ (m.type or 'UNKNOWN')|replace('_', ' ') }}</div>
+                {% if m.decoded_payload %}
+                  {{ render_payload(m.decoded_payload) }}
+                {% else %}
+                  <div class="text-msg muted">{{ m.text_message or m.note or m.type or '—' }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            {# generalised inspector — a pretty-rendered card can still expand
+               its full decoded payload (every field, verbatim from the blob) #}
+            {% if m.decoded_payload and (m.type in ('PAYMENT_INFO_CARD', 'TEXT_MESSAGE', 'IMAGE_ATTACHMENT') or 'GIFT' in (m.type or '') or 'REWARD' in (m.type or '')) %}
+            <details class="decoded-fields">
+              <summary>🔍 Decoded payload — {{ m.decoded_payload|length }} field{{ '' if m.decoded_payload|length == 1 else 's' }}</summary>
+              {{ render_payload(m.decoded_payload) }}
+            </details>
             {% endif %}
           </div>
           <div class="bubble-time">{{ m.created_at|ts }}</div>
@@ -126,6 +305,40 @@
 .pcard-amount { font-family:var(--mono); font-size:18px; font-weight:700; color:var(--success); }
 .pcard-state { margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; }
 .pcard-line { margin-top:6px; font-size:12px; color:var(--text-2); }
+.bubble-row { display:flex; align-items:flex-start; gap:8px; }
+.bubble-row.me { justify-content:flex-end; }
+.bubble-row.them { justify-content:flex-start; }
+.bubble-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:4px; background:var(--bg-2); }
+.routing-rail {
+  margin-top:8px; padding:8px 10px;
+  background:rgba(0,0,0,0.18); border:1px solid var(--border-soft);
+  border-radius:8px;
+  display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center;
+}
+.rail-leg { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.rail-leg.sender .rail-label { color:#f87171; }
+.rail-leg.receiver .rail-label { color:#34d399; }
+.rail-label { font-size:9px; text-transform:uppercase; letter-spacing:0.4px; font-weight:600; }
+.rail-vpa { font-size:11px; word-break:break-all; }
+.rail-app { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-2); flex-wrap:wrap; }
+.rail-app-icon { width:14px; height:14px; border-radius:2px; }
+.rail-arrow { font-size:18px; color:var(--text-3); font-weight:700; }
+.dir-pill { padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.dir-pill.out { background:rgba(245,158,11,0.2); color:#f59e0b; }
+.dir-pill.in  { background:rgba(16,185,129,0.2); color:#10b981; }
+/* generic decoded-payload renderer (every card type) */
+.generic-card { padding:8px 10px; background:rgba(255,255,255,0.04); border-radius:8px; }
+.gcard-type { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; color:var(--accent); margin-bottom:6px; }
+.kvt { display:flex; flex-direction:column; gap:3px; }
+.kvt-row { display:flex; gap:8px; align-items:baseline; font-size:12px; }
+.kvt-key { color:var(--text-3); font-weight:600; min-width:118px; flex-shrink:0; font-family:var(--mono); font-size:11px; }
+.kvt-val { color:var(--text-1); word-break:break-word; }
+.kvt-nest { border-left:1px solid var(--border-soft); padding-left:8px; margin-top:2px; flex:1; min-width:0; }
+.decoded-fields { margin-top:8px; }
+.decoded-fields summary { cursor:pointer; color:var(--text-3); font-size:11px; user-select:none; }
+.decoded-fields summary:hover { color:var(--text-1); }
+.decoded-fields[open] summary { margin-bottom:6px; }
+.decoded-fields .kvt { padding:6px 8px; background:rgba(0,0,0,0.18); border-radius:6px; }
 </style>
 
 {% endblock %}

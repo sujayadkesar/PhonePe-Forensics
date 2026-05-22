@@ -110,6 +110,15 @@ class Case:
         # AFTER both `identity` and `chat` extractions have run).
         self._tag_chat_self_direction()
 
+        # v2 enrichment: merge Burble payment-cards (~170 historical rows
+        # outside the 450-day TxnStore retention), fix classifier, decode
+        # NPCI initiation codes, attribute TPAP from ConfigManagerKeyStore.
+        try:
+            from .v2_integration import enrich_case as _v2_enrich
+            _v2_enrich(self)
+        except Exception as exc:  # never break the upstream pipeline
+            self.data["_v2_error"] = str(exc)
+
         # Findings + timeline + graph
         self._findings = detect_suspicious_signals(self.data)
         self.data["findings"] = self._findings
@@ -191,6 +200,12 @@ class Case:
         chat_summary = self.data.get("chat", {}).get("summary", {})
         contacts_summary = self.data.get("contacts", {}).get("summary", {})
         analytics_summary = self.data.get("analytics", {}).get("summary", {})
+        v2 = self.data.get("_v2") or {}
+        v2_coverage = v2.get("coverage") or {}
+        # Prefer v2 unique count when available (combines TxnStore + Burble),
+        # falling back to upstream extractor's count for older acquisitions
+        # where Burble or PaymentDataStore is missing.
+        v2_total = v2_coverage.get("combined_unique")
         return {
             "case_root": self.root,
             "valid": self.paths.is_valid(),
@@ -203,7 +218,7 @@ class Case:
                 "session_id_updated_at": ident.get("sessions", {}).get("session_id_updated_at"),
             },
             "metrics": {
-                "transactions": txn_summary.get("transaction_count", 0),
+                "transactions": v2_total if v2_total is not None else txn_summary.get("transaction_count", 0),
                 "transactions_in": txn_summary.get("total_received_inr", 0),
                 "transactions_out": txn_summary.get("total_sent_inr", 0),
                 "groups": chat_summary.get("group_count", 0),
@@ -219,6 +234,28 @@ class Case:
             "yearly_volume": txn_summary.get("yearly_volume_inr", {}),
             "top_counterparties": txn_summary.get("top_counterparties", []),
             "findings_count": len(self.findings()),
+            # v2-derived tiles (None when enrichment unavailable)
+            "v2": {
+                "available": bool(v2),
+                "coverage": v2_coverage,
+                "retention_days": v2.get("retention_days"),
+                "owner_vpas": v2.get("owner_vpas", []),
+                "phonepe_psps": v2.get("phonepe_psps", []),
+                "by_app": v2.get("by_app", {}),
+                "by_initiation": v2.get("by_initiation", {}),
+                "qr_scan_count": v2.get("qr_scan_count", 0),
+                "intent_count": v2.get("intent_count", 0),
+                "failures_count": len(v2.get("failures", []) or []),
+                "failures_chat_only": sum(1 for f in (v2.get("failures") or []) if f.get("is_failed_chat_only")),
+                "refunds_count": len(v2.get("refunds", []) or []),
+                "mandates_count": v2.get("mandates_count", 0),
+                "tpap_map_size": v2.get("tpap_map_size", 0),
+                "source_db_hashes": v2.get("source_db_hashes", {}),
+                "subject_name": v2.get("owner_subject_name"),
+                "account_no": v2.get("owner_account_no"),
+                "bank_name": v2.get("owner_bank_name"),
+                "ifsc": v2.get("owner_ifsc"),
+            } if v2 else {"available": False},
         }
 
     # ---- export ----

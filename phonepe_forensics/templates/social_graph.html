@@ -31,6 +31,7 @@
   <table id="sgTable">
     <thead>
       <tr>
+        <th style="width:44px"></th>
         <th>Name</th>
         <th>Kind</th>
         <th>Phone</th>
@@ -49,6 +50,14 @@
     <tbody>
     {% for n in graph.nodes %}
       <tr>
+        <td>
+          {% if n.phone %}
+            <img class="zoomable" data-caption="{{ n.name or n.phone }}"
+                 src="{{ url_for('page_v2_avatar', phone=n.phone) }}"
+                 onerror="this.style.display='none'"
+                 style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--bg-2)">
+          {% endif %}
+        </td>
         <td><a href="{{ url_for('page_counterparty', q=n.name or n.phone or n.vpa) }}">{{ n.name or '—' }}</a></td>
         <td><span class="tag">{{ n.kind }}</span></td>
         <td class="mono small">{{ n.phone or '—' }}</td>

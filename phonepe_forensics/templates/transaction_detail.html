@@ -6,6 +6,16 @@
 
 {% block content %}
 
+{% if txn.data_source == 'burble_only' %}
+<div class="card" style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #f59e0b;background:rgba(245,158,11,0.05)">
+  <span class="muted small">
+    ⏳ This transaction was recovered from <span class="mono">Burble.sqlite</span> chat-card history.
+    Its full instrument blob (paidFrom / receivedIn / paymentFlags / responseCode / UTR / IFSC) was pruned by PhonePe after the 450-day TransactionsStore retention window expired.
+    Available fields are limited to: amount, state, counterparty (via chat-group), date, and direction.
+  </span>
+</div>
+{% endif %}
+
 <div class="grid grid-2">
   <div class="card">
     <div class="card-title">Core</div>
@@ -81,8 +91,11 @@
 
 {% if txn.search_token %}
 <div class="card" style="margin-top:18px">
-  <div class="card-title">Plain-text Search Token (forensic full-text)</div>
-  <pre class="code">{{ txn.search_token }}</pre>
+  <div class="card-row">
+    <div class="card-title">Plain-text Search Token (forensic full-text)</div>
+    <button type="button" class="btn small" data-copy="#tx-search-token">⧉ Copy</button>
+  </div>
+  <pre class="code" id="tx-search-token">{{ txn.search_token }}</pre>
 </div>
 {% endif %}
 
@@ -90,16 +103,20 @@
 <div class="card" style="margin-top:18px">
   <div class="card-row">
     <div class="card-title">ZDATA — decoded NSKeyedArchiver</div>
-    <span class="muted small">payment payload as published by the UPI gateway response</span>
+    <button type="button" class="btn small" data-copy="#tx-zdata">⧉ Copy JSON</button>
   </div>
-  <pre class="json-tree">{{ txn.raw_data | tojson(indent=2) }}</pre>
+  <p class="muted small" style="margin:2px 0 8px">payment payload as published by the UPI gateway response</p>
+  <pre class="json-tree" id="tx-zdata">{{ txn.raw_data | tojson(indent=2) }}</pre>
 </div>
 {% endif %}
 
 {% if txn.raw_tags %}
 <div class="card" style="margin-top:18px">
-  <div class="card-title">ZTAGSDATA — flattened tag dict</div>
-  <pre class="json-tree">{{ txn.raw_tags | tojson(indent=2) }}</pre>
+  <div class="card-row">
+    <div class="card-title">ZTAGSDATA — flattened tag dict</div>
+    <button type="button" class="btn small" data-copy="#tx-ztags">⧉ Copy JSON</button>
+  </div>
+  <pre class="json-tree" id="tx-ztags">{{ txn.raw_tags | tojson(indent=2) }}</pre>
 </div>
 {% endif %}
 

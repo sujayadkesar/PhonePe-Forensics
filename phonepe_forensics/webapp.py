@@ -36,6 +36,11 @@ from . import research_data
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config["JSON_SORT_KEYS"] = False
+# Re-read templates from disk on every request even though the server runs
+# with debug=False — otherwise Jinja caches the compiled template and UI
+# edits only appear after a full server restart.
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
 app.secret_key = os.environ.get("PP_FORENSICS_SECRET", "phonepe-forensics-local-dev")
 
 
@@ -96,6 +101,10 @@ def _inject():
     case = manager.get_active_case()
     if case:
         ident = case.data.get("identity", {})
+        # Prefer v2 union count (TxnStore + Burble) when available, otherwise
+        # fall back to upstream extractor's count.
+        v2 = case.data.get("_v2") or {}
+        v2_total = (v2.get("coverage") or {}).get("combined_unique")
         return {
             "case_loaded": True,
             "case_root": case.root,
@@ -105,7 +114,7 @@ def _inject():
             "subject_name": ident.get("registered_name"),
             "subject_upi": ident.get("upi_id"),
             "nav_metrics": {
-                "transactions": _safe_get(case.data, "transactions", "summary", "transaction_count", default=0),
+                "transactions": v2_total if v2_total is not None else _safe_get(case.data, "transactions", "summary", "transaction_count", default=0),
                 "messages": _safe_get(case.data, "chat", "summary", "message_count", default=0),
                 "contacts": _safe_get(case.data, "contacts", "summary", "phonebook_total", default=0),
                 "findings": len(case.findings()),
@@ -593,7 +602,11 @@ def page_chat_group(group_id: str):
     msgs.sort(key=lambda m: (m.get("created_at") or {}).get("epoch_ms") or 0)
     members = [m for m in chat.get("members", []) if m.get("group_id") == group_id]
     self_name = case.data.get("identity", {}).get("registered_name", "")
-    return render_template("chat_group.html", group=group, messages=msgs, members=members, self_name=self_name)
+    # counterparty identity panel — built in enrich_case (group["v2_counterparty"]);
+    # present even for chat-only / empty groups via the connectid resolver.
+    return render_template("chat_group.html", group=group, messages=msgs,
+                           members=members, self_name=self_name,
+                           counterparty=group.get("v2_counterparty"))
 
 
 @app.route("/notifications")
@@ -1008,6 +1021,283 @@ def _err_404(e):
 @app.errorhandler(500)
 def _err_500(e):
     return render_template("error.html", code=500, message=str(e)), 500
+
+
+# ---------------------------------------------------------------------------
+# v2 routes (additive — coverage / classifier / TPAP / raw provenance)
+# ---------------------------------------------------------------------------
+
+@app.route("/v2/raw/<source>/<path:row_pk>")
+def page_raw_record(source: str, row_pk: str):
+    """Return the decoded JSON + forensic-provenance envelope for one record.
+
+    `source` is "txnstore" | "burble" | "mandate"; `row_pk` is either the
+    transaction primary_id or the message Z_PK depending on source.
+    """
+    case = _active()
+    v2 = case.data.get("_v2") or {}
+    result = v2.get("_reconcile_result")
+    if result is None:
+        return jsonify({"error": "v2 enrichment not available for this case"}), 404
+
+    payload = None
+    if source in ("txnstore", "payment"):
+        for p in result.payments:
+            if p.primary_id == row_pk or p.global_id == row_pk:
+                payload = {
+                    "kind": "payment",
+                    "provenance": p.provenance,
+                    "decoded": p.decoded_blob,
+                    "summary": {
+                        "primary_id": p.primary_id,
+                        "global_id": p.global_id,
+                        "amount_inr": p.amount_inr,
+                        "direction": p.direction,
+                        "state": p.state,
+                        "datetime_ist": p.datetime_ist,
+                        "counterparty_name": p.counterparty_name,
+                        "classification": p.classification,
+                        "data_source": p.data_source,
+                    },
+                }
+                break
+    elif source == "mandate":
+        for m in result.mandates:
+            if m["primary_id"] == row_pk:
+                payload = {
+                    "kind": "mandate_or_request",
+                    "provenance": m.get("provenance"),
+                    "decoded": m.get("decoded_blob"),
+                    "summary": {
+                        "primary_id": m["primary_id"],
+                        "entity_type": m["entity_type"],
+                        "name": m["name"],
+                        "amount_inr": m["amount_inr"],
+                        "datetime_ist": m["datetime_ist"],
+                    },
+                }
+                break
+    if payload is None:
+        return jsonify({"error": f"record not found: {source}/{row_pk}"}), 404
+    return jsonify(payload)
+
+
+@app.route("/v2/avatar/<phone>")
+def page_v2_avatar(phone: str):
+    """Return the JPEG avatar bytes for the given phone (from SamparkV2)."""
+    from .v2.data_layer import load_avatars
+    case = manager.get_active_case()
+    if not case:
+        return abort(404)
+    avatars = load_avatars(case.root)
+    # last 10 digits
+    norm = "".join(c for c in str(phone) if c.isdigit())[-10:]
+    if not norm or norm not in avatars:
+        return abort(404)
+    return Response(avatars[norm], mimetype="image/jpeg")
+
+
+@app.route("/v2/app-icon/<icon_id>.png")
+def page_v2_app_icon(icon_id: str):
+    """Return a TPAP app icon PNG (PhonePe / GPay / Paytm / Cred / Amazon Pay)."""
+    from pathlib import Path
+    p = Path(__file__).parent / "v2" / "static" / "logos" / "apps" / f"{icon_id}.png"
+    if not p.exists():
+        return abort(404)
+    return Response(p.read_bytes(), mimetype="image/png")
+
+
+@app.route("/v2/coverage")
+def page_v2_coverage():
+    """JSON summary of the v2 enrichment coverage + retention banner."""
+    case = _active()
+    v2 = case.data.get("_v2") or {}
+    return jsonify(
+        {
+            "available": bool(v2),
+            "coverage": v2.get("coverage", {}),
+            "retention_days": v2.get("retention_days"),
+            "phonepe_psps": v2.get("phonepe_psps", []),
+            "tpap_map_size": v2.get("tpap_map_size", 0),
+            "qr_scan_count": v2.get("qr_scan_count", 0),
+            "intent_count": v2.get("intent_count", 0),
+            "refunds_count": len(v2.get("refunds", [])),
+            "failures_count": len(v2.get("failures", [])),
+            "mandates_count": v2.get("mandates_count", 0),
+            "source_db_hashes": v2.get("source_db_hashes", {}),
+            "owner_vpas": v2.get("owner_vpas", []),
+        }
+    )
+
+
+@app.route("/v2/export/evidence.html")
+def page_export_offline_html():
+    """Build the single-file offline HTML report and stream it as a download."""
+    import io
+    import tempfile
+    from pathlib import Path
+
+    from flask import send_file
+
+    case = _active()
+    from .v2_integration import render_offline_html
+
+    # NOTE: manager.get_active_case() returns a Case object, not a string —
+    # iterating it (below) raised TypeError and 500'd the route. Use the id.
+    case_id = manager.active_id or "case"
+    safe = "".join(c for c in str(case_id) if c.isalnum() or c in ("-", "_")) or "case"
+    tmp_dir = Path(tempfile.mkdtemp(prefix="phonepe_evidence_"))
+    out = tmp_dir / f"case_{safe}_phonepe_evidence.html"
+    render_offline_html(case, out)
+    return send_file(
+        out,
+        as_attachment=True,
+        download_name=f"case_{safe}_phonepe_evidence.html",
+        mimetype="text/html",
+    )
+
+
+@app.route("/v2/mandates")
+def page_v2_mandates():
+    case = _active()
+    v2 = case.data.get("_v2") or {}
+    return render_template(
+        "v2_mandates.html",
+        mandates=v2.get("mandates", []),
+        refunds=v2.get("refunds", []),
+    )
+
+
+@app.route("/v2/raw-records")
+def page_v2_raw_records():
+    case = _active()
+    v2 = case.data.get("_v2") or {}
+    result = v2.get("_reconcile_result")
+    rows: List[Dict[str, Any]] = []
+    if result is not None:
+        for p in result.payments:
+            rows.append(
+                {
+                    "kind": "payment",
+                    "source_db": p.provenance.get("source_db"),
+                    "source_table": p.provenance.get("source_table"),
+                    "source_row_pk": p.provenance.get("source_row_pk"),
+                    "id": p.primary_id,
+                    "datetime_ist": p.datetime_ist,
+                    "summary": f"{p.direction} ₹{p.amount_inr:.2f} {p.counterparty_name}",
+                    "url": f"/v2/raw/payment/{p.primary_id}",
+                }
+            )
+        for m in result.mandates:
+            rows.append(
+                {
+                    "kind": "mandate_or_request",
+                    "source_db": m["provenance"].get("source_db"),
+                    "source_table": m["provenance"].get("source_table"),
+                    "source_row_pk": m["provenance"].get("source_row_pk"),
+                    "id": m["primary_id"],
+                    "datetime_ist": m["datetime_ist"],
+                    "summary": f"{m['entity_type']} {m['name']} ₹{m['amount_inr']:.2f}",
+                    "url": f"/v2/raw/mandate/{m['primary_id']}",
+                }
+            )
+    return render_template("v2_raw_records.html", rows=rows)
+
+
+@app.route("/v2/counterparty/<path:cluster_id>")
+def page_v2_counterparty(cluster_id: str):
+    """Identifier-stable counterparty profile.
+
+    Unlike the upstream /counterparty?q=<name> route (substring name match —
+    which conflates two different people who share a name), this resolves the
+    EXACT identifier cluster assigned by resolve_counterparties(). Every payment
+    shown shares a userId / phone / VPA with this counterparty — never a name.
+    """
+    case = _active()
+    v2 = case.data.get("_v2") or {}
+    result = v2.get("_reconcile_result")
+    clusters = v2.get("clusters") or {}
+    if result is None:
+        return render_template("error.html", code=404,
+                               message="v2 enrichment not available for this case"), 404
+
+    cluster = clusters.get(cluster_id) or {}
+    payments = [p for p in result.payments if p.counterparty_cluster_id == cluster_id]
+    # Stale / aliased id: the URL may carry a `pmt:<primary_id>` that is no
+    # longer a cluster root — it merged into an identifier cluster once the
+    # counterparty resolved (connectid / phone). Re-point to the payment's
+    # CURRENT cluster so an old bookmark or deep link still resolves.
+    if not payments:
+        needle = cluster_id[4:] if cluster_id.startswith("pmt:") else cluster_id
+        for p in result.payments:
+            if needle and needle in (p.primary_id, p.global_id):
+                cluster_id = p.counterparty_cluster_id
+                cluster = clusters.get(cluster_id) or {}
+                payments = [
+                    q for q in result.payments
+                    if q.counterparty_cluster_id == cluster_id
+                ]
+                break
+    payments.sort(key=lambda p: p.timestamp_ms or 0, reverse=True)
+
+    # decompose identifiers into readable buckets
+    phones, vpas, user_ids, connect_ids = [], [], [], []
+    for ident in cluster.get("identifiers", []):
+        if ident.startswith("ph:"):
+            phones.append(ident[3:])
+        elif ident.startswith("vpa:"):
+            vpas.append(ident[4:])
+        elif ident.startswith("uid:"):
+            user_ids.append(ident[4:])
+        elif ident.startswith("cid:"):
+            connect_ids.append(ident[4:])
+
+    # Money totals count COMPLETED payments only — a FAILED payment carries an
+    # amount but no money moved, so summing it would inflate the figures.
+    def _completed(p):
+        return p.state == "COMPLETED"
+
+    total_recv = sum(p.amount_inr for p in payments if p.direction == "RECEIVED" and _completed(p))
+    total_sent = sum(p.amount_inr for p in payments if p.direction == "SENT" and _completed(p))
+    by_year: Dict[str, Dict[str, float]] = {}
+    for p in payments:
+        if not p.timestamp_ms or not _completed(p):
+            continue
+        from datetime import datetime, timezone
+        yr = str(datetime.fromtimestamp(p.timestamp_ms / 1000, tz=timezone.utc).year)
+        b = by_year.setdefault(yr, {"recv": 0.0, "sent": 0.0})
+        if p.direction == "RECEIVED":
+            b["recv"] += p.amount_inr
+        elif p.direction == "SENT":
+            b["sent"] += p.amount_inr
+
+    profile = {
+        "cluster_id": cluster_id,
+        "display_name": cluster.get("display_name", "(unknown)"),
+        "names_verified": cluster.get("names_verified", []),
+        "names_cbs": cluster.get("names_cbs", []),
+        "names_display": cluster.get("names_display", []),
+        "names_saved": cluster.get("names_saved", []),
+        "masked_phones": cluster.get("masked_phones", []),
+        "kinds": cluster.get("kinds", []),
+        "is_merchant": "MERCHANT" in cluster.get("kinds", []),
+        "phones": phones,
+        "vpas": vpas,
+        "user_ids": user_ids,
+        "connect_ids": connect_ids,
+        "identifiers": cluster.get("identifiers", []),
+        "payments": payments,
+        "total_received_inr": round(total_recv, 2),
+        "total_sent_inr": round(total_sent, 2),
+        "net_inr": round(total_recv - total_sent, 2),
+        "txn_count": len(payments),
+        "received_count": sum(1 for p in payments if p.direction == "RECEIVED"),
+        "sent_count": sum(1 for p in payments if p.direction == "SENT"),
+        "burble_only_count": sum(1 for p in payments if p.data_source == "burble_only"),
+        "txnstore_count": sum(1 for p in payments if p.data_source == "txnstore_full"),
+        "by_year": dict(sorted(by_year.items())),
+    }
+    return render_template("v2_counterparty.html", profile=profile)
 
 
 # ---------------------------------------------------------------------------

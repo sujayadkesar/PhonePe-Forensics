@@ -28,7 +28,7 @@
     <tbody>
       {% for g in chat.groups %}
       <tr>
-        <td><a href="{{ url_for('page_chat_group', group_id=g.group_id) }}">{{ g.name or '—' }}</a></td>
+        <td><a href="{{ url_for('page_chat_group', group_id=g.group_id) }}">{{ g.v2_display_name or g.name or '—' }}</a></td>
         <td>{{ g.type or g.subsystem or '—' }}</td>
         <td>{{ g.active|yes_no }}</td>
         <td class="mono right">{{ g.member_count or '' }}</td>
@@ -114,11 +114,11 @@
         </td>
         <td>
           {% if is_out %}
-            <span class="muted small">You →</span> <b>{{ m.other_party_name or m.receiver_name or '—' }}</b>
-            {% if m.other_party_phone %}<br><span class="mono small muted">{{ m.other_party_phone }}</span>{% endif %}
+            <span class="muted small">You →</span> <b>{{ m.v2_other_party_display or m.other_party_name or m.receiver_name or '—' }}</b>
+            {% if m.v2_other_party_phone or m.other_party_phone %}<br><span class="mono small muted">{{ m.v2_other_party_phone or m.other_party_phone }}</span>{% endif %}
           {% elif is_in %}
-            <b>{{ m.other_party_name or m.sender_name or '—' }}</b> <span class="muted small">→ You</span>
-            {% if m.other_party_phone %}<br><span class="mono small muted">{{ m.other_party_phone }}</span>{% endif %}
+            <b>{{ m.v2_other_party_display or m.other_party_name or m.sender_name or '—' }}</b> <span class="muted small">→ You</span>
+            {% if m.v2_other_party_phone or m.other_party_phone %}<br><span class="mono small muted">{{ m.v2_other_party_phone or m.other_party_phone }}</span>{% endif %}
           {% else %}
             {{ m.sender_name or '—' }}
             {% if m.receiver_name %}<span class="muted small"> → {{ m.receiver_name }}</span>{% endif %}

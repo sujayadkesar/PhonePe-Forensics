@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name }} — Counterparty — PhonePe iOS Forensics{% endblock %}
+{% block heading %}Counterparty · {{ profile.display_name }}{% endblock %}
+{% block subheading %}Resolved by stable identifier cluster — every transaction below shares a userId / phone / VPA with this counterparty. Same-name people are NOT merged.{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('page_dashboard') }}" class="btn">← Dashboard</a>{% endblock %}
+
+{% block content %}
+
+{% if not profile.identifiers %}
+<div class="card" style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #f59e0b;background:rgba(245,158,11,0.05)">
+  <span class="muted small">
+    ⚠ No stable identifier (PhonePe userId / phone / VPA / connect-id) could be recovered for this counterparty.
+    Burble retained no member record for this chat group — only the chat-card name
+    <b>{{ profile.display_name }}</b> survives. The counterparty's number is genuinely absent from the acquisition.
+  </span>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title">
+    Identity
+    <span class="tag {% if profile.is_merchant %}accent{% else %}info{% endif %}" style="margin-left:8px">
+      {{ 'Merchant' if profile.is_merchant else 'Personal' }}
+    </span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin:12px 0 6px">
+    {% set _ph = profile.phones[0] if profile.phones else '' %}
+    <span class="dp dp-xl" data-initials="{{ (profile.display_name or '?')[:2]|upper }}">
+      {% if _ph %}<img class="zoomable" data-caption="{{ profile.display_name }}"
+        src="{{ url_for('page_v2_avatar', phone=_ph) }}" onerror="this.remove()" loading="lazy">{% endif %}
+    </span>
+    <div>
+      <div style="font-size:20px;font-weight:700">{{ profile.display_name }}</div>
+      <div class="muted small">
+        {{ 'Merchant' if profile.is_merchant else 'Personal counterparty' }}
+        {% if _ph %} · <span class="mono">{{ _ph }}</span>{% endif %}
+      </div>
+      <div class="muted small" style="font-size:10px;margin-top:2px">DP shown when the counterparty is saved in the device phonebook with a photo</div>
+    </div>
+  </div>
+  <div class="kv">
+    <b>Bank / verified name</b>
+    <span class="plain">
+      {% if profile.names_verified %}{{ profile.names_verified|join(', ') }}
+      {% elif profile.names_cbs %}{{ profile.names_cbs|join(', ') }}
+      {% else %}<span class="muted">—</span>{% endif %}
+    </span>
+    <b>CBS name (bank record)</b>
+    <span class="plain">{% if profile.names_cbs %}{{ profile.names_cbs|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>Saved contact name</b>
+    <span class="plain">
+      {% if profile.names_saved %}<b style="color:var(--accent)">{{ profile.names_saved|join(', ') }}</b>
+        <span class="muted small">(the subject's own phonebook label)</span>
+      {% else %}<span class="muted">— (not in device phonebook)</span>{% endif %}
+    </span>
+    <b>PhonePe display name</b>
+    <span class="plain">{% if profile.names_display %}{{ profile.names_display|join(', ') }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <b>Cluster id</b><span class="mono small">{{ profile.cluster_id }}</span>
+    <b>PhonePe userId</b>
+    <span class="mono">
+      {% if profile.user_ids %}{% for u in profile.user_ids %}{{ u }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% else %}<span class="muted">— (not on PhonePe, or chat-only counterparty)</span>{% endif %}
+    </span>
+    <b>Phone(s)</b>
+    <span class="mono">
+      {% if profile.phones %}{% for ph in profile.phones %}{{ ph }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+      {% if profile.masked_phones %}{% if profile.phones %} · {% endif %}{% for mp in profile.masked_phones %}<span title="Chat retained only the last 4 digits — full number not in this acquisition">{{ mp }}</span>{% if not loop.last %}, {% endif %}{% endfor %}
+        <span class="muted small">(masked — chat kept last 4 only)</span>{% endif %}
+      {% if not profile.phones and not profile.masked_phones %}<span class="muted">—</span>{% endif %}
+    </span>
+    <b>VPA(s)</b>
+    <span class="mono">
+      {% if profile.vpas %}{% for v in profile.vpas %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% else %}<span class="muted">—</span>{% endif %}
+    </span>
+    <b>Connect id(s)</b>
+    <span class="mono small">
+      {% if profile.connect_ids %}{% for c in profile.connect_ids %}{{ c }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% else %}<span class="muted">—</span>{% endif %}
+    </span>
+  </div>
+</div>
+
+<div class="metric-grid" style="margin-top:14px">
+  <div class="metric">
+    <div class="mlabel">Transactions</div>
+    <div class="mvalue">{{ profile.txn_count }}</div>
+    <div class="msub">{{ profile.txnstore_count }} full · {{ profile.burble_only_count }} chat-only</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Received from</div>
+    <div class="mvalue pos">{{ profile.total_received_inr|inr }}</div>
+    <div class="msub">{{ profile.received_count }} txns</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Sent to</div>
+    <div class="mvalue neg">{{ profile.total_sent_inr|inr }}</div>
+    <div class="msub">{{ profile.sent_count }} txns</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Net flow</div>
+    <div class="mvalue {% if profile.net_inr >= 0 %}pos{% else %}neg{% endif %}">{{ profile.net_inr|inr }}</div>
+  </div>
+</div>
+
+{% if profile.by_year %}
+<div class="card" style="margin-top:14px">
+  <div class="card-title">Money flow by year (with this counterparty)</div>
+  <table>
+    <thead><tr><th>Year</th><th class="right">Received</th><th class="right">Sent</th><th class="right">Net</th></tr></thead>
+    <tbody>
+      {% for yr, b in profile.by_year.items() %}
+        <tr>
+          <td class="mono">{{ yr }}</td>
+          <td class="right amount-pos" style="white-space:nowrap">{{ b.recv|inr }}</td>
+          <td class="right amount-neg" style="white-space:nowrap">{{ b.sent|inr }}</td>
+          <td class="right {% if b.recv-b.sent >= 0 %}amount-pos{% else %}amount-neg{% endif %}" style="white-space:nowrap">{{ (b.recv-b.sent)|inr }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:14px">
+  <div class="card-title">Transaction history ({{ profile.txn_count }}) — includes Burble chat-recovered payments</div>
+  <div class="tbl-wrap-scroll" style="max-height:560px;overflow-y:auto">
+  <table>
+    <thead>
+      <tr>
+        <th>Date (IST)</th>
+        <th>Dir</th>
+        <th class="right">Amount</th>
+        <th>State</th>
+        <th>Counterparty VPA</th>
+        <th>Counterparty phone</th>
+        <th>Note</th>
+        <th>Class</th>
+        <th>Source</th>
+        <th>ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in profile.payments %}
+        <tr {% if p.state == 'FAILED' %}style="background:rgba(239,68,68,0.06)"{% endif %}>
+          <td class="mono small">{{ p.datetime_ist or '—' }}</td>
+          <td><span class="tag {{ (p.direction or 'unknown')|lower }}">{{ p.direction }}</span></td>
+          <td class="right amount-{% if p.direction=='RECEIVED' %}pos{% elif p.direction=='SENT' %}neg{% else %}meta{% endif %}" style="white-space:nowrap">{{ p.amount_inr|inr }}</td>
+          <td><span class="tag {{ (p.state or '')|lower }}">{{ p.state }}</span></td>
+          <td class="mono small">{{ p.counterparty_vpa or p.counterparty_full_vpa or '—' }}</td>
+          <td class="mono small">{{ p.counterparty_phone or '—' }}</td>
+          <td class="small" style="max-width:220px">{% if p.note %}<span title="{{ p.note }}">{{ p.note|truncate(60) }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td>{{ p.classification }}</td>
+          <td>
+            {% if p.data_source == 'burble_only' %}
+              <span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Chat-only</span>
+            {% else %}
+              <span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">Full</span>
+            {% endif %}
+          </td>
+          <td class="mono small">
+            <a href="{{ url_for('page_transaction_detail', txn_id=p.global_id or p.primary_id) }}">{{ (p.primary_id or '')|truncate(18) }}</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="10" class="muted" style="text-align:center;padding:30px">No transactions in this cluster.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────────────────────────────────
+#  PhonePe iOS Forensics — .gitignore
+#  NEVER commit acquisition data, generated reports, or the case registry.
+#  These contain a real person's financial, social and identity PII.
+# ─────────────────────────────────────────────────────────────────────────
+
+# Raw iOS acquisition / evidence (the subject's entire financial + social life)
+database/
+database.7z
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+
+# Generated analysis output — every file here is full of the subject's PII
+phonepe_evidence/
+phonepe_analysis/
+exports/
+*_phonepe_evidence.html
+
+# Case registry — stores subject name, UPI id, investigator, local paths
+.pp_forensics/
+
+# Accidental nested copy of the repository
+PhonePe-Forensics-main/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+ENV/
+
+# Editors / OS / tooling
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+desktop.ini

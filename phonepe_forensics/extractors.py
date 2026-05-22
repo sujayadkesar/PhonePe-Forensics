@@ -707,6 +707,38 @@ def _resolve_member_blob(blob: Any) -> Dict[str, Any]:
     return {}
 
 
+def _sanitize_payload(obj: Any, depth: int = 0) -> Any:
+    """Recursively coerce a decoded bplist into template-safe primitives."""
+    if depth > 12:
+        return "…"
+    if isinstance(obj, dict):
+        return {str(k): _sanitize_payload(v, depth + 1) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_payload(v, depth + 1) for v in obj]
+    if isinstance(obj, bytes):
+        return f"<{len(obj)} bytes>"
+    if isinstance(obj, (str, int, float, bool)) or obj is None:
+        return obj
+    return str(obj)
+
+
+def _decode_chat_payload(blob: Any) -> Optional[Dict[str, Any]]:
+    """Decode a ZCONTENT.ZCONTENT payload bplist into a plain dict.
+
+    Every Burble chat row — whatever its content type — carries a structured
+    NSKeyedArchiver payload in this column. Decoding it generically means no
+    field of any card type (CONTACT bank details, TRANSACTION_RECEIPT recharge
+    info, or a future type the flat-column extractor never anticipated) is
+    silently dropped from the conversation view.
+    """
+    if not blob:
+        return None
+    decoded = safe_decode_blob(blob)
+    if not isinstance(decoded, dict):
+        return None
+    return _sanitize_payload(decoded)
+
+
 def extract_chat(case: CasePaths) -> Dict[str, Any]:
     """Burble.sqlite: groups (P2P conversations), messages, payment cards.
 
@@ -740,9 +772,11 @@ def extract_chat(case: CasePaths) -> Dict[str, Any]:
             SELECT gm.ZGROUPID, gm.ZNAME, gm.ZGROUPSTATUSVALUE, gm.ZNAMESPACE,
                    gm.ZIMAGEURL, gm.ZCREATEDAT, gm.ZUPDATEDAT, gm.ZACTIVE,
                    gm.ZVISIBILITYVALUE, g.ZGROUPTYPE, g.ZSUBSYSTEMTYPE, g.ZSUBSCRIPTIONSTATUS,
-                   gm.Z_PK as meta_pk, g.Z_PK as group_pk
+                   gm.Z_PK as meta_pk, g.Z_PK as group_pk,
+                   cm.ZRESTORECOMPLETED, cm.ZLASTREADTIMESTAMP, cm.ZUNREADMESSAGECOUNT
             FROM ZGROUPMETA gm
             LEFT JOIN ZGROUP g ON gm.ZGROUP = g.Z_PK
+            LEFT JOIN ZGROUPCLIENTMETA cm ON cm.ZGROUP = g.Z_PK
             ORDER BY gm.ZCREATEDAT DESC
         """)
 
@@ -811,7 +845,8 @@ def extract_chat(case: CasePaths) -> Dict[str, Any]:
         messages = db.query("""
             SELECT M.Z_PK as msg_pk, M.ZMESSAGEID, M.ZTHREADID, M.ZISVISIBLE,
                    M.ZGROUPMEMBERSOURCE, M.ZGROUPMEMBERDESTINATION,
-                   C.ZCONTENTTYPEVALUE, C.ZTEXT, C.ZAMOUNT, C.ZCREATEDAT,
+                   C.ZCONTENTTYPEVALUE, C.ZCONTENT as PAYLOAD_BLOB,
+                   C.ZTEXT, C.ZAMOUNT, C.ZCREATEDAT,
                    C.ZTRANSACTIONID, C.ZNOTE, C.ZSTATEVALUE, C.ZPAYMENTSTATEVALUE,
                    C.ZRECEIVERTRANSACTIONID, C.ZSENDERTRANSACTIONID, C.ZINSTRUMENTUSEDVALUE,
                    C.ZUTR, C.ZEXTERNALVPA, C.ZEXTERNALVPACBSNAME,
@@ -848,6 +883,12 @@ def extract_chat(case: CasePaths) -> Dict[str, Any]:
             "created_at": normalize_timestamp(r.get("ZCREATEDAT")),
             "updated_at": normalize_timestamp(r.get("ZUPDATEDAT")),
             "member_count": mc_by_group.get(r.get("ZGROUPID")),
+            # ZGROUPCLIENTMETA — chat-restore / sync state. restore_completed=0
+            # on a group with no messages means the group shell was synced but
+            # its message history was never paged down to the device.
+            "restore_completed": r.get("ZRESTORECOMPLETED"),
+            "last_read_ts": normalize_timestamp(r.get("ZLASTREADTIMESTAMP")),
+            "unread_count": r.get("ZUNREADMESSAGECOUNT"),
         })
     out["groups"] = out_groups
 
@@ -948,6 +989,9 @@ def extract_chat(case: CasePaths) -> Dict[str, Any]:
             "local_file": r.get("ZLOCALFILEURL"),
             "request_id": r.get("ZREQUESTID"),
             "request_state": r.get("ZREQUESTSTATEVALUE"),
+            # generically-decoded payload — every field of every card type,
+            # so CONTACT / TRANSACTION_RECEIPT / unknown types are never blank
+            "decoded_payload": _decode_chat_payload(r.get("PAYLOAD_BLOB")),
             "expires_at": normalize_timestamp(r.get("ZEXPIRESAT")),
             "last_reminded": normalize_timestamp(r.get("ZLASTREMINDEDTIMESTAMP")),
             "created_at": normalize_timestamp(ts_raw),

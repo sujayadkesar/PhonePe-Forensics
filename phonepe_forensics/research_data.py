@@ -157,7 +157,7 @@ RESEARCH_SECTIONS: List[Dict[str, Any]] = [
                 "heading": "Forensic queries to run",
                 "list": [
                     "Top 5 outgoing transactions by value: `transactions | where direction = \"OUT\" | sort amount_inr desc | head 5`",
-                    "All transactions to a specific phone: `transactions | where counterparty_phone = \"9491508461\"`",
+                    "All transactions to a specific phone: `transactions | where counterparty_phone = \"9999900000\"`",
                     "All ERRORED transactions: `transactions | where state = \"ERRORED\"`",
                     "Total received per year: `transactions | where direction = \"IN\" and state = \"COMPLETED\" | stats sum(amount_inr) by created_at_iso`",
                 ],
@@ -243,8 +243,8 @@ RESEARCH_SECTIONS: List[Dict[str, Any]] = [
             {
                 "heading": "Hunting the chat",
                 "list": [
-                    "All TEXT messages from a specific person: `chat_messages | where sender_name = \"Bharath Kalyan\" and type = \"TEXT_MESSAGE\"`",
-                    "Find a UTR mentioned in chat: `chat_messages | where utr = \"905177669040\"`",
+                    "All TEXT messages from a specific person: `chat_messages | where sender_name = \"Contact Name\" and type = \"TEXT_MESSAGE\"`",
+                    "Find a UTR mentioned in chat: `chat_messages | where utr = \"000000000000\"`",
                     "Money requests still pending: `chat_messages | where request_state = \"PENDING\"`",
                     "Bank disclosures shared as attachments: `shared_bank_disclosures | where verified = false`",
                 ],
@@ -432,7 +432,7 @@ RESEARCH_SECTIONS: List[Dict[str, Any]] = [
                          "request — often the only authoritative location "
                          "evidence for the device.", ""),
                     _row("com.firebase.FIRInstallations.plist", "Firebase ID", "Library/Preferences",
-                         "1:412209864940:ios:<install_id>",
+                         "1:<project_number>:ios:<install_id>",
                          "Firebase Installation ID — pivots into Firebase "
                          "Analytics (Google) and FCM logs server-side.", ""),
                     _row("com.apple.AdSupport.plist", "IDFA", "Library/Preferences",

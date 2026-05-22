@@ -1,6 +1,7 @@
-"""PhonePe iOS Forensics package."""
-from .case import Case  # noqa: F401
-from .core import CasePaths, SQLiteReader, BinaryCookieReader  # noqa: F401
+"""
+PhonePe Forensics — coverage, classification, conversation & provenance pipeline.
 
-__all__ = ["Case", "CasePaths", "SQLiteReader", "BinaryCookieReader"]
+Single-file offline HTML evidence report + CSV/XLSX exports for PhonePe iOS acquisitions.
+Sources every fact from the acquired backup; no network, no inference.
+"""
 __version__ = "1.0.0"

@@ -442,7 +442,8 @@ def _try_json(text: str) -> Any:
 # ---------------------------------------------------------------------------
 
 # PhonePe iOS transaction IDs follow the pattern T<YY><MM><DD><HH><MM><SS><digits>
-#   T2502241950445948970469  -> 25/02/24 19:50:44 + 5948970469 (server seq + node)
+#   T<YYMMDD><HHMMSS><server-seq+node>  e.g. the leading 12 digits decode to a
+#   UTC timestamp; the trailing digits are an opaque server sequence + node id.
 # Group IDs use a different scheme: GP<32 hex chars>
 # Refund IDs prefix: R<TXN-ID>
 _TXN_ID_RX = re.compile(r"^[TR]?(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\d+$")
