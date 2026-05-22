@@ -145,7 +145,7 @@
       Net: {{ (filtered_total_in - filtered_total_out)|inr }}
     </div>
   </div>
-  <div class="tbl-wrap-scroll">
+  <div class="tbl-wrap-scroll" style="max-height:68vh">
   <table>
     <thead>
       <tr>
@@ -175,14 +175,43 @@
         </td>
         <td><span class="tag {{ (t.state or 'unknown')|lower }}">{{ t.state }}</span></td>
         <td>
-          {{ t.counterparty or '—' }}
-          {% if t.counterparty_cbs_name and t.counterparty_cbs_name != t.counterparty %}
-            <div class="muted small">CBS: {{ t.counterparty_cbs_name }}</div>
-          {% endif %}
+          <div style="display:flex;align-items:center;gap:8px">
+            {% if t.counterparty_phone %}
+              <img class="zoomable" data-caption="{{ t.counterparty or t.counterparty_phone }}"
+                   src="{{ url_for('page_v2_avatar', phone=t.counterparty_phone) }}"
+                   onerror="this.style.display='none'"
+                   style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--bg-2)">
+            {% endif %}
+            <div>
+              <div>{{ t.counterparty or '—' }}</div>
+              {% if t.counterparty_cbs_name and t.counterparty_cbs_name != t.counterparty %}
+                <div class="muted small">CBS: {{ t.counterparty_cbs_name }}</div>
+              {% endif %}
+              {% if t.classification or t.data_source %}
+                <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">
+                  {% if t.classification %}<span class="tag {% if t.classification == 'MERCHANT' %}accent{% elif t.classification == 'PEER_TO_PEER' %}info{% elif t.classification == 'MANDATE' %}med{% else %}{% endif %}" style="font-size:9px">{{ t.classification }}</span>{% endif %}
+                  {% if t.data_source == 'burble_only' %}<span class="tag med" style="font-size:9px">Chat-only</span>{% endif %}
+                  {% if t.is_qr_scan %}<span class="tag med" style="font-size:9px">QR</span>{% endif %}
+                  {% if t.is_intent %}<span class="tag info" style="font-size:9px">INTENT</span>{% endif %}
+                  {% if t.is_refund %}<span class="tag med" style="font-size:9px">REFUND</span>{% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </td>
         <td class="mono small">
           {% if t.counterparty_phone %}{{ t.counterparty_phone }}<br>{% endif %}
           {% if t.counterparty_vpa %}{{ t.counterparty_vpa }}{% endif %}
+          {% set app = t.receiver_app if t.direction == 'OUT' else t.sender_app %}
+          {% set icon = t.receiver_app_icon if t.direction == 'OUT' else t.sender_app_icon %}
+          {% if app and app != 'No VPA' %}
+            <div style="margin-top:3px;display:flex;align-items:center;gap:4px">
+              {% if icon %}<img src="{{ url_for('page_v2_app_icon', icon_id=icon) }}"
+                   onerror="this.style.display='none'"
+                   style="width:14px;height:14px;border-radius:2px;flex-shrink:0">{% endif %}
+              <span style="font-size:11px;color:var(--text-2)">{{ app }}</span>
+            </div>
+          {% endif %}
         </td>
         <td class="mono small">{{ t.received_in_type or t.transfer_mode or '—' }}</td>
         <td class="mono small">{{ t.utr or '—' }}</td>

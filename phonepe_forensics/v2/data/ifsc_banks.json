@@ -1,0 +1,6914 @@
+[
+ {
+  "zid": "BARB",
+  "name": "Bank Of Baroda",
+  "ifsc_prefix": "BARB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUBG",
+  "name": "Bhavani Urban Co-operative Bank Ltd Georai",
+  "ifsc_prefix": "YESB0BHVUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSBL",
+  "name": "Indore Paraspar Sahakari Bank Ltd",
+  "ifsc_prefix": "ICIC00INPRS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BNSB",
+  "name": "Bhagini Nivedita Sahakari Bank Ltd Pune",
+  "ifsc_prefix": "BNSB",
+  "central_ifsc": "HDFC0CBNBNK",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MUDB",
+  "name": "THE MUDALAGI CO OPERATIVE BANK LTD MUDALAGI",
+  "ifsc_prefix": "UTIB0S01MCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UBIN",
+  "name": "Union Bank Of India",
+  "ifsc_prefix": "UBIN",
+  "central_ifsc": "UBIN0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CCBL",
+  "name": "Citizen Credit Co-operative Bank",
+  "ifsc_prefix": "CCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JCUB",
+  "name": "Jampeta Cooperative Urban Bank Ltd",
+  "ifsc_prefix": "UTIB0SJCUB2",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSCB",
+  "name": "JANATHA SEVA CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CJSCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PPCB",
+  "name": "PUNE PEOPLES CO-OP BANK LTDPune",
+  "ifsc_prefix": "IBKL0548PPC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMCO",
+  "name": "The Sangamner Merchants Co Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0TSMCBT",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AUCB",
+  "name": "Almora Urban Co-operative Bank",
+  "ifsc_prefix": "AUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SRCC",
+  "name": "Saraswat Co-op Bank Credit Card",
+  "ifsc_prefix": "SRCB00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AUBL",
+  "name": "AU Small Finance Bank",
+  "ifsc_prefix": "AUBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "FDRL",
+  "name": "Federal Bank",
+  "ifsc_prefix": "FDRL",
+  "central_ifsc": "FDRL0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TCBL",
+  "name": "The Tirupati Co-operative Bank Ltd Tirupati",
+  "ifsc_prefix": "ICIC00TTCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DTPB",
+  "name": "Shri D T Patil Co-opertive Bank Ltd Chikodi",
+  "ifsc_prefix": "IBKL01340DT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TGCL",
+  "name": "TAMLUK GHATAL CENTRAL COOPERATIVE BANK LTD",
+  "ifsc_prefix": "WBSC0TCCB23",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACUL",
+  "name": "The Agrasen Co-Operative Urban Bank Limited",
+  "ifsc_prefix": "HDFC0CAU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KUCO",
+  "name": "The Kolhapur Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CKUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GUCB",
+  "name": "Godhra Urban Coop Bank Ltd",
+  "ifsc_prefix": "UTIB0SGUCB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VSBM",
+  "name": "Vaishya Sahakari Bank Ltd",
+  "ifsc_prefix": "IBKL0501VSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UTGB",
+  "name": "Uttarakhand Gramin Bank",
+  "ifsc_prefix": "SBIN0RRUTGB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCOP",
+  "name": "Uma Co Operative Bank Ltd",
+  "ifsc_prefix": "GSCB0UMA002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCCB",
+  "name": "BARODA CENTRAL CO-OP BANK LTD",
+  "ifsc_prefix": "GSCB0BRD001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCBU",
+  "name": "Mahalakshmi Co-Operative Bank Ltd UDUPI",
+  "ifsc_prefix": "IBKL0186MC2",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RECB",
+  "name": "The Railway Employees Cooperative Bank Ltd Jaipur",
+  "ifsc_prefix": "UTIB0SRECB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RBIH",
+  "name": "Idrbt",
+  "ifsc_prefix": "RBIH",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BRCB",
+  "name": "The Bhavana Rishi Co Op Urban Bank Ltd",
+  "ifsc_prefix": "YESB0BRCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSLM",
+  "name": "The Muslim Cooperative Bank Ltd",
+  "ifsc_prefix": "MSLM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCBA",
+  "name": "The Kancheepuram Central Co-operative Bank Limited",
+  "ifsc_prefix": "TNSC0010200",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PMEC",
+  "name": "Prime Co-operative Bank Ltd",
+  "ifsc_prefix": "PMEC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SIBL",
+  "name": "South Indian Bank",
+  "ifsc_prefix": "SIBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCCB",
+  "name": "DINDIGUL CENTRAL COOPERATIVE BANK LTD",
+  "ifsc_prefix": "TNSC0011700",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SVCO",
+  "name": "SRI VASAVAMBA CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CSVCBA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CHAS",
+  "name": "JP Morgan",
+  "ifsc_prefix": "CHAS",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KJSB",
+  "name": "Kalyan Janata Sahakari Bank",
+  "ifsc_prefix": "KJSB",
+  "central_ifsc": "KJSB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MAHG",
+  "name": "Maharashtra Gramin Bank",
+  "ifsc_prefix": "MAHG",
+  "central_ifsc": "MAHG0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LECB",
+  "name": "LIC Employees Co-operative Bank Ltd Udupi",
+  "ifsc_prefix": "IBKL0186LEC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GSSB",
+  "name": "Guardian Souharda Sahakari Bank Niyamita",
+  "ifsc_prefix": "SVCB0002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LAVB",
+  "name": "Laxmi Vilas Bank",
+  "ifsc_prefix": "DBSS0IN0426",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "YBCC",
+  "name": "Yes Bank Credit Card",
+  "ifsc_prefix": "YESB0UPIRCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VJPB",
+  "name": "Vijayapura DCC Bank",
+  "ifsc_prefix": "KSCB0014001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HDCL",
+  "name": "HDFC Bank Credit Line",
+  "ifsc_prefix": "HDCL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AGOB",
+  "name": "The Accountant Generals Office Employees Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CAGSBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BMBL",
+  "name": "Bharatiya Mahila Bank",
+  "ifsc_prefix": "BMBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RUMC",
+  "name": "The Raipur Urban Mercantile Co-op Bank",
+  "ifsc_prefix": "HDFC0CTRUMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ITBL",
+  "name": "Irinjalakuda Town Co-Operative Bank Ltd",
+  "ifsc_prefix": "ITBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "UBCC",
+  "name": "Union Bank Credit Card",
+  "ifsc_prefix": "UBIN0907826",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JCCB",
+  "name": "JIVAN COMMERCIAL CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL0JIVAN1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PGBK",
+  "name": "Punjab Gramin Bank",
+  "ifsc_prefix": "PUNB0PGB003",
+  "central_ifsc": "PUNB0PGB003",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSFB",
+  "name": "Jana Small Finance Bank Ltd",
+  "ifsc_prefix": "JSFB",
+  "central_ifsc": "JSFB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SRCB",
+  "name": "Saraswat Bank",
+  "ifsc_prefix": "SRCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUCC",
+  "name": "SURYODAY SMALL FINANCE BANK CREDIT CARD",
+  "ifsc_prefix": "SURY00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NUCB",
+  "name": "Nagar Urban Co-operative Bank",
+  "ifsc_prefix": "NUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DPBC",
+  "name": "Deutsche Bank - DBA",
+  "ifsc_prefix": "DEUT0784PBC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ORBC",
+  "name": "Oriental Bank Of Commerce",
+  "ifsc_prefix": "ORBC",
+  "central_ifsc": "ORBC0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "FDCC",
+  "name": "Federal Bank Credit Card",
+  "ifsc_prefix": "FDRL00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CICC",
+  "name": "City Union Bank Credit Card",
+  "ifsc_prefix": "CIUB0CMS002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ZSBL",
+  "name": "Zila Sahkari Bank Ghaziabad",
+  "ifsc_prefix": "ZSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CMSV",
+  "name": "Chaitanya Mahila Sahakari Bank Ltd Vijayapur",
+  "ifsc_prefix": "UTIB0SCHAIT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WBSC",
+  "name": "West Bengal State Co-operative Bank",
+  "ifsc_prefix": "WBSC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UTKS",
+  "name": "Utkarsh Small Finance Bank Ltd",
+  "ifsc_prefix": "UTKS",
+  "central_ifsc": "UTKS0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BRGB",
+  "name": "Baroda Rajasthan Kshetriya Gramin Bank",
+  "ifsc_prefix": "BARB0BRGBXX",
+  "central_ifsc": "BARB0BRGBXX",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "HDCB",
+  "name": "Hyderabad District Coop Central Bank ltd",
+  "ifsc_prefix": "TSAB0015",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RDCR",
+  "name": "The Raichur District Central Coop Bank Ltd Raichur",
+  "ifsc_prefix": "IBKL0296RDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCOB",
+  "name": "The Bhagyodaya Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CTBCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HUCB",
+  "name": "Hadagali Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "UTIB0SHUCBH",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RPCB",
+  "name": "Rajkot Peoples Co Op Bank Ltd",
+  "ifsc_prefix": "IBKL01642RP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCTB",
+  "name": "The Udupi Co Operative Town Bank",
+  "ifsc_prefix": "UTIB0SUCTBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BMCO",
+  "name": "The Bhuj Mercantile Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CBMCBJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JASB",
+  "name": "Janaseva Sahakari Bank Borivli",
+  "ifsc_prefix": "JASB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TSPB",
+  "name": "The Shirpur Peoples Co-Op Bank Ltd",
+  "ifsc_prefix": "KKBK0SPCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KBSL",
+  "name": "KRISHNA BHIMA SAMRUDDHI LOCAL AREA BANK",
+  "ifsc_prefix": "HDFC0CKBS01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SNBK",
+  "name": "Saraspur Nagrik Co Operative Bank Ltd Saraspur",
+  "ifsc_prefix": "SNBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ASBL",
+  "name": "Apna Sahakari Bank",
+  "ifsc_prefix": "ASBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VYSA",
+  "name": "ING Vysya Bank",
+  "ifsc_prefix": "VYSA",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AMRB",
+  "name": "Amreli Jilla Madhyastha Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0AMR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DEVB",
+  "name": "DEVELOPMENT COOPERATIVE BANK LTD",
+  "ifsc_prefix": "YESB0DEV",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TMCB",
+  "name": "The Muslim Cooperative Bank Ltd",
+  "ifsc_prefix": "HDFC0CMUSLM",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RATN",
+  "name": "RBL Bank",
+  "ifsc_prefix": "RATN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KGGB",
+  "name": "Kashi Gomati Samyut Grameen Bank",
+  "ifsc_prefix": "UBIN0RRBKGS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ESCC",
+  "name": "ESAF Small Finance Bank Ltd Credit Card",
+  "ifsc_prefix": "ESMF0000004",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NSBG",
+  "name": "Nagrik Sahkari Bank",
+  "ifsc_prefix": "INDB0NSBG01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TMCL",
+  "name": "Tamilnad Mercantile Bank Credit Line",
+  "ifsc_prefix": "TMBL0123456",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CLBL",
+  "name": "Capital Small Finance Bank",
+  "ifsc_prefix": "CLBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CNSB",
+  "name": "NAGRIK SAHAKARI BANK MYDT",
+  "ifsc_prefix": "HDFC0CNSBMV",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBBL",
+  "name": "Shri Bharat Ur Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CBHRAT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "YLCB",
+  "name": "Yadagiri Lns Coop Urbn Bank Bhongir",
+  "ifsc_prefix": "YESB0YLNS01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBUC",
+  "name": "Shree Balaji Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "ICIC00SBUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VLCB",
+  "name": "The Villupuram District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0012200",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "QCUB",
+  "name": "The Quilon Co-Operative Urban Bank",
+  "ifsc_prefix": "IBKL0737",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MLGB",
+  "name": "Malwa Gramin Bank",
+  "ifsc_prefix": "SBIN0RRMLGB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JCBL",
+  "name": "THE JANATA CO-OPERATIVE BANK LTD DELHI",
+  "ifsc_prefix": "HDFC0CTJCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CBML",
+  "name": "The Coop Bank Of Mehsana Ltd",
+  "ifsc_prefix": "GSCB0UCO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSKB",
+  "name": "JILA SAHKARI KENDRIYA BANK MARYADIT KHARGONE",
+  "ifsc_prefix": "CBIN0MPDCAS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SRBS",
+  "name": "Shri Rukmini Sahakari Bank Ltd Shrigonda",
+  "ifsc_prefix": "UTIB0SRSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUCB",
+  "name": "Sterling Urban Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CSTUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SIDC",
+  "name": "The Sindhudurg District Central Coop Bank Ltd",
+  "ifsc_prefix": "SIDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCOB",
+  "name": "Samruddhi Co-Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0041SCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCOB",
+  "name": "Dapoli Urban Co Op Bank Ltd",
+  "ifsc_prefix": "IBKL0116DPC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DEOB",
+  "name": "Deogiri Nagari Sahakari Bank Ltd Aurangabad",
+  "ifsc_prefix": "DEOB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ESFB",
+  "name": "Equitas Small Finance Bank Limited",
+  "ifsc_prefix": "ESFB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCCB",
+  "name": "The Madurai District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0010600",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GMCB",
+  "name": "The Gandhidham Mercantile Co-operative Bank Ltd",
+  "ifsc_prefix": "GSCB0UGMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UTIB",
+  "name": "Axis Bank",
+  "ifsc_prefix": "UTIB",
+  "central_ifsc": "UTIB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCBL",
+  "name": "Standard Chartered Bank",
+  "ifsc_prefix": "SCBL",
+  "central_ifsc": "SCBL0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RDCL",
+  "name": "Ratnagiri District Central Co operative Bank Ltd",
+  "ifsc_prefix": "IBKL0574RDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCEY",
+  "name": "Bank Of Ceylon",
+  "ifsc_prefix": "BCEY",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "IBBK",
+  "name": "Pt Bank Maybank Indonesia Tbk",
+  "ifsc_prefix": "IBBK",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "UJVN",
+  "name": "UJJIVAN SMALL FINANCE BANK",
+  "ifsc_prefix": "UJVN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JCBD",
+  "name": "Jamia Co-Operative Bank Ltd",
+  "ifsc_prefix": "UTIB0SJCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSSB",
+  "name": "Manvi Pattana Souharda Sahakari Bank NI",
+  "ifsc_prefix": "HDFC0CMPSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MANS",
+  "name": "Mansing Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CMCBLD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KBKB",
+  "name": "Kookmin Bank",
+  "ifsc_prefix": "KBKB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PUDB",
+  "name": "Pune DCC Bank",
+  "ifsc_prefix": "HDFC0CPDCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSCL",
+  "name": "Sundarlal Sawji Urban Co Op Bank Ltd",
+  "ifsc_prefix": "SRCB0SSB001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MUBT",
+  "name": "The Moti Urban Co-operative Bank Ltd Taloda",
+  "ifsc_prefix": "UTIB0STMUC1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PAUB",
+  "name": "The Panipat Urban Cooperative Bank LTD",
+  "ifsc_prefix": "YESB0PUCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APGVB",
+  "name": "Andhra Pradesh Grameena Vikas Bank",
+  "ifsc_prefix": "SBIN0RRAPGB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "FINC",
+  "name": "The Financial Co-Operative Bank Ltd",
+  "ifsc_prefix": "YESB0FINCO2",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AMSB",
+  "name": "The Ambika Mahila Sahakari Bank Ltd Ahmednagar",
+  "ifsc_prefix": "YESB00AM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SKAB",
+  "name": "Shri Kanyaka Nagari Sahakari Bank Ltd",
+  "ifsc_prefix": "UTIB0SKN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TCUB",
+  "name": "Tirumala Cooperative Urban Bank Ltd",
+  "ifsc_prefix": "SVCB0028002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GNCB",
+  "name": "Gandhinagar Nagarik Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CGNCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBNB",
+  "name": "Sonbhadra Nagar Sahkari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSNSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HDCC",
+  "name": "HDFC Bank Credit Card",
+  "ifsc_prefix": "HDCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KHCB",
+  "name": "Khattri Co-op Bank",
+  "ifsc_prefix": "YESB0KCUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VMCB",
+  "name": "The Veraval Mercantile Co Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CVMCBA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UUCB",
+  "name": "The Udaipur Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "UUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AGRB",
+  "name": "Agroha CoOperative Urban Bank Ltd",
+  "ifsc_prefix": "KKBK0ACUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BIGB",
+  "name": "Bihar Gramin Bank",
+  "ifsc_prefix": "UCBA0RRBBKG",
+  "central_ifsc": "UCBA0RRBBKG",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BKCC",
+  "name": "Bank of India Credit Card",
+  "ifsc_prefix": "BKID00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TVCB",
+  "name": "The Vijay Cooperative Bank Ltd",
+  "ifsc_prefix": "HDFC0CTVCBL",
+  "central_ifsc": "HDFC0CTVCBL",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TNSB",
+  "name": "Tamil Nadu State Apex Co-op Bank Ltd",
+  "ifsc_prefix": "TNSC0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JNTS",
+  "name": "JANATHA SEVA CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "JTSC0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SMSM",
+  "name": "SANMITRA MAHILA NAGARI SAHAKARI BANK MARYADIT CHANDRAPUR",
+  "ifsc_prefix": "HDFC0CSMNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SRBM",
+  "name": "The Sarvodaya Sahakari Bank Ltd Modasa",
+  "ifsc_prefix": "GSCB0USS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUBN",
+  "name": "Sadalga Urban Souharda Sahakari Bank Niyamit",
+  "ifsc_prefix": "UTIB0SSUSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCNB",
+  "name": "SHRI CHHANI NAGRIK SAHAKARI BANK LTD",
+  "ifsc_prefix": "HDFC0CSCNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SGUB",
+  "name": "SRI GANAPATHI URBAN CO OPERATIVE BANK LTD SAGAR",
+  "ifsc_prefix": "UTIB0SSGUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LNSB",
+  "name": "Lokvikas Nagari Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0LNS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SKSB",
+  "name": "Shikshak Sahakari Bank",
+  "ifsc_prefix": "SKSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SDCB",
+  "name": "Surat District Co-operative Bank",
+  "ifsc_prefix": "SDCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "FINO",
+  "name": "Fino Payments Bank",
+  "ifsc_prefix": "FINO",
+  "central_ifsc": "FINO0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APMC",
+  "name": "AP Mahesh Co-operative Urban Bank",
+  "ifsc_prefix": "APMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CNCL",
+  "name": "Canara Bank Credit Line",
+  "ifsc_prefix": "CNRB00CLUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MDCB",
+  "name": "Mumbai District Central Co-operative Bank",
+  "ifsc_prefix": "MDCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KUCB",
+  "name": "Karad Urban Co-operative Bank",
+  "ifsc_prefix": "KUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SANT",
+  "name": "Sant Sopankaka Sahakari Bank Ltd",
+  "ifsc_prefix": "SANT0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RSSB",
+  "name": "Rajarshi Shahu Sahakari Bank Ltd  Pune",
+  "ifsc_prefix": "RSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BDCB",
+  "name": "Bhavnagar District Central Co Op Bank Ltd",
+  "ifsc_prefix": "GSCB0BVN001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RDCC",
+  "name": "RAIGAD DISTRICT CENTRAL CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL0299RDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RPBL",
+  "name": "The Rander Peoples Coop Bank Ltd",
+  "ifsc_prefix": "HDFC0CRPCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICKA",
+  "name": "The Kaira District Central Co-operative Bank",
+  "ifsc_prefix": "ICIC00KAIRA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UMAB",
+  "name": "UMA CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "YESB0UMA002",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TTCB",
+  "name": "Textile Traders Co Operative Bank Ltd",
+  "ifsc_prefix": "TTCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BOMB",
+  "name": "Bombay Mercantile Co-Op Bank Ltd",
+  "ifsc_prefix": "BMCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TSSB",
+  "name": "Satara Sahakari Bank Ltd",
+  "ifsc_prefix": "TSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KBCL",
+  "name": "Karnataka Bank Credit Line",
+  "ifsc_prefix": "KARB00CLUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PKCB",
+  "name": "The Pudukkottai District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0010900",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GANB",
+  "name": "The Gandhidham Co-Operative Bank Limited",
+  "ifsc_prefix": "HDFC0CGCBLG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KKCC",
+  "name": "Kotak Mahindra Bank Credit Card",
+  "ifsc_prefix": "KKBK00UPICC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KKBK",
+  "name": "Kotak Mahindra Bank",
+  "ifsc_prefix": "KKBK",
+  "central_ifsc": "KKBK0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GACB",
+  "name": "Gujarat Ambuja Co Op Bank Ltd",
+  "ifsc_prefix": "GSCB0UGA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NICB",
+  "name": "New India Co-operative Bank",
+  "ifsc_prefix": "NICB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TBMC",
+  "name": "The Banaskantha Mercantile Cooperative Bank Ltd",
+  "ifsc_prefix": "TBMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TDBL",
+  "name": "The Thane District Central Co-op Bank Ltd",
+  "ifsc_prefix": "TDCB0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ANZB",
+  "name": "ANZ",
+  "ifsc_prefix": "ANZB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CIUB",
+  "name": "City Union Bank",
+  "ifsc_prefix": "CIUB",
+  "central_ifsc": "CIUB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CKGB",
+  "name": "Kaveri Grameena Bank",
+  "ifsc_prefix": "SBIN0RRCKGB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "GNUB",
+  "name": "The Gandhinagar Urban Coop Bank Ltd",
+  "ifsc_prefix": "HDFC0CTGUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GSBL",
+  "name": "GAUTAM SAHAKARI BANK LTD GAUTAMNAGAR",
+  "ifsc_prefix": "YESB0GASBL1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VMCU",
+  "name": "Vardhaman Mahila Co-op Urban Bank Ltd",
+  "ifsc_prefix": "HDFC0CVB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSAB",
+  "name": "Mahila Nagrik Sahakari Bank Maryadit Mahasamund",
+  "ifsc_prefix": "HDFC0CMN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VAKL",
+  "name": "Vakrangee Ltd",
+  "ifsc_prefix": "YESB0VAKRTL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCUB",
+  "name": "Sudha Co Op Urban Bank Ltd",
+  "ifsc_prefix": "HDFC0CSUCUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RVGB",
+  "name": "Raje Vikramsinh Ghatge Co-Op Bank Ltd Kagal",
+  "ifsc_prefix": "IBKL0116KCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CBIN",
+  "name": "Central Bank Of India",
+  "ifsc_prefix": "CBIN",
+  "central_ifsc": "CBIN0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSCB",
+  "name": "The SSK Co-operative Bank Ltd",
+  "ifsc_prefix": "UTIB0SSSKCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PIMC",
+  "name": "The Pimpalgaon Merchants Co-Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CPIMCO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SPSB",
+  "name": "Sandur Pattana Souharda Sahakari Bank",
+  "ifsc_prefix": "IBKL0776SPS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCBL",
+  "name": "GS Mahanagar Co Operative Bank Ltd",
+  "ifsc_prefix": "MCBL",
+  "central_ifsc": "MCBL0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUBL",
+  "name": "The Sirsi Urban Bank",
+  "ifsc_prefix": "IBKL0069S01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BACB",
+  "name": "Bassein Catholic Co-operative Bank",
+  "ifsc_prefix": "BACB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DNSA",
+  "name": "Deogiri Nagari Sahakari Bank Ltd Aurangabad",
+  "ifsc_prefix": "DEOB0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DOHB",
+  "name": "Doha Bank",
+  "ifsc_prefix": "DOHB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NPCB",
+  "name": "The Nadiad Peoples Co Op Bank Ltd",
+  "ifsc_prefix": "GSCBOUNP",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TMBL",
+  "name": "Tamilnad Mercantile Bank",
+  "ifsc_prefix": "TMBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APGV",
+  "name": "Andhra Pradesh Grameena Vikas Bank",
+  "ifsc_prefix": "APGV",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KUBL",
+  "name": "The Kranthi Coop Urban Bank Ltd",
+  "ifsc_prefix": "UTIB0SKRN01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACEB",
+  "name": "ACE Cooperative Bank Ltd",
+  "ifsc_prefix": "IBKL0100ACB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LSBL",
+  "name": "Lonavala Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CLSABL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MERB",
+  "name": "Meghalaya Rural Bank",
+  "ifsc_prefix": "SBIN0RRMEGB",
+  "central_ifsc": "SBIN0RRMEGB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MUCC",
+  "name": "Mugberia Central Cooperative Bank Ltd",
+  "ifsc_prefix": "WBSC0MGCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBMY",
+  "name": "State Bank Of Mysore",
+  "ifsc_prefix": "SBMY",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SMBG",
+  "name": "Shree Mahalaxmi Coop Crd Bk Gokak",
+  "ifsc_prefix": "SVCB0012002",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MSCI",
+  "name": "Maharashtra State Co-operative Bank",
+  "ifsc_prefix": "MSCI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RNSB",
+  "name": "Rajkot Nagarik Sahakari Bank",
+  "ifsc_prefix": "RNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MPRS",
+  "name": "Madhya Pradesh Rajya Sahakari Bank Maryadit",
+  "ifsc_prefix": "CBIN0MPABAA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICMB",
+  "name": "Indore Cloth Market Cooperative Bank Ltd",
+  "ifsc_prefix": "YESB0ICMB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BOTM",
+  "name": "Bank Of Tokyo-Mitsubishi",
+  "ifsc_prefix": "BOTM",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BNSM",
+  "name": "Basoda Nagrik Sahakari Bank Mydt Ganjbasoda",
+  "ifsc_prefix": "YESB0BNSBGB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JANA",
+  "name": "Janaseva Sahakari Bank",
+  "ifsc_prefix": "JANA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSBK",
+  "name": "MALAD SAHKARI BANK LTD",
+  "ifsc_prefix": "TMSB0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KRTH",
+  "name": "Krung Thai Bank Pcl",
+  "ifsc_prefix": "KRTH",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PRTH",
+  "name": "Prathama Bank",
+  "ifsc_prefix": "PRTH",
+  "central_ifsc": "PRTH0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RABO",
+  "name": "Rabobank International",
+  "ifsc_prefix": "RABO",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ARIH",
+  "name": "SHRI ARIHANT CO-OP BANK LTD",
+  "ifsc_prefix": "ICIC00ARIHT",
+  "central_ifsc": "ICIC00ARIHT",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DMCB",
+  "name": "The Dahod Mercantile Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CDMCBD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AMNB",
+  "name": "Astha Mahila Nagrik Sahkari BnakMaryadit",
+  "ifsc_prefix": "YESB0AMN001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LPCB",
+  "name": "THE LUNAWADA PEOPLES COOP BANK LTD",
+  "ifsc_prefix": "HDFC0CLPCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APSB",
+  "name": "The Amravati Zilla Parishad Shikshak Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0ASSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NMBL",
+  "name": "Navi Mumbai Co-operative Bank Limited",
+  "ifsc_prefix": "IBKL0123NMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NSBL",
+  "name": "Nandani Sahakari Bank Ltd Nandani",
+  "ifsc_prefix": "HDFC0CNSBLN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PBGB",
+  "name": "PASCHIM BANGA GRAMIN BANK",
+  "ifsc_prefix": "UCBA0RRBPBG",
+  "central_ifsc": "UCBA0RRBPBG",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TJSB",
+  "name": "TJSB Sahakari Bank",
+  "ifsc_prefix": "TJSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUNB",
+  "name": "Surat National Co-operative Bank",
+  "ifsc_prefix": "SUNB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SAHE",
+  "name": "Sahebrao Deshmukh Co-operative Bank",
+  "ifsc_prefix": "SAHE",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "VYAS",
+  "name": "Vyaparik Audhyogik Sahakari Bank ltd",
+  "ifsc_prefix": "YESB0VAS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VMNS",
+  "name": "Vasundhara Mahila Nagari Sahakari Bank Ltd Ambejogai",
+  "ifsc_prefix": "ICIC00VMNSL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCUB",
+  "name": "Bhadradri Cooperative Urban Bank Ltd",
+  "ifsc_prefix": "SRCB0BCB808",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HDBK",
+  "name": "Bhagini Nivedita Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CBNBNK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VARA",
+  "name": "Varachha Co-operative Bank",
+  "ifsc_prefix": "VARA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RDCB",
+  "name": "Rajnandgaon District Central CoOperative Bank Ltd",
+  "ifsc_prefix": "RDCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BECB",
+  "name": "The Bellary District Coop Central Bank Ltd",
+  "ifsc_prefix": "IBKL0103",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UMCB",
+  "name": "The Umreth Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CUU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IPCB",
+  "name": "Indore Premier Co-operative Bank Ltd Indore",
+  "ifsc_prefix": "CBIN0MPDCAO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KARB",
+  "name": "Karnataka Bank",
+  "ifsc_prefix": "KARB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ASSL",
+  "name": "Ahmednagar Shahar Sahakari Bank Ltd",
+  "ifsc_prefix": "SVCB0008011",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SPNS",
+  "name": "Shree Panchganga Nagari Sahakari Bank Ltd",
+  "ifsc_prefix": "IBKL0464PNS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUBB",
+  "name": "Sultan Battery Bank",
+  "ifsc_prefix": "IBKL01708SB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BACC",
+  "name": "Bank of Baroda Credit Card",
+  "ifsc_prefix": "BARB0RCCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MNBB",
+  "name": "Mahanagar Nagrik Sah Bank Bairagarh",
+  "ifsc_prefix": "YESB0MNSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCUB",
+  "name": "Darussalam Co Operative Urban Bank Ltd",
+  "ifsc_prefix": "DCUB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MVCB",
+  "name": "Sir M Visvesvaraya Co Operative Bank Ltd",
+  "ifsc_prefix": "MVCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ONEC",
+  "name": "OneCard",
+  "ifsc_prefix": "ONEC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DURG",
+  "name": "Durgapur Steel Peoples Co-Operative Bank Ltd",
+  "ifsc_prefix": "DURG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NSPB",
+  "name": "Nsdl Payments Bank Limited",
+  "ifsc_prefix": "NSPB",
+  "central_ifsc": "NSPB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DVSB",
+  "name": "DHULE VIKAS SAHAKARI BANK LTD",
+  "ifsc_prefix": "ICIC00DVSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LATB",
+  "name": "The Latur Urban Coop Bank LtdLatur",
+  "ifsc_prefix": "IBKL0497LUC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "COCB",
+  "name": "The Commercial Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CTCCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GCBL",
+  "name": "The Karnavati Coop Bank Ltd",
+  "ifsc_prefix": "GSCB0UTKCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "COSB",
+  "name": "Cosmos Bank",
+  "ifsc_prefix": "COSB",
+  "central_ifsc": "COSB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KYSB",
+  "name": "Koyana Sahakari bank Ltd Karad",
+  "ifsc_prefix": "IBKL0470KSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBIN",
+  "name": "State Bank Of India",
+  "ifsc_prefix": "SBIN",
+  "central_ifsc": "SBIN0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HITP",
+  "name": "Hitachi Payment Services Pvt Ltd",
+  "ifsc_prefix": "HITP",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TSAB",
+  "name": "Telangana State Coop Apex Bank",
+  "ifsc_prefix": "TSAB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HSBL",
+  "name": "Hutatma Sahakari Bank Ltd",
+  "ifsc_prefix": "ICIC00HSBLW",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PNUB",
+  "name": "The Pioneer Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0101PUC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PCBL",
+  "name": "Pune Urban Coop Bank Ltd",
+  "ifsc_prefix": "HDFC0CCPUBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "FSFB",
+  "name": "Fincare Small Finance Bank Ltd",
+  "ifsc_prefix": "FSFB",
+  "central_ifsc": "FSFB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SVBL",
+  "name": "Seva Vikas Co-operative Bank",
+  "ifsc_prefix": "SVBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KOKB",
+  "name": "KOILKUNTLA CO OP BANK LTD",
+  "ifsc_prefix": "SVCB0026",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SGCB",
+  "name": "THE SIVAGANGAI DISTRICT CENTRAL COOP BANK LTD",
+  "ifsc_prefix": "TNSC0011900",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NNSB",
+  "name": "Nutan Nagarik Sahakari Bank",
+  "ifsc_prefix": "NNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NKGS",
+  "name": "NKGSB Co-operative Bank",
+  "ifsc_prefix": "NKGS",
+  "central_ifsc": "NKGS0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MARB",
+  "name": "Manipur Rural Bank",
+  "ifsc_prefix": "UTBI0RRBMRB",
+  "central_ifsc": "UTBI0RRBMRB",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AIRP",
+  "name": "Airtel Payments Bank Limited",
+  "ifsc_prefix": "AIRP",
+  "central_ifsc": "AIRP0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GDVB",
+  "name": "Godavari Urban Co-Op Bank",
+  "ifsc_prefix": "HDFC0CGC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VSBL",
+  "name": "Vishweshwar Sahakari Bank",
+  "ifsc_prefix": "VSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VASJ",
+  "name": "Vasai Janata Sahakari Bank Ltd",
+  "ifsc_prefix": "VASJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UMIB",
+  "name": "Umiya Urban Co-Operative Bank",
+  "ifsc_prefix": "YESB0UMI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RCOB",
+  "name": "Sri Rama Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CSRCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RBEB",
+  "name": "Reserve Bank Employees Co-opertive Bank Limited",
+  "ifsc_prefix": "INDB0RBECBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HPSC",
+  "name": "Himachal Pradesh State Cooperative Bank Ltd",
+  "ifsc_prefix": "HPSC0000438",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CGGB",
+  "name": "Andhra Pradesh Grameena Bank",
+  "ifsc_prefix": "ANDB0CGGBHO",
+  "central_ifsc": "ANDB0CGGBHO",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PRCB",
+  "name": "Prerana Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CPRCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JAKA",
+  "name": "J&K Bank",
+  "ifsc_prefix": "JAKA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MUZB",
+  "name": "Muzaffarnagar District Cooperative Bank Ltd",
+  "ifsc_prefix": "UPCB00MUZAF",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMCL",
+  "name": "Shri Mahalaxmi Co Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00SMCOB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KANG",
+  "name": "Kangra Co-operative Bank",
+  "ifsc_prefix": "KANG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AUCO",
+  "name": "Ajantha Urban Coop Bank",
+  "ifsc_prefix": "YESB0AUC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SPGB",
+  "name": "Saptagiri Grameena Bank",
+  "ifsc_prefix": "IDIB0SGB001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "STOB",
+  "name": "Sree Thyagaraja Co operative Bank Ltd",
+  "ifsc_prefix": "INDB0STCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BBUC",
+  "name": "Bhausaheb Birajdar Urban Co-Operative Bank Ltd Omerga",
+  "ifsc_prefix": "ICIC00BBNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABHS",
+  "name": "THE ABHINAV SAHAKARI BANK LTD MUMBAI",
+  "ifsc_prefix": "SVCB0007",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SHGB",
+  "name": "Sarva Haryana Gramin Bank",
+  "ifsc_prefix": "PUNB0HGB001",
+  "central_ifsc": "PUNB0HGB001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KSBK",
+  "name": "The Kerala State Co Operative Bank Ltd",
+  "ifsc_prefix": "KSBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCBM",
+  "name": "DCCB MEDAK",
+  "ifsc_prefix": "TSAB0017",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NDCB",
+  "name": "The Nilgiris District Central Coop Bank Ltd",
+  "ifsc_prefix": "TNSC0010700",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NOSC",
+  "name": "Scotiabank",
+  "ifsc_prefix": "NOSC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CICO",
+  "name": "CITIZENS CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL01642C1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VNSB",
+  "name": "Vaishya Nagari Sahakari Bank",
+  "ifsc_prefix": "UTIB0SVNS01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TRGB",
+  "name": "Tripura Gramin Bank",
+  "ifsc_prefix": "PUNB0RRBTGB",
+  "central_ifsc": "UTBI0RRBTGB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSBN",
+  "name": "CHARTERED SAHAKARI BANK NIYAMITHA",
+  "ifsc_prefix": "YESB0CSB001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBCC",
+  "name": "SBI Credit Card",
+  "ifsc_prefix": "SBIN0CONUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSBL",
+  "name": "Sadhana Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSBL02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MAHB",
+  "name": "Bank Of Maharashtra",
+  "ifsc_prefix": "MAHB",
+  "central_ifsc": "MAHB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSHQ",
+  "name": "Mashreq Bank",
+  "ifsc_prefix": "MSHQ",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PSBA",
+  "name": "PAVANA SAHAKARI BANK",
+  "ifsc_prefix": "IBKL0087PSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SUSB",
+  "name": "Suco Souharda Sahakari Bank Ltd",
+  "ifsc_prefix": "SUSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BTNB",
+  "name": "Betul Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "UTIB0SBNSBM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUBL",
+  "name": "Balotra Urban Co Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00BALUC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MMCB",
+  "name": "The Maharashtra Mantralaya And Allied Offices Co Op Bank Ltd",
+  "ifsc_prefix": "IBKL0004MCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MECB",
+  "name": "Merchants Cooperative Bank Ltd Tiptur",
+  "ifsc_prefix": "UTIB0SMCBL1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSAB",
+  "name": "Satara Sahakari Bank Ltd",
+  "ifsc_prefix": "TSSB0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SSBS",
+  "name": "Saibaba Nagari Sahakari Bank Ltd Selu",
+  "ifsc_prefix": "UTIB0SSNS01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AXCC",
+  "name": "Axis Bank Credit Card",
+  "ifsc_prefix": "UTIB0AXISCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCUL",
+  "name": "The Shoranur Co Operative Urban Bank Ltd",
+  "ifsc_prefix": "IBKL0763SCU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KOLH",
+  "name": "The Kolhapur Urban CoOp Bank Ltd",
+  "ifsc_prefix": "KOLH",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CCOB",
+  "name": "Citizen Co Operative Bank Ltd Noida",
+  "ifsc_prefix": "HDFC0CCBL06",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DUCO",
+  "name": "Dausa Urban Co-Op Bank Ltd",
+  "ifsc_prefix": "UTIB0SDUCB3",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SVSL",
+  "name": "Shree Vardhaman Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0SVS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APGB",
+  "name": "Andhra Pragathi Grameena Bank",
+  "ifsc_prefix": "APGB",
+  "central_ifsc": "APGB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NNCB",
+  "name": "Naroda Nagarik Co-Operative Bank Ltd",
+  "ifsc_prefix": "GSCB0UNNCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PDCB",
+  "name": "The Panchmahal District Co-operative Bank Ltd",
+  "ifsc_prefix": "GSCB0PDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UMSB",
+  "name": "The Udaipur Mahila Samridhi Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "YESB0MSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GSBK",
+  "name": "BANASKANTHA DISTRICT CENTRAL CO-OP BANK LTD",
+  "ifsc_prefix": "GSCB0BKD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RTGS",
+  "name": "CITI",
+  "ifsc_prefix": "CITI0RTGSMI",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MSBL",
+  "name": "Mahesh Sahakari Bank Ltd Pune",
+  "ifsc_prefix": "MSBL",
+  "central_ifsc": "MSBL0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VCBL",
+  "name": "Vilas Co-operative Bank Ltd Latur",
+  "ifsc_prefix": "ICIC00VBLTR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IUCB",
+  "name": "Integral Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CIUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IDSB",
+  "name": "Idar Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0UIDARB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PYTM",
+  "name": "Paytm Payments Bank Ltd",
+  "ifsc_prefix": "PYTM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BNBL",
+  "name": "Baran Nagrik Sahkari Bank Ltd",
+  "ifsc_prefix": "HDFC0CBNB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RBIS",
+  "name": "RBI",
+  "ifsc_prefix": "RBIS",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SUTB",
+  "name": "Sutex Co-operative Bank",
+  "ifsc_prefix": "SUTB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSBL",
+  "name": "Janakalyan Sahakari Bank",
+  "ifsc_prefix": "JSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KAMC",
+  "name": "Kashmir Mercantile Cooperative Bank Ltd",
+  "ifsc_prefix": "HDFC0CKAMCO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KGCB",
+  "name": "THE KODAGU DISTRICT COOPERATIVE CENTRAL BANK LTD",
+  "ifsc_prefix": "KSCB0011001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MNSB",
+  "name": "THE MODASA NAGARIK SAHAKARI BANK",
+  "ifsc_prefix": "KKBK0MNSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SPCB",
+  "name": "Surat People's Co-operative Bank",
+  "ifsc_prefix": "SPCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AUBH",
+  "name": "The Akola Urban Co-op Bank Limited Akola",
+  "ifsc_prefix": "YESB0AUBHO1",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "STCO",
+  "name": "Standard Urban Co-op Bank Ltd",
+  "ifsc_prefix": "IBKL001SUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MHUB",
+  "name": "Mahesh Urban Co-operative Bank Parbhani",
+  "ifsc_prefix": "UTIB0SMUCB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CUBL",
+  "name": "The Chikhli urban Co-op Bank Ltd chikhli",
+  "ifsc_prefix": "HDFC0CCUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DHCB",
+  "name": "The Dhanbad Central Co-Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00TDCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SVSB",
+  "name": "Sardar Vallabhbhai Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSVSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SYNB",
+  "name": "Syndicate Bank",
+  "ifsc_prefix": "SYNB",
+  "central_ifsc": "SYNB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AMCB",
+  "name": "Ahmedabad Mercantile Co-operative Bank",
+  "ifsc_prefix": "AMCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TGMB",
+  "name": "Tumkur Grain Merchants Co-operative Bank",
+  "ifsc_prefix": "TGMB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SARM",
+  "name": "The Sarvodaya Sahakari Bank Ltd Modasa",
+  "ifsc_prefix": "GSCB0USSBLM",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BCBN",
+  "name": "The Business Coop Bank Nashik",
+  "ifsc_prefix": "YESB0BCBL02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VPCB",
+  "name": "The Veraval peoples Coop Bank Ltd",
+  "ifsc_prefix": "HDFC0CVPCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BGVB",
+  "name": "West Bengal Gramin Bank",
+  "ifsc_prefix": "PUNB0RRBBGB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IDCC",
+  "name": "Indian Bank Credit Card",
+  "ifsc_prefix": "IDIB000C106",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SURY",
+  "name": "Suryoday Small Finance Bank Limited",
+  "ifsc_prefix": "SURY",
+  "central_ifsc": "SURY0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSKD",
+  "name": "Jila Sahakari Kendriya Bank Mydt Durg",
+  "ifsc_prefix": "UTIB0SJSD01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSNB",
+  "name": "The Mehsana District Central Co-Operative Bank Ltd",
+  "ifsc_prefix": "GSCB0MSN001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PUCB",
+  "name": "The Pandharpur Urban Co Op Bank Ltd Pandharpur",
+  "ifsc_prefix": "PUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PNSB",
+  "name": "PATAN NAGARIK SAHAKARI BANK LTD",
+  "ifsc_prefix": "GSCB0UPATAN",
+  "central_ifsc": "GSCB0UPATAN",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMNS",
+  "name": "SHREE MAHUVA NAGRIK SAHKARI BANK LTD",
+  "ifsc_prefix": "HDFC0CMNSAA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MBGB",
+  "name": "Bihar Gramin Bank",
+  "ifsc_prefix": "PUNB0MBGB06",
+  "central_ifsc": "PUNB0MBGB06",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSBN",
+  "name": "Sadhana Sahakari Bank Ltd Nagpur",
+  "ifsc_prefix": "IBKL0041SSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SJSB",
+  "name": "Solapur Janata Sahakari Bank",
+  "ifsc_prefix": "SJSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DCBK",
+  "name": "District Central Co Op Bank Ltd Khammam",
+  "ifsc_prefix": "TSAB0022",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APJB",
+  "name": "Dr Appasaheb Urf Sa Re Patil Jaysingpur Udgaon Sahakari Bank Ltd Jaysingpur",
+  "ifsc_prefix": "ICIC00JUSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DSBN",
+  "name": "DAIVADNYA SAHAKAR BANK NIYAMIT",
+  "ifsc_prefix": "UTIB0SDSBNB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PCBD",
+  "name": "Peoples Co-operative Bank Ltd Dholka",
+  "ifsc_prefix": "HDFC0CPCBLD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LOKB",
+  "name": "LOKMANGAL CO OP BANK LTD SOLAPUR",
+  "ifsc_prefix": "IBKL0478LOK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MIEB",
+  "name": "THE MAKARPURA INDUSTRIAL ESTATE COOP BANK LTD",
+  "ifsc_prefix": "YESB0MIEB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBBJ",
+  "name": "State Bank Of Bikaner And Jaipur",
+  "ifsc_prefix": "SBBJ",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CORP",
+  "name": "Corporation Bank",
+  "ifsc_prefix": "CORP",
+  "central_ifsc": "CORP0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KMBL",
+  "name": "Krishna Mercantile Cooperative Bank Ltd Bhopal",
+  "ifsc_prefix": "UTIB0SKMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBSB",
+  "name": "SHRI BASAVESHWAR SAHAKARI BANK NYT BAGALKOT",
+  "ifsc_prefix": "ICIC00SBSBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PCSB",
+  "name": "PUNE CANTONMENT SAHAKARI BANK LTD",
+  "ifsc_prefix": "HDFC0CPCSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VCCB",
+  "name": "VIJAY COMMERCIAL CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "KKBK0VCCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICBK",
+  "name": "ICBC",
+  "ifsc_prefix": "ICBK",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "UNCC",
+  "name": "Unity Small Finance Bank Ltd Rupay Credit Card",
+  "ifsc_prefix": "UNBA0CC0",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BNPA",
+  "name": "BNP Paribas",
+  "ifsc_prefix": "BNPA",
+  "central_ifsc": "BNPA0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "IDFB",
+  "name": "IDFC First Bank",
+  "ifsc_prefix": "IDFB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TUBL",
+  "name": "Tirupati Urban Co-op Bank Ltd",
+  "ifsc_prefix": "HDFC0CTU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KAIJ",
+  "name": "Kallapanna Awade Ichalkaranji Janata Sahakari Bank",
+  "ifsc_prefix": "KAIJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PUNB",
+  "name": "Punjab National Bank",
+  "ifsc_prefix": "PUNB",
+  "central_ifsc": "PUNB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KDTC",
+  "name": "The Kodinar Taluka Cooperative Banking Union Ltd",
+  "ifsc_prefix": "GSCB0KDT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SOPB",
+  "name": "The Sarangpur Co Op Bank Ltd",
+  "ifsc_prefix": "GSCB0UTSCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "STCC",
+  "name": "SBM BANK INDIA CC",
+  "ifsc_prefix": "STCB0000011",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KMNB",
+  "name": "Kankaria Maninagar Nag Sah Bk Ltd",
+  "ifsc_prefix": "HDFC0CKMNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SHBK",
+  "name": "Shinhan Bank",
+  "ifsc_prefix": "SHBK",
+  "central_ifsc": "SHBK0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DBSS",
+  "name": "DBS Bank",
+  "ifsc_prefix": "DBSS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NMCN",
+  "name": "Nandurbar Merchants Co-operative Bank LtdNandurbar",
+  "ifsc_prefix": "YESB0NMB001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APRR",
+  "name": "The AP Raja Rajeswari Mahila Co Operative Urban Bank Ltd",
+  "ifsc_prefix": "UTIB0SAPRR2",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DUBL",
+  "name": "The Dahod Urban Coop Bank Ltd",
+  "ifsc_prefix": "HDFC0CDUCBE",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MNBL",
+  "name": "The Mandvi Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0UTMNBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TJCB",
+  "name": "The Thanjavur Central cooperative Bank Ltd",
+  "ifsc_prefix": "TNSC0011300",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NBAD",
+  "name": "National Bank Of Abu Dhabi",
+  "ifsc_prefix": "NBAD",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "LDRB",
+  "name": "Langpi Dehangi Rural Bank",
+  "ifsc_prefix": "SBIN0RRLDGB",
+  "central_ifsc": "SBIN0RRLDGB",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CMMB",
+  "name": "The Commercial Co-Operative Bank Ltd Jamnagar",
+  "ifsc_prefix": "HDFC0COMMCO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LDCB",
+  "name": "Latur District Central Co-Op Bank Ltd",
+  "ifsc_prefix": "IBKL0497LDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IDIB",
+  "name": "Indian Bank",
+  "ifsc_prefix": "IDIB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HCBL",
+  "name": "Hasti Co-op Bank",
+  "ifsc_prefix": "HCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KVBL",
+  "name": "Karur Vysya Bank",
+  "ifsc_prefix": "KVBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCOB",
+  "name": "The Mahaveer Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CTMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HARC",
+  "name": "Haryana State Cooperative Bank",
+  "ifsc_prefix": "HARC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VRCB",
+  "name": "The Virudhunagar District Central Cooperative Bank Ltd",
+  "ifsc_prefix": "TNSC0011800",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MUCB",
+  "name": "MALVIYA URBAN CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CMUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSNU",
+  "name": "Mehsana Urban Co-operative Bank",
+  "ifsc_prefix": "MSNU",
+  "central_ifsc": "MSNU0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UNBA",
+  "name": "Unity Small Finance Bank Limited",
+  "ifsc_prefix": "UNBA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCOP",
+  "name": "Samata Sahakari Bank LtdMumbai",
+  "ifsc_prefix": "SRCB0SAM001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TNCB",
+  "name": "The Nawanagar Cooperative Bank Ltd",
+  "ifsc_prefix": "TNCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RANB",
+  "name": "The Ranuj Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CRANUJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SUGB",
+  "name": "Prathama UP Gramin Bank",
+  "ifsc_prefix": "PUNB0SUPGB5",
+  "central_ifsc": "PUNB0SUPGB5",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SMOB",
+  "name": "The Sangamner Merch Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CTSMCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSBM",
+  "name": "Samarth Sahakari Bank Maryadit Jalna",
+  "ifsc_prefix": "HDFC0CSSBMJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SHPB",
+  "name": "The Shahada Peoples Coop Bank LTD",
+  "ifsc_prefix": "YESB0SPC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DACB",
+  "name": "Dr Annasaheb Chougule Urban Co-Op Bank LtdPeth Vadgaon",
+  "ifsc_prefix": "HDFC0CDACUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KRMB",
+  "name": "Karimnagar DCCB",
+  "ifsc_prefix": "TSAB0020",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TAGB",
+  "name": "Tamilnadu grama bank",
+  "ifsc_prefix": "IDIB0PLB001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RBIN",
+  "name": "Reserve Bank Of India",
+  "ifsc_prefix": "RBIN",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SCSM",
+  "name": "Shri Chatrapati Shivaji Maharaj Sahakari Bank Niyamith Gulbarga",
+  "ifsc_prefix": "UTIB0SCSMSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CITI",
+  "name": "Citibank",
+  "ifsc_prefix": "CITI",
+  "central_ifsc": "CITI0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACCB",
+  "name": "Adilabad District Coop Central Bank Ltd",
+  "ifsc_prefix": "TSAB0019",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AGVB",
+  "name": "Assam Gramin Vikash Bank",
+  "ifsc_prefix": "PUNB0RRBAGB",
+  "central_ifsc": "PUNB0RRBAGB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBCB",
+  "name": "Sardar Bhiladwala Pardi Peoples Coop Bank Ltd",
+  "ifsc_prefix": "UTIB0SBPP02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICBL",
+  "name": "ILKAL CO-OPERATIVE BANK LTD ILKAL",
+  "ifsc_prefix": "UTIB0SICB25",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RCMB",
+  "name": "Rani Channamma Mahila Sahakari Bank Belagavi",
+  "ifsc_prefix": "IBKL0101BZR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCBM",
+  "name": "Bharat Co-operative Bank Mumbai",
+  "ifsc_prefix": "BCBM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VCGB",
+  "name": "JHARKHAND RAJYA GRAMIN BANK",
+  "ifsc_prefix": "SBIN0RRVCGB",
+  "central_ifsc": "SBIN0RRVCGB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UNJB",
+  "name": "Unjha Nagarik Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0UUN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABWC",
+  "name": "FIVE ONE ZERO ARMY BASE WORKSHOP CREDIT CO OPERATIVE PRIMARY BANK LTD",
+  "ifsc_prefix": "ICIC00ABWCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUCL",
+  "name": "Bramhapuri Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CBUCBB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PMCB",
+  "name": "Punjab And Maharashtra Co-operative Bank",
+  "ifsc_prefix": "PMCB",
+  "central_ifsc": "PMCB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JNSB",
+  "name": "Jodhpur Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CJNB08",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KACE",
+  "name": "Kangra Central Co-operative Bank",
+  "ifsc_prefix": "KACE0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KDCC",
+  "name": "KOLHAPUR DISTRICT CENTRAL CO-OP BANK LTD",
+  "ifsc_prefix": "IBKL0463KDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ALCB",
+  "name": "Alavi Cooperative Bank Ltd",
+  "ifsc_prefix": "HDFC0CALAVI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SOGE",
+  "name": "Socit Gnrale",
+  "ifsc_prefix": "SOGE",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BACL",
+  "name": "Bank of Baroda Credit Line",
+  "ifsc_prefix": "BARB0UPICLU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "STCB",
+  "name": "SBM Bank India Ltd",
+  "ifsc_prefix": "STCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SLCB",
+  "name": "The Salem District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0011100",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NBRD",
+  "name": "National Bank For Agriculture And Rural Development",
+  "ifsc_prefix": "NBRD",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DUCB",
+  "name": "THE DARUSSALAM CO-OPERATIVE URBAN BANK LTD",
+  "ifsc_prefix": "HDFC0CDUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NILB",
+  "name": "Nileshwar Cooperative Urban bank Ltd",
+  "ifsc_prefix": "IBKL0340NCU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TLGB",
+  "name": "Telangana Grameena Bank",
+  "ifsc_prefix": "SBIN0RRDCGB",
+  "central_ifsc": "SBIN0RRDCGB",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "COCL",
+  "name": "Contai Co-operative Bank Limited",
+  "ifsc_prefix": "ICIC00CCBLT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KMCB",
+  "name": "KOKAN MERCANTILE CO OP BANK LTD",
+  "ifsc_prefix": "KKBK0KMCB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WUBL",
+  "name": "The Washim Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CWUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CNRB",
+  "name": "Canara Bank",
+  "ifsc_prefix": "CNRB",
+  "central_ifsc": "CNRB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "COAS",
+  "name": "Coastal Local Area Bank Ltd",
+  "ifsc_prefix": "COAS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GDCB",
+  "name": "Gadchiroli District Central Co-operative Bank",
+  "ifsc_prefix": "GDCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MLCB",
+  "name": "Merchants liberal Co operative Bank Ltd Gadag",
+  "ifsc_prefix": "UTIB0SMLCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BDSB",
+  "name": "The Bardoli Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0UTB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RUBL",
+  "name": "Rajlaxmi Urban Co-op Bank Ltd",
+  "ifsc_prefix": "HDFC0CRU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HSCC",
+  "name": "HSBC BANK CREDIT CARD",
+  "ifsc_prefix": "HSBC01CC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CDDB",
+  "name": "The Cuddalore District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0011200",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TNGB",
+  "name": "Tamilnadu grama bank",
+  "ifsc_prefix": "",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JJSB",
+  "name": "Jalgaon Janata Sahkari Bank",
+  "ifsc_prefix": "JJSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TNSC",
+  "name": "Tamil Nadu State Apex Co-operative Bank",
+  "ifsc_prefix": "TNSC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SMSB",
+  "name": "Sampada Sahakari Bank Ltd Pune",
+  "ifsc_prefix": "IBKL0459SBS",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ASCU",
+  "name": "The Annasaheb Savant Co-operative Urban Bank Mahad Ltd",
+  "ifsc_prefix": "HDFC0CMAHAD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSBL",
+  "name": "Suvarnayug Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSUVRN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SIDH",
+  "name": "Solapur Siddheshwar Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSIDDH",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NCCB",
+  "name": "Nalgonda District Coop Central Bank Ltd",
+  "ifsc_prefix": "TSAB0023",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MZRB",
+  "name": "Mizoram Rural Bank",
+  "ifsc_prefix": "SBIN0RRMIGB",
+  "central_ifsc": "SBIN0RRMIGB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SGBA",
+  "name": "Saurashtra Gramin Bank",
+  "ifsc_prefix": "SGBA0000",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BBKM",
+  "name": "Bank Of Bahrain And Kuwait BBK",
+  "ifsc_prefix": "BBKM",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SYSB",
+  "name": "Shri Yashwant Sahakari Bank Maryadit Kuditre",
+  "ifsc_prefix": "IBKL0463YSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ANKB",
+  "name": "The Ankola Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0069AUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TKCB",
+  "name": "The Thoothukudi  District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0012100",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SKCB",
+  "name": "Shrikrishna Co-Operative Bank Ltd Umred",
+  "ifsc_prefix": "SVCB0037002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LLCB",
+  "name": "Liluah Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CLL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AHNB",
+  "name": "Ahmednagar Shahar Sahakari Bank Ltd",
+  "ifsc_prefix": "SVCB0008",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ADCO",
+  "name": "The Adarsh Co-operative Urban Bank Ltd",
+  "ifsc_prefix": "ADBK0001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KGRB",
+  "name": "Kaveri Grameena Bank",
+  "ifsc_prefix": "KGRB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PCBK",
+  "name": "Priyadarshani Urban Co Op Bank Ltd Kallam",
+  "ifsc_prefix": "ICIC00PUCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KKPN",
+  "name": "Priyadarshani Nagari Sahakari Bank MaryaditJalna",
+  "ifsc_prefix": "KKBK0PNSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSCB",
+  "name": "MS Co-Operative Bank Limited",
+  "ifsc_prefix": "IBKL0553MSC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VCNB",
+  "name": "The Vaish Co-operative New Bank Ltd",
+  "ifsc_prefix": "YESB0VNB002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBCB",
+  "name": "THE VISAKHAPATNAM COOPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL0031VCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BSNB",
+  "name": "Balasinor Nagarik Sahakari Bank ltd",
+  "ifsc_prefix": "HDFC0CBNSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICCC",
+  "name": "ICICI Bank Credit Card",
+  "ifsc_prefix": "ICIC0DC0095",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSBA",
+  "name": "Janata Bank Ajara",
+  "ifsc_prefix": "IBKL0116JSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TPSC",
+  "name": "The Punjab State Cooperative Bank Ltd",
+  "ifsc_prefix": "TPSC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VSBS",
+  "name": "Vyapari Sahakari Bank Maryadit Solapur",
+  "ifsc_prefix": "HDFC0CVSBMS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WNSB",
+  "name": "Wana Nagarik Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0WAN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JNDB",
+  "name": "The Junagadh Jilla Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0JND",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KACB",
+  "name": "The Kangra Central Cooperative Bank Ltd",
+  "ifsc_prefix": "KACE0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PKGB",
+  "name": "Karnataka Grameena Bank",
+  "ifsc_prefix": "PKGB",
+  "central_ifsc": "PKGB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMLC",
+  "name": "Shree Mahayogi Lakshmamma Co-op Bank Limited",
+  "ifsc_prefix": "UTIB0SAVB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ARGB",
+  "name": "ARUNACHAL PRADESH RURAL BANK",
+  "ifsc_prefix": "SBIN0RRARGB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KDCB",
+  "name": "Kozhikode District Cooperatiave Bank Ltd",
+  "ifsc_prefix": "KDCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SNUB",
+  "name": "The Santrampur Urban Co-Op Bank Ltd",
+  "ifsc_prefix": "GSCB0USUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CDBL",
+  "name": "The Chittoor District Co-op Central Bank Ltd",
+  "ifsc_prefix": "APBL0010001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "STBP",
+  "name": "State Bank Of Patiala",
+  "ifsc_prefix": "STBP",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DAUB",
+  "name": "The Davangere Urban co op Bank Ltd",
+  "ifsc_prefix": "IBKL0069DUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NRPB",
+  "name": "NORTHERN RAILWAY MULTI STATE PRIMARY COOPERATIVE BANK LTD",
+  "ifsc_prefix": "UTIB0SNRP03",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NUOB",
+  "name": "NAVANAGARA URBAN CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CNUCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WPAC",
+  "name": "Westpac",
+  "ifsc_prefix": "WPAC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NESF",
+  "name": "slice small finance bank",
+  "ifsc_prefix": "NESF",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ECUB",
+  "name": "THE ELURU Co-OPERATIVE URBAN BANK LTD",
+  "ifsc_prefix": "UTIB0STECUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MMSV",
+  "name": "The Mumbai Mahanagarpalika Shikshan Vibhag Sahakari Bank",
+  "ifsc_prefix": "MDCB0680289",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SLUB",
+  "name": "Shri Laxmikrupa Urban Co - Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CSLKUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NCBL",
+  "name": "The National Coop Bank Ltd",
+  "ifsc_prefix": "YESB0NBL002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NYSB",
+  "name": "Nyayamitra Sahakari Bank Niyamita",
+  "ifsc_prefix": "UTIB0SNSBNB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AJAR",
+  "name": "The Ajara Urban Co Op Bank Ltd Ajara",
+  "ifsc_prefix": "AJAR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GOKB",
+  "name": "Sri Gokarnanath Co-Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0078GOK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RMGB",
+  "name": "Rajasthan Gramin Bank",
+  "ifsc_prefix": "RMGB",
+  "central_ifsc": "RMGB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBCL",
+  "name": "Indian Bank Credit Line",
+  "ifsc_prefix": "IDIB00CL108",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IOBA",
+  "name": "Indian Overseas Bank",
+  "ifsc_prefix": "IOBA",
+  "central_ifsc": "IOBA0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UMUB",
+  "name": "The Udaipur Mahila Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00UMUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WUCB",
+  "name": "Warangal Urban Co-op Bank Ltd",
+  "ifsc_prefix": "YESB0WUC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CCCB",
+  "name": "Chennai Central Co-op Bank Ltd",
+  "ifsc_prefix": "TNSC0010500",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JMCB",
+  "name": "JALNA MERCHANTS CO-OP BANK LTD",
+  "ifsc_prefix": "HDFC0CJMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ATCB",
+  "name": "The Ashta Peoples Co-op Bank Ltd Ashta",
+  "ifsc_prefix": "IBKL0116APC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AMBT",
+  "name": "Ahmednagar Merchants Co Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CMBANK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RCCB",
+  "name": "The Rajkot Commercial Co Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00RCCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APCB",
+  "name": "Ambajogai Peoples Co Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CAPCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CCUB",
+  "name": "The Chikhli urban Co-op Bank Ltd chikhli",
+  "ifsc_prefix": "YESB0CCUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NDBL",
+  "name": "The Naval Dockyard Co Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0452ND1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ANUB",
+  "name": "Abhinandan Urban Co-Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CMAN01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CLAB",
+  "name": "Coastal Local Area Bank Ltd",
+  "ifsc_prefix": "MAHB000CB01",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ZISB",
+  "name": "Zila Sahkari Bank Ltd Rampur",
+  "ifsc_prefix": "UPCB00RAMPR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CRUB",
+  "name": "Shri Chhatrapati Rajarshi Shahu Urban Co-op Bank",
+  "ifsc_prefix": "CRUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MHNB",
+  "name": "The Mehsana Nagarik Sahakari Bank Ltd",
+  "ifsc_prefix": "IBKL0443MNB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CRGB",
+  "name": "Chhattisgarh Rajya Gramin Bank",
+  "ifsc_prefix": "CRGB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SABL",
+  "name": "AMAN SAHAKARI BANK LTD ICHALKARANJI",
+  "ifsc_prefix": "ICIC00AMSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMCB",
+  "name": "Shivalik Small Finance Bank",
+  "ifsc_prefix": "SMCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VCOB",
+  "name": "The Vijay Co Operative Bank Limited",
+  "ifsc_prefix": "VCOB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBKL0031VCB",
+  "name": "Visakhapatnam Co-Operative Bank Limited",
+  "ifsc_prefix": "IBKL0031VCB",
+  "central_ifsc": "IBKL0031VCB",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UOVB",
+  "name": "United Overseas Bank UOB",
+  "ifsc_prefix": "UOVB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BSDB",
+  "name": "The Babasaheb Deshmukh Sahakari Bank Ltd Atpadi",
+  "ifsc_prefix": "IBKL0467BDS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BVNB",
+  "name": "The Bavla Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0BNS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JUCB",
+  "name": "The Jamkhandi Urban Co Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00TJUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KDBL",
+  "name": "The Krishna District Cooperative Central Bank Ltd",
+  "ifsc_prefix": "APBL0006001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RACC",
+  "name": "RBL Bank Credit Card",
+  "ifsc_prefix": "RATN0CRDXXX",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SNSL",
+  "name": "Shri Shiveshwar Nagari Sahakari Bank Ltd",
+  "ifsc_prefix": "UTIB0SSSN01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSUB",
+  "name": "SUNDARLAL SAWJI URBAN CO-OP BANK LTD",
+  "ifsc_prefix": "SRCB0SSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCBK",
+  "name": "Swatantrya Senani Late Shripal Alase Kaka Kurundwad Urban Co-Op Bank Ltd Kurundwad",
+  "ifsc_prefix": "IBKL0116SBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ARBL",
+  "name": "Arvind Sahakari Bank ltd",
+  "ifsc_prefix": "ARBL0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SVSH",
+  "name": "Shri Veershaiv Co Op Bank Ltd",
+  "ifsc_prefix": "SVSH",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DLSC",
+  "name": "Delhi State Co-operative Bank",
+  "ifsc_prefix": "DLSC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ANCB",
+  "name": "THE ANAND MERCANTILE COOP BANK LTD",
+  "ifsc_prefix": "HDFC0CAMCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NRDB",
+  "name": "THE NASIKROAD DEOLALI VYAPARI SAHAKARI BANK LTD",
+  "ifsc_prefix": "YESB0NRDB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "EDCB",
+  "name": "The Erode District Central Co-Operative Bank Ltd",
+  "ifsc_prefix": "TNSC0010800",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NCOB",
+  "name": "Nidhi Co Operative Bank Ltd",
+  "ifsc_prefix": "ICIC00NIDHI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NPBC",
+  "name": "NSDL Payments Bank CF",
+  "ifsc_prefix": "NSPB0000011",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SJSH",
+  "name": "Shri Janata Sahakari Bank Ltd Halol",
+  "ifsc_prefix": "GSCB0USJSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMBN",
+  "name": "Shree Mahesh Co-Op Bank Ltd Nashik",
+  "ifsc_prefix": "YESB0SMBLHO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GSCB",
+  "name": "Gujarat State Co-operative Bank",
+  "ifsc_prefix": "GSCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BSBU",
+  "name": "Bhausaheb Sahakari Bank Ltd Udgir",
+  "ifsc_prefix": "ICIC00YEUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HPGB",
+  "name": "Himachal Pradesh Gramin Bank",
+  "ifsc_prefix": "PUNB0HPGB04",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUCG",
+  "name": "The Bicholim Urban Cooperative Bank Ltd",
+  "ifsc_prefix": "HDFC0CBUCBG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BDBL",
+  "name": "Bandhan Bank",
+  "ifsc_prefix": "BDBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SAUR",
+  "name": "The Saurashtra Co Operative Bank Ltd",
+  "ifsc_prefix": "GSCB0USAURA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IDUK",
+  "name": "Idukki District Co Operative Bank Ltd",
+  "ifsc_prefix": "IDUK",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RMDB",
+  "name": "The Ramanathapuram District Central Co op Bank Ltd",
+  "ifsc_prefix": "TNSC0011000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HSBC",
+  "name": "HSBC",
+  "ifsc_prefix": "HSBC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BHLB",
+  "name": "Bhilwara Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CBHLUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IPOS",
+  "name": "India Post Payment Bank",
+  "ifsc_prefix": "IPOS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUCB",
+  "name": "THE BURDWAN CENTRAL COOPERATIVE BANK LTD",
+  "ifsc_prefix": "BUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PUCO",
+  "name": "Peoples Urban Co-operative Bank Ltd Tripunitura",
+  "ifsc_prefix": "IBKL0341PUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KKBL",
+  "name": "The Kanakamahalakshmi Co-operative Bank Ltd",
+  "ifsc_prefix": "IBKL0150KMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSIB",
+  "name": "Punjab And Sind Bank",
+  "ifsc_prefix": "PSIB",
+  "central_ifsc": "PSIB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSBA",
+  "name": "Shramik Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB00SNSL1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KTBL",
+  "name": "Kottayam Co-operative Urban Bank Ltd",
+  "ifsc_prefix": "IBKL0027K01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BALB",
+  "name": "Balitikuri Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CBCBMN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SDMB",
+  "name": "SHRI DURGADEVI MAHILA SAHAKARI BANK NIYAMITH",
+  "ifsc_prefix": "UTIB0SDMSBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CTCB",
+  "name": "Chinatrust Commercial Bank CTBC",
+  "ifsc_prefix": "CTCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NVNM",
+  "name": "The Navnirman Co-Operative Bank Limited",
+  "ifsc_prefix": "NVNM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ANBL",
+  "name": "The Agrasen Nagari Sahakari Bank Ltd Akola",
+  "ifsc_prefix": "HDFC0CTANSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NTBL",
+  "name": "Nainital Bank",
+  "ifsc_prefix": "NTBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DNSB",
+  "name": "Dombivli Nagari Sahakari Bank",
+  "ifsc_prefix": "DNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NAMC",
+  "name": "The Nanded Merchants Coop Bank Ltd Nanded",
+  "ifsc_prefix": "IBKL0500NMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DGGB",
+  "name": "Dena Gujarat Gramin Bank",
+  "ifsc_prefix": "BKDN0700000",
+  "central_ifsc": "BKDN0700000",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "GGCB",
+  "name": "The Gandhi Gunj Co-Operative Bank Ltd",
+  "ifsc_prefix": "IBKL01081GG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSBK",
+  "name": "CSB Bank",
+  "ifsc_prefix": "CSBK",
+  "central_ifsc": "CSBK0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VVCB",
+  "name": "The Vallabh Vidyanagar Commercial Co Op Bank Ltd",
+  "ifsc_prefix": "GSCB0UVVCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VDCB",
+  "name": "THE VELLORE DISTRICT CENTRAL CO-OP BANK LTD",
+  "ifsc_prefix": "TNSC0011600",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UPCB",
+  "name": "Uttar Pradesh Cooperative Bank Ltd",
+  "ifsc_prefix": "UPCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICIC",
+  "name": "ICICI Bank",
+  "ifsc_prefix": "ICIC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBD",
+  "name": "The Urban Co Op Bank Ltd Dharangaon",
+  "ifsc_prefix": "ICIC00TUCBD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TNSA",
+  "name": "Tamilnadu State Apex Bank Ltd",
+  "ifsc_prefix": "TNSC0011400",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PJSB",
+  "name": "GP Parsik Bank",
+  "ifsc_prefix": "PJSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JUBL",
+  "name": "Jankalyan Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CJUCBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SNSB",
+  "name": "Smriti Nagrik Sahakari Bank Maryadit Mandsaur",
+  "ifsc_prefix": "YESB0SNSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KCUB",
+  "name": "The Kakatiya Cooperative Urban Bank",
+  "ifsc_prefix": "UTIB0SKCUB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSSN",
+  "name": "Shri Swami Samarth Sahakari Bank Ltd Nighoj",
+  "ifsc_prefix": "HDFC0CSSSSN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DSAB",
+  "name": "Deendayal Nagari Sahakari Bank",
+  "ifsc_prefix": "ICIC00DDNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AMDN",
+  "name": "Ahmednagar Merchants Co-Op Bank Ltd",
+  "ifsc_prefix": "AMDN",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SUOB",
+  "name": "Shriram Urban Co-Operative Bank Ltd Nagpur",
+  "ifsc_prefix": "KKBK0SUCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "APBL",
+  "name": "Andhra Pradesh State Co-operative Bank",
+  "ifsc_prefix": "APBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DLXB",
+  "name": "Dhanlaxmi Bank",
+  "ifsc_prefix": "DLXB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ORCB",
+  "name": "The Odisha State Cooperative Bank Ltd",
+  "ifsc_prefix": "ORCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TCSB",
+  "name": "The Chitnavispura Sahakari Bank Ltd",
+  "ifsc_prefix": "ICIC00TCSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RCBL",
+  "name": "THE RAJAJINAGAR CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CRCBLB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MHSB",
+  "name": "Maharashtra Nagari Sahakari Bank Ltd Latur",
+  "ifsc_prefix": "SVCB0024002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMBL",
+  "name": "The Surat Mercantile Co Op Bank Ltd",
+  "ifsc_prefix": "YESB0SMCB05",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CMCB",
+  "name": "Colour Merchants Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CCMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ADCC",
+  "name": "Akola District Central Co-operative Bank",
+  "ifsc_prefix": "ADCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GMOB",
+  "name": "THE GRAIN MERCHANTS CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL0551GMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CRLY",
+  "name": "Crdit Agricole CIB",
+  "ifsc_prefix": "CRLY",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "HNSB",
+  "name": "Himatnagar Nagarik Sahakari Bank",
+  "ifsc_prefix": "IBKL0218HNS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GUOB",
+  "name": "The Goa Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CGUB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MDBK",
+  "name": "Model Cooperative Bank Ltd",
+  "ifsc_prefix": "MDBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BHCB",
+  "name": "The Bharuch District Central Co-operative Bank Ltd",
+  "ifsc_prefix": "GSCB0BRC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "YESB",
+  "name": "YES Bank",
+  "ifsc_prefix": "YESB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BKDN",
+  "name": "Dena Bank",
+  "ifsc_prefix": "BKDN",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JALB",
+  "name": "Jalore Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CJALOR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IOCC",
+  "name": "Indian Overseas Bank Credit Card",
+  "ifsc_prefix": "IOBA00CARDS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JOCB",
+  "name": "Jogindra Central Cooperative Bank Limited",
+  "ifsc_prefix": "YESB0JCCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMUB",
+  "name": "SHRI MAHAVIR URBAN CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CSMUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VYSB",
+  "name": "Vyavsayak Sahkari Bank",
+  "ifsc_prefix": "YESB0VSBL02",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ARYB",
+  "name": "Aryavart Bank",
+  "ifsc_prefix": "BKID0ARYAGB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "LUCB",
+  "name": "Laxmi Urban Co-Op Bank Ltd Latur",
+  "ifsc_prefix": "ICIC00LUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCBL",
+  "name": "DCB Bank",
+  "ifsc_prefix": "DCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SECB",
+  "name": "Sree Charan Souhardha Co Operative Bank Ltd",
+  "ifsc_prefix": "SECB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NATA",
+  "name": "NAB",
+  "ifsc_prefix": "NATA",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MFUB",
+  "name": "Mahatma Fule Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CMFUCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "YNSB",
+  "name": "Yeshwant Nagari Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CYNSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NSIC",
+  "name": "Navsarjan Industrial Co-Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CNICBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KLGB",
+  "name": "Kerala Grameena Bank",
+  "ifsc_prefix": "KLGB",
+  "central_ifsc": "KLGB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CNBL",
+  "name": "The Chembur Nagarik Sahakari Bank LTD",
+  "ifsc_prefix": "SRCB0CNS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SKCU",
+  "name": "Kottakkal Co- Op Urban Bank Ltd",
+  "ifsc_prefix": "UTIB0SKCU78",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCUB",
+  "name": "MAHAVEER CO-OPERATIVE URBAN BANK LIMILTED",
+  "ifsc_prefix": "HDFC0CMCUBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VDCC",
+  "name": "Valsad District Central Co-op Bank Ltd",
+  "ifsc_prefix": "GSCB0VDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GPCB",
+  "name": "The Gandevi People S Co Op Bank Ltd",
+  "ifsc_prefix": "IBKL0068GP1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ADCB",
+  "name": "THE AHMEDABAD DISTRICT COOP BANK LTD",
+  "ifsc_prefix": "GSCB0ADC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VSCB",
+  "name": "Vikas Souharda Co-operative Bank Ltd",
+  "ifsc_prefix": "ICIC00VSCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HDFC",
+  "name": "HDFC Bank",
+  "ifsc_prefix": "HDFC",
+  "central_ifsc": "HDFC0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "URBN",
+  "name": "The Urban Co-Operative Bank LtdPerinthalmanna",
+  "ifsc_prefix": "URBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBL",
+  "name": "UNION COOP BANK LTD",
+  "ifsc_prefix": "HDFC0CUCBNR",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JTSC",
+  "name": "Janatha Seva Cooperative Bank Ltd",
+  "ifsc_prefix": "JTSC0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSBS",
+  "name": "Prathamik Shikshak Sahakari Bank Ltd Satara",
+  "ifsc_prefix": "IBKL0485PSS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABSB",
+  "name": "Appasaheb Birnale Sahakari Bank Ltd Dudhgaon",
+  "ifsc_prefix": "SVCB0055003",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUGB",
+  "name": "Uttar Pradesh Gramin Bank",
+  "ifsc_prefix": "BARB0BUPGBX",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCTB",
+  "name": "The Kakinada Co-Op Town Bank Ltd",
+  "ifsc_prefix": "UTIB0SKCTBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSSB",
+  "name": "SUCO SOUHARDA SAHAKARI BANK LTD",
+  "ifsc_prefix": "HDFC0CSUCOB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SIDU",
+  "name": "Siddheshwar Urban Co-Operative Bank Mydt Sillod",
+  "ifsc_prefix": "ICIC00SIDUC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MACB",
+  "name": "Maratha Cooperative Bank Ltd",
+  "ifsc_prefix": "IBKL0101MCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PCTB",
+  "name": "THE PAYYANUR CO OPERATIVE TOWN BANK LTD",
+  "ifsc_prefix": "ICIC00PCTBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TBSB",
+  "name": "Thane Bharat Sahakari Bank",
+  "ifsc_prefix": "TBSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "FIRN",
+  "name": "FirstRand Bank",
+  "ifsc_prefix": "FIRN",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ODPB",
+  "name": "Omprakash Deora Peoples Co operative Bank Ltd Hingoli",
+  "ifsc_prefix": "SVCB0009001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABNA",
+  "name": "RBS",
+  "ifsc_prefix": "ABNA",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TGCB",
+  "name": "THE GAYATRI CO-OPERATIVE URBAN BANK LTD",
+  "ifsc_prefix": "HDFC0CTGCUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AHMB",
+  "name": "THE AHMEDNAGAR DISTRICT CENTRAL COOP BANK LTD",
+  "ifsc_prefix": "ICIC00ADCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACOB",
+  "name": "THE ASSOCIATE CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "GSCB0ASCB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBHY",
+  "name": "State Bank Of Hyderabad",
+  "ifsc_prefix": "SBHY",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "BBSB",
+  "name": "Bellad Bagewadi Urban Souharada Sahakari Bank NYT",
+  "ifsc_prefix": "IBKL0101BBU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CRES",
+  "name": "Credit Suisse",
+  "ifsc_prefix": "CRES",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RJTB",
+  "name": "Shri Rajkot District Co-operative Bank",
+  "ifsc_prefix": "GSCB0RJT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SAMB",
+  "name": "Sampada Sahakari Bank Ltd Pune",
+  "ifsc_prefix": "HDFC0CSAMBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBKO",
+  "name": "Industrial Bank Of Korea",
+  "ifsc_prefix": "IBKO",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SICL",
+  "name": "South Indian Bank Credit Line",
+  "ifsc_prefix": "SIBL0CL0001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BKID",
+  "name": "Bank Of India",
+  "ifsc_prefix": "BKID",
+  "central_ifsc": "BKID0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSSB",
+  "name": "Merchants Souharda Sahakara Bank Chitradurga",
+  "ifsc_prefix": "UTIB0SMCB51",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BOFA",
+  "name": "Bank Of America",
+  "ifsc_prefix": "BOFA",
+  "central_ifsc": "BOFA0MM6205",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBB",
+  "name": "URBAN CO-OPERATIVE BANK LTD BAREILLY",
+  "ifsc_prefix": "IBKL0232UCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JKGB",
+  "name": "Jammu and Kashmir Grameen Bank",
+  "ifsc_prefix": "JAKA0GRAMEN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CDCB",
+  "name": "The Coimbatore District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0010000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "QNBA",
+  "name": "Qatar National Bank Saq",
+  "ifsc_prefix": "QNBA",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MZCB",
+  "name": "Mizoram Co-Operative Apex Bank Ltd",
+  "ifsc_prefix": "YESB0MAB001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AUCC",
+  "name": "AU SMALL FINANCE BANK CREDIT CARD",
+  "ifsc_prefix": "AUBL00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SVCB",
+  "name": "Shamrao Vithal Co-operative Bank",
+  "ifsc_prefix": "SVCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SKNB",
+  "name": "SHREE KADI NAGARIK SAHAKARI BANK",
+  "ifsc_prefix": "SKNB0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSCB",
+  "name": "The Chandigarh State Co-op Bank Ltd",
+  "ifsc_prefix": "UTIB0CSCB22",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NPBL",
+  "name": "The Nadiad Peoples Co Op Bank Ltd",
+  "ifsc_prefix": "GSCB0UNPC02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SWSB",
+  "name": "Shree Warana Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSWSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DMBL",
+  "name": "The Dhanera Mercantile Co Bank Ltd",
+  "ifsc_prefix": "HDFC0CDMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ESMF",
+  "name": "Esaf Small Finance Bank Limited",
+  "ifsc_prefix": "ESMF",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "OCUB",
+  "name": "The Ottapalam Co-operative Urban Bank Ltd",
+  "ifsc_prefix": "IBKL0763OCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TDCB",
+  "name": "The Thane District Central Co Op Bank Ltd",
+  "ifsc_prefix": "TDCB0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AACB",
+  "name": "Akhand Anand Co Operative Bank ltd",
+  "ifsc_prefix": "HDFC0CAA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LALA",
+  "name": "LALA URBAN CO-OP BANK LTD",
+  "ifsc_prefix": "HDFC0CLALAB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GSSK",
+  "name": "THE SABARKANTHA DISTRICT CENTRAL CO OP BANK LTD",
+  "ifsc_prefix": "GSCB0SKB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HDBL",
+  "name": "The Hassan DCC Bank Pvt Ltd",
+  "ifsc_prefix": "YESB0HDCCB2",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCBL",
+  "name": "The Baroda City Cooperative Bank Li",
+  "ifsc_prefix": "HDFC0CTBCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VDMB",
+  "name": "VIDARBHA MERCHANTS URBAN COOP BANK LTD HINGANGHAT",
+  "ifsc_prefix": "YESB0VMU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RSCB",
+  "name": "The Rajasthan State Cooperative Bank",
+  "ifsc_prefix": "RSCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "USFB",
+  "name": "Unity Small Finance Bank Limited",
+  "ifsc_prefix": "UNBA0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBR",
+  "name": "The New Urban Co Op Bank Ltd Rampur",
+  "ifsc_prefix": "HDFC0CNUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MMSB",
+  "name": "Manndeshi Mahila Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0MAN001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TSBL",
+  "name": "TRIPURA STATE COOPERATIVE BANK LTD",
+  "ifsc_prefix": "ICIC00TSCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PUSB",
+  "name": "PUSAD URBAN CO-OP BANK LTD",
+  "ifsc_prefix": "YESB0PUB001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "JSKR",
+  "name": "JILA  SAHAKARI  KENDRIYA  BANK MARYADIT RAIPUR",
+  "ifsc_prefix": "UTIB0JSBR01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCOP",
+  "name": "Khardah Co-operative Bank Ltd",
+  "ifsc_prefix": "ICIC00KDCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PMCP",
+  "name": "The Panchsheel Mercantile Co-Op Bank Ltd",
+  "ifsc_prefix": "YESB0PMC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMNB",
+  "name": "Smriti Nagrik Sahakari Bank Maryadit",
+  "ifsc_prefix": "SMNB0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSNS",
+  "name": "SARDAR SINGH NAGRIK SAHKARI BANK MARYADIT TIKAMGARH",
+  "ifsc_prefix": "HDFC0CSSNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AZOB",
+  "name": "THE AZAD CO-OPERATIVE LTD GADAG",
+  "ifsc_prefix": "UTIB0SAZADB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BARC",
+  "name": "Barclays",
+  "ifsc_prefix": "BARC",
+  "central_ifsc": "BARC0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SHSB",
+  "name": "SHARAD SAHAKARI BANK LTD MANCHAR",
+  "ifsc_prefix": "HDFC0CSHSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DEUT",
+  "name": "Deutsche Bank",
+  "ifsc_prefix": "DEUT",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ANDB",
+  "name": "Andhra Bank",
+  "ifsc_prefix": "ANDB",
+  "central_ifsc": "ANDB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "MHCB",
+  "name": "Mizuho Corporate Bank",
+  "ifsc_prefix": "MHCB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TGRB",
+  "name": "Telangana Grameena Bank",
+  "ifsc_prefix": "TGRB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KOEX",
+  "name": "Keb Hana Bank",
+  "ifsc_prefix": "KOEX",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SDCE",
+  "name": "SATARA DISTRICT CENTRAL CO-OPERATIVE BANK",
+  "ifsc_prefix": "SDCE",
+  "central_ifsc": "SDCE0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PDPK",
+  "name": "PDP BANK KARAD",
+  "ifsc_prefix": "HDFC0CPDPBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ZCBL",
+  "name": "The Zoroastrian Co-operative Bank Ltd",
+  "ifsc_prefix": "ZCBL0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CICL",
+  "name": "City Union Bank Credit Line",
+  "ifsc_prefix": "CIUB0000654",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABHY",
+  "name": "Abhyudaya Co-operative Bank",
+  "ifsc_prefix": "ABHY",
+  "central_ifsc": "ABHY0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CMSB",
+  "name": "Karnataka Mahila Sahakara Bank Niyamitha",
+  "ifsc_prefix": "UTIB0SCJMSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBTR",
+  "name": "State Bank Of Travancore",
+  "ifsc_prefix": "SBTR",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AJSB",
+  "name": "Amreli Jilla Sahakari Bank Ltd",
+  "ifsc_prefix": "GSCB0AMR001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "HSAB",
+  "name": "The Haryana State Co-operative Apex Bank Ltd",
+  "ifsc_prefix": "HARC0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SDBL",
+  "name": "SHREE DHARATI CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL01642SD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VUCB",
+  "name": "Valmiki Urban Co Op Bank Ltd",
+  "ifsc_prefix": "UTIB0SVAUB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BHUJ",
+  "name": "The Bhuj Commercial Co-Operative Bank Ltd",
+  "ifsc_prefix": "UTIB0BCCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBKL",
+  "name": "IDBI Bank",
+  "ifsc_prefix": "IBKL",
+  "central_ifsc": "IBKL0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BSBL",
+  "name": "The Baramati Sahakari Bank Ltd",
+  "ifsc_prefix": "BARA0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TRCB",
+  "name": "The Tiruvannamalai District Central Coop Bank Limited",
+  "ifsc_prefix": "TNSC0012000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PNCC",
+  "name": "Punjab National Bank Credit Card",
+  "ifsc_prefix": "PUNB0645400",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SNKB",
+  "name": "Sankheda Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSNSB0",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCCB",
+  "name": "SARVODAYA COMMERCIAL CO OP BANK LTD",
+  "ifsc_prefix": "IBKL0443SCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CTBA",
+  "name": "Commonwealth Bank Of Australia",
+  "ifsc_prefix": "CTBA",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SHUB",
+  "name": "The Shillong Cooperative Urban Bank Ltd",
+  "ifsc_prefix": "IBKL0158SCU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CHUB",
+  "name": "The Chiplun Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "SVCB0006002",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "EBIL",
+  "name": "Emirates Nbd Bank P J S C",
+  "ifsc_prefix": "EBIL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ZBLK",
+  "name": "ZILA SAHKARI BANK LTD LAKHIMPUR KHERI",
+  "ifsc_prefix": "UPCB00KHIRI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ANSB",
+  "name": "Amreli Nagarik Sahakari Bank Ltd",
+  "ifsc_prefix": "IBKL0697ANS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "THRS",
+  "name": "Thrissur District Co-Operative Bank Ltd",
+  "ifsc_prefix": "THRS",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DMKJ",
+  "name": "Dmk Jaoli Bank",
+  "ifsc_prefix": "DMKJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSCC",
+  "name": "CSB Bank Credit Card",
+  "ifsc_prefix": "CSBK0CC0001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AJHC",
+  "name": "Ambarnath Jaihind Coop Bank Ltd Ambarnath",
+  "ifsc_prefix": "AJHC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SACB",
+  "name": "Samata Co-Operative Development Bank Ltd",
+  "ifsc_prefix": "HDFC0CSAMAT",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSBP",
+  "name": "Palus Sahakari Bank Ltd",
+  "ifsc_prefix": "UTIB0SPSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SABI",
+  "name": "Shri Adinath Co-op Bank Ltd Ichalkaranji",
+  "ifsc_prefix": "HDFC0CSACBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VESB",
+  "name": "Veerashaiva Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CVSBHO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RSBL",
+  "name": "Rajgurunagar Sahakari Bank",
+  "ifsc_prefix": "RSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MRBB",
+  "name": "Manipur Rural Bank",
+  "ifsc_prefix": "PUNB0RRBMRB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "USPB",
+  "name": "The Uttarsanda Peoples Coop Bank Ltd",
+  "ifsc_prefix": "GSCB0UUPC01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PCUB",
+  "name": "THE POCHAMPALLY COOP URBAN BANK LTD",
+  "ifsc_prefix": "HDFC0CPCUBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBS",
+  "name": "URBAN CO OPERATIVA BANK LTD SIDDHARTHNAGAR",
+  "ifsc_prefix": "ICIC00SIDRH",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ABPB",
+  "name": "Aditya Birla Idea Payments Bank",
+  "ifsc_prefix": "ABPB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TMUB",
+  "name": "The Muvattupuzha Urban Co-operative Bank",
+  "ifsc_prefix": "IBKL0105",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JMBL",
+  "name": "Jijamata Mahila Sah Bank Ltd",
+  "ifsc_prefix": "HDFC0CJMS01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSBJ",
+  "name": "Shree Mahavir Sahakari Bank Ltd Jalgaon",
+  "ifsc_prefix": "KKBK0SMSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSBV",
+  "name": "Jila Sahakari Kendriya Bank Mydt Vidisha",
+  "ifsc_prefix": "CBIN0MPDCBM",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCOB",
+  "name": "The Khamgaon Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CKUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ARCB",
+  "name": "Arihant Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CACOBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PUBL",
+  "name": "PALI URBAN CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CPUB03",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMSS",
+  "name": "Shri Mahila Sewa Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CSMSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSNB",
+  "name": "Sarakari Naukarara Sahakari Bank Niyamit Vijayapura",
+  "ifsc_prefix": "UTIB0SSNSBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMBC",
+  "name": "Sumitomo Mitsui Banking Corporation",
+  "ifsc_prefix": "SMBC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KKCB",
+  "name": "The Kumbakonam Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0010400",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ALLA",
+  "name": "Allahabad Bank",
+  "ifsc_prefix": "ALLA",
+  "central_ifsc": "ALLA0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PDBG",
+  "name": "Puduvai Bharathiar Grama Bank",
+  "ifsc_prefix": "IDIB0PBG001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TCOB",
+  "name": "Teachers Co Operative Bank Ltd",
+  "ifsc_prefix": "UTIB0STCOBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NUBL",
+  "name": "The Nandura Urban Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CNUCBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACBL",
+  "name": "Adarsh Co-operative Bank Limited",
+  "ifsc_prefix": "HDFC0CADARS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ACUB",
+  "name": "The Adarsh Co-operative Urban Bank Ltd",
+  "ifsc_prefix": "ICIC00ADRSH",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "AKJB",
+  "name": "Akola Janata Commercial Co-operative Bank",
+  "ifsc_prefix": "AKJB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LKUB",
+  "name": "Lakhimpur Urban Cooperative Bank Ltd",
+  "ifsc_prefix": "YESB0LUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GUBL",
+  "name": "Guntur Urban Bank",
+  "ifsc_prefix": "UTIB0SGUB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HUSB",
+  "name": "Hutatma Sahakari Bank Ltd",
+  "ifsc_prefix": "HUSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SABR",
+  "name": "Sberbank of Russia",
+  "ifsc_prefix": "SABR",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "RSBP",
+  "name": "Ramrajya Sahakari Bank Ltd Pune",
+  "ifsc_prefix": "YESB0RSBL01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "INCC",
+  "name": "INDUSIND BANK CREDIT CARD",
+  "ifsc_prefix": "INDB0CC0001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JIOP",
+  "name": "Jio Payments Bank",
+  "ifsc_prefix": "JIOP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PVSB",
+  "name": "Pavana Sahakari Bank Ltd",
+  "ifsc_prefix": "PSBL0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RAJB",
+  "name": "The Co-Operative Bank of Rajkot Ltd",
+  "ifsc_prefix": "YESB0RAJ",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SRVS",
+  "name": "THE SARVODAYA SAHAKARI BANK LTD",
+  "ifsc_prefix": "YESB0SSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BARA",
+  "name": "The Baramati Sahakari Bank Ltd",
+  "ifsc_prefix": "BARA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KSCB",
+  "name": "Karanataka State Co-operative Apex Bank",
+  "ifsc_prefix": "KSCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBTA",
+  "name": "Sahakarmaharshi Bhausaheb Thorat Amrutvahini Sahakari Bank",
+  "ifsc_prefix": "ICIC00SBTAS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NCUB",
+  "name": "The Nilambur Co Operative Urban Bank Ltd Nilambur",
+  "ifsc_prefix": "NCUB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "DDCB",
+  "name": "Dharmapuri District Central Co-op Bank Limited",
+  "ifsc_prefix": "TNSC0010100",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TAUB",
+  "name": "The Akola Urban Cooperative Bank Limited",
+  "ifsc_prefix": "TAUB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NMCB",
+  "name": "Nasik Merchants Co-operative Bank",
+  "ifsc_prefix": "NMCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DHUB",
+  "name": "The Davanagere Harihar Urban Sahakara Bank Niyamitha",
+  "ifsc_prefix": "UTIB0SDHUSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CGSB",
+  "name": "Chhattisgarh Rajya Sahakari Bank Maryadit",
+  "ifsc_prefix": "CBIN0CGDCBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SIDB",
+  "name": "Small Industries Development Bank Of India",
+  "ifsc_prefix": "SIDB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CMBL",
+  "name": "The Chandwad Merchants Co-op Bank Ltd Chandwad",
+  "ifsc_prefix": "ICIC00CMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CNCC",
+  "name": "Canara Bank Credit Card",
+  "ifsc_prefix": "CNRB00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GCCB",
+  "name": "The Godhra City Co-operative Bank Ltd Godhra",
+  "ifsc_prefix": "GSCB0UGCCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "AHDC",
+  "name": "The Ahmednagar District Central CoOperative Bank Ltd",
+  "ifsc_prefix": "AHDC",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KKDB",
+  "name": "The Kanyakumari District Central Co-operative Bank Ltd",
+  "ifsc_prefix": "TNSC0010300",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RJCB",
+  "name": "Rajadhani Co-operative Urban Bank",
+  "ifsc_prefix": "KKBK0RCU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBLS",
+  "name": "Samarth Sahakari Bank Ltd",
+  "ifsc_prefix": "SBLS0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "IPSB",
+  "name": "Indraprastha Sehkari Bank Ltd",
+  "ifsc_prefix": "UTIB0SIP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UTBI",
+  "name": "United Bank Of India",
+  "ifsc_prefix": "UTBI",
+  "central_ifsc": "UTBI0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "UCLB",
+  "name": "Urban Co Operative Bank Ltd Bareilly",
+  "ifsc_prefix": "UCLB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MUBL",
+  "name": "Municipal Co-operative Bank",
+  "ifsc_prefix": "MUBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JPCB",
+  "name": "The Jalgaon Peoples Co-Op Bank Ltd",
+  "ifsc_prefix": "JPCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSBP",
+  "name": "Janata Sahakari Bank",
+  "ifsc_prefix": "JSBP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MUBA",
+  "name": "Mahesh Urban Co-Op Bank Ltd Ahmedpur",
+  "ifsc_prefix": "ICIC00MUCBA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCCB",
+  "name": "Kalupur Commercial Co-operative Bank",
+  "ifsc_prefix": "KCCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SNBN",
+  "name": "Sreenidhi Souharda Sahakari Bank Niyamitha",
+  "ifsc_prefix": "INDB0SSBN01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSKB",
+  "name": "The Satara Sahakari Bank Ltd",
+  "ifsc_prefix": "TSSB0000",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SHVB",
+  "name": "Shree Vardhaman Sahakari Bank Ltd",
+  "ifsc_prefix": "YESB0SVSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "NJBK",
+  "name": "Nav Jeevan Co Op Bank Ltd",
+  "ifsc_prefix": "NJBK",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TMCC",
+  "name": "Tamilnad Mercantile Bank RuPay Credit Card",
+  "ifsc_prefix": "TMBL00CCARD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "GMUB",
+  "name": "Shri Gajanan Maharaj Urban Co-Op Bank Ltd",
+  "ifsc_prefix": "YESB0GMU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BMBS",
+  "name": "Brahmdevdada Mane Sahakari Bank Limited Solapur",
+  "ifsc_prefix": "YESB0BMSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RYSB",
+  "name": "The Rayat Sevak Co-Op Bank LimitedSatara",
+  "ifsc_prefix": "IBKL0485RSC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HSBM",
+  "name": "Haveli Sahakari Bank Maryadit",
+  "ifsc_prefix": "YESB0HSBLM0",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BGGB",
+  "name": "Gujarat Gramin Bank",
+  "ifsc_prefix": "BARB0BGGBXX",
+  "central_ifsc": "BARB0BGGBXX",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RUCB",
+  "name": "Rajapur Urban Cooperative Bank Ltd Rajapur",
+  "ifsc_prefix": "ICIC00RUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BLMB",
+  "name": "The Bhagyalakshmi Mahila Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CBLMSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ICOB",
+  "name": "Indrayani Co Op Bank Ltd",
+  "ifsc_prefix": "ICIC00ICBLP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IFCC",
+  "name": "IDFC FIRST CREDIT CARD",
+  "ifsc_prefix": "IDCC0040101",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCBA",
+  "name": "UCO Bank",
+  "ifsc_prefix": "UCBA",
+  "central_ifsc": "UCBA0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SRSB",
+  "name": "Sri Seetharaghava Souharda Sahakara Bank Niyamitha",
+  "ifsc_prefix": "UTIB0SSSSBN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KNSB",
+  "name": "Kurmanchal Nagar Sahkari Bank",
+  "ifsc_prefix": "KNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "KSBR",
+  "name": "Krishna Sahakari Bank Ltd Rethare Bk",
+  "ifsc_prefix": "IBKL0470KRS",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CUCB",
+  "name": "Chittorgarh Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CCUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MKPB",
+  "name": "The Malkapur Urban Co Operative Bank Ltd Malkapur",
+  "ifsc_prefix": "MKPB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PCBN",
+  "name": "Pratap Coop Bank Nagdevi",
+  "ifsc_prefix": "MDCB0680265",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KPRB",
+  "name": "Kopargaon Peoples Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CKP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KKNS",
+  "name": "The Kukarwada Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CTKNSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "EIBI",
+  "name": "Exim Bank",
+  "ifsc_prefix": "EIBI",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "CPCB",
+  "name": "The Chiplun Urban Co-Operative Bank Ltd",
+  "ifsc_prefix": "SVCB0006",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CKMB",
+  "name": "Kolhapur Mahila Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CKMB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCAB",
+  "name": "The Meghalaya CoOperative Apex Bank Ltd",
+  "ifsc_prefix": "MCAB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VINB",
+  "name": "Vikramaditya Nagrik Sahakari Bank",
+  "ifsc_prefix": "YESB0VNSB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "RRBP",
+  "name": "Rajarambapu Sahakari Bank Limited",
+  "ifsc_prefix": "RRBP",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UTCC",
+  "name": "Utkarsh Small Finance Bank Credit Card",
+  "ifsc_prefix": "UTKS0999999",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "UCOB",
+  "name": "The Urban Co Operative Bank Ltd",
+  "ifsc_prefix": "HDFC0CTUCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JCOB",
+  "name": "The Junagadh Comm Co Op Bank Ltd",
+  "ifsc_prefix": "HDFC0CJCCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BUCO",
+  "name": "Bhingar Urban Cooperative Bank",
+  "ifsc_prefix": "SVCB0057005",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PNBL",
+  "name": "Poornawadi Nagrik Sahakari Bank Ltd",
+  "ifsc_prefix": "HDFC0CPNSBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCBL",
+  "name": "Kapol Co-operative Bank",
+  "ifsc_prefix": "KCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PUSD",
+  "name": "The Pusad Urban Cooperative Bank Ltd Pusad",
+  "ifsc_prefix": "PUSD",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SNBL",
+  "name": "The Sarvodaya Nagrik Sahkari Bank Ltd",
+  "ifsc_prefix": "GSCB0UTSNBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "WLCB",
+  "name": "Warangal District Co Op Central Bank",
+  "ifsc_prefix": "TSAB0021",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSCO",
+  "name": "Sri Sudha Co Operative Bank Limited",
+  "ifsc_prefix": "HDFC0CSUDHA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ENAD",
+  "name": "The Eenadu Co Op Urban Bank Ltd",
+  "ifsc_prefix": "HDFC0CEENAD",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SBUB",
+  "name": "Shree Basaveshwar Urban Co Op Bank Ltd Ranebennur",
+  "ifsc_prefix": "UTIB0SBUBRN",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KTCB",
+  "name": "The Kodungallur Town Co Operative Bank Ltd",
+  "ifsc_prefix": "IBKL0269KTC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "NGSB",
+  "name": "Nagpur Nagarik Sahakari Bank",
+  "ifsc_prefix": "NGSB",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "GBCB",
+  "name": "Greater Bombay Co-operative Bank",
+  "ifsc_prefix": "GBCB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DICG",
+  "name": "Deposit Insurance And Credit Guarantee Corporation DICGC",
+  "ifsc_prefix": "DICG",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "TCCB",
+  "name": "The Tirunelveli District Central Co-op Bank Ltd",
+  "ifsc_prefix": "TNSC0011500",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KVGB",
+  "name": "Karnataka Vikas Grameena Bank",
+  "ifsc_prefix": "KVGB",
+  "central_ifsc": "KVGB0000001",
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "ACOU",
+  "name": "The Agrasen Coop Urban Bank Ltd",
+  "ifsc_prefix": "HDFC0CAUB01",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SCHB",
+  "name": "Sree Charan Bank",
+  "ifsc_prefix": "INDB0SCSC01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HVBK",
+  "name": "Woori Bank",
+  "ifsc_prefix": "HVBK",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "INDB",
+  "name": "IndusInd Bank",
+  "ifsc_prefix": "INDB",
+  "central_ifsc": "INDB0000001",
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BCCL",
+  "name": "The Banglore City Co Operative Bank Ltd",
+  "ifsc_prefix": "INDB0BCCB02",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VVSB",
+  "name": "Vasai Vikas Sahakari Bank",
+  "ifsc_prefix": "VVSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SANB",
+  "name": "Shri Anand Nagari Sahakari Bank LtdChandrapur",
+  "ifsc_prefix": "ICIC00SANSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IBOC",
+  "name": "Indian Bank One Credit Card",
+  "ifsc_prefix": "IDIB0CCC108",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "PADB",
+  "name": "Padmavathi Co-Operative Urban Bank Limited",
+  "ifsc_prefix": "HDFC0CPADMA",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "HOCB",
+  "name": "Hooghly District Central Cooperative Bank Ltd",
+  "ifsc_prefix": "WBSC0HDCB21",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "YBCL",
+  "name": "YES BANK CREDIT LINE",
+  "ifsc_prefix": "YESB0CLO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SFCL",
+  "name": "Suryoday Small Finance Bank Credit Line",
+  "ifsc_prefix": "SURY000CLOU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VBLM",
+  "name": "Vidyasagar Central Cooperative Bank LtdMidnapore",
+  "ifsc_prefix": "WBSC0VCCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BECC",
+  "name": "The Bengaluru District Central Cooperative Bank Ltd",
+  "ifsc_prefix": "KSCB0002001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MCDB",
+  "name": "THE MYSORE AND CHAMARAJANAGAR DISTRICT CO OPERATIVE CENTRAL BANK LTD",
+  "ifsc_prefix": "KSCB0007001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JKBM",
+  "name": "Jila Sahakari Kendriya Bank Maryadit Jagdalpur",
+  "ifsc_prefix": "UTIB0SJSJ01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "EFCC",
+  "name": "Equitas Small Finance Bank Rupay Credit Card",
+  "ifsc_prefix": "ESFB0CCARDS",
+  "central_ifsc": null,
+  "is_upi_supported": 0,
+  "is_active": 1
+ },
+ {
+  "zid": "SFCC",
+  "name": "slice small finance bank credit card",
+  "ifsc_prefix": "NESF0SLICCC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "LSBN",
+  "name": "Laxmi Sahakari Bank Niyamit Guledgudd",
+  "ifsc_prefix": "UTIB0SLSBNG",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "ERCC",
+  "name": "Equitas Small Finance Bank Rupay Credit Card",
+  "ifsc_prefix": "ESFB00CCUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "KCCL",
+  "name": "The Kanara District Central Co-operative Bank Ltd",
+  "ifsc_prefix": "KSCB0016001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BSCB",
+  "name": "Balusseri Co-Operative Urban Bank Ltd",
+  "ifsc_prefix": "IDIB0CBKLBU",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "YCBY",
+  "name": "Yadrav Co Op Bank Ltd Yadrav",
+  "ifsc_prefix": "HDFC0CYCBLY",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "COAB",
+  "name": "The Coastal Urban Co-operative Bank Ltd",
+  "ifsc_prefix": "IBKL0737CU1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TCDC",
+  "name": "THE CHIKMAGALUR DISTRICT CO OPERATIVE CENTRAL BANK LTD",
+  "ifsc_prefix": "KSCB0012001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SSMB",
+  "name": "SHRI SHIVAYOGI MURUGHENDRA SWAMI URBAN CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CSSMSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SICB",
+  "name": "SIKKIM STATE CO-OPERATIVE BANK LTD",
+  "ifsc_prefix": "IBKL0108SIC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "TMSC",
+  "name": "The Mattancherry Sarvajanik Co-operative Bank Ltd",
+  "ifsc_prefix": "KKBK0MSCB01",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MPCB",
+  "name": "Maharana Pratap Co-operative Urban Bank Ltd",
+  "ifsc_prefix": "YESB0MPCUB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CBCL",
+  "name": "Central Bank Credit Line",
+  "ifsc_prefix": "CBIN028CRED",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JKCC",
+  "name": "J&K BankCredit Card",
+  "ifsc_prefix": "JAKA0DEALER",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DBCC",
+  "name": "DCB Bank Credit Card",
+  "ifsc_prefix": "DCBL00UPICC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SMBP",
+  "name": "THE SARDARGUNJ MERCANTILE COOP BANK LTDPATAN",
+  "ifsc_prefix": "GSCB0USMCBL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SCDB",
+  "name": "THE SOUTH CANARA DISTRICT CO-OP BANK LTD",
+  "ifsc_prefix": "IBKL078SCDC",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CPBL",
+  "name": "THE CHOPDA PEOPLES CO-OP BANK LTD",
+  "ifsc_prefix": "YESB0SCPCB1",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SPSN",
+  "name": "SRI POTTI SRIRAMULU NELLORE DCCB LTD",
+  "ifsc_prefix": "APBL0009",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "PSAB",
+  "name": "PRAGATI SAHAKARI BANK LTD",
+  "ifsc_prefix": "YESB0PSB002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "MSCO",
+  "name": "MSC BANK",
+  "ifsc_prefix": "MSCI0082102",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DLCC",
+  "name": "DHANLAXMI BANK RUPAY CREDIT CARD",
+  "ifsc_prefix": "DLXB0000146",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DCBE",
+  "name": "THE DISTRICT COOPERATIVE CENTRAL BANK LTD ELURU",
+  "ifsc_prefix": "APBL0005",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "VMCO",
+  "name": "THE VANI MERCHANTS CO OPERATIVE BANK LTD",
+  "ifsc_prefix": "HDFC0CVAMCO",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "SLCL",
+  "name": "SLICE SMALL FINANCE BANK CREDIT LINE",
+  "ifsc_prefix": "NESF0SLICCL",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BSBP",
+  "name": "BHARATI SAHAKARI BANK LTD PUNE",
+  "ifsc_prefix": "SVCB0010999",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "JSCL",
+  "name": "JANA SMALL FINANCE BANK CREDIT LINE",
+  "ifsc_prefix": "JSFB0000002",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "CSSB",
+  "name": "COL RD NIKAM SAINIK SAHAKARI BANK LTD",
+  "ifsc_prefix": "HDFC0CRNSSB",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "BDCC",
+  "name": "BANDHAN BANK CREDIT CARD",
+  "ifsc_prefix": "BDBL0001008",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "DNAB",
+  "name": "DOMBIVLI NAGARI SAHAKARI BANK",
+  "ifsc_prefix": "DNSB0000001",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ },
+ {
+  "zid": "IOCL",
+  "name": "Indian Overseas Bank Credit Line",
+  "ifsc_prefix": "IOBA00CLUPI",
+  "central_ifsc": null,
+  "is_upi_supported": 1,
+  "is_active": 1
+ }
+]

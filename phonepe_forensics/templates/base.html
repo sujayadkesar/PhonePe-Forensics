@@ -60,6 +60,7 @@
 
     <div class="nav-section">Financial</div>
     <a href="{{ url_for('page_transactions') }}" class="nav-item">₹ Transactions</a>
+    <a href="{{ url_for('page_v2_mandates') }}" class="nav-item">⟳ Mandates · Refunds</a>
     <a href="{{ url_for('page_financial') }}" class="nav-item">◊ Rewards / MF / Vouchers</a>
     <a href="{{ url_for('page_travel') }}" class="nav-item">→ Travel Journeys</a>
 
@@ -80,6 +81,7 @@
     <a href="{{ url_for('page_media') }}" class="nav-item">◳ QR & Backgrounds & DPs</a>
 
     <div class="nav-section">Raw Data</div>
+    <a href="{{ url_for('page_v2_raw_records') }}" class="nav-item">{ } Raw Records · Provenance</a>
     <a href="{{ url_for('page_db_browser') }}" class="nav-item">▢ Database Inventory</a>
     <a href="{{ url_for('page_db_sql') }}" class="nav-item">⏵ SQL Console</a>
 
@@ -122,7 +124,93 @@
 </main>
 </div>
 
+<!-- ── shared avatar (DP) styling — used on every page ───────────────── -->
+<style>
+.dp{display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  background:linear-gradient(135deg,#3b3266,#5b4a9e);
+  color:#fff;font-size:11px;font-weight:700;position:relative;}
+.dp::before{content:attr(data-initials);position:absolute;}
+.dp img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1;}
+.dp-lg{width:64px;height:64px;font-size:22px;}
+.dp-xl{width:88px;height:88px;font-size:30px;}
+img.zoomable{cursor:zoom-in;}
+.dp img.zoomable{cursor:zoom-in;}
+/* ── global full-size image lightbox ──────────────────────────────── */
+.lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;cursor:zoom-out;}
+.lightbox[hidden]{display:none;}
+.lightbox img{max-width:92vw;max-height:84vh;border-radius:10px;
+  box-shadow:0 12px 48px rgba(0,0,0,.6);object-fit:contain;background:#15151f;}
+.lightbox-cap{color:rgba(255,255,255,.6);font-size:12px;font-family:var(--mono,monospace);}
+/* copy-to-clipboard button feedback */
+.btn.copied,button.copied{
+  background:rgba(16,185,129,.2)!important;color:#10b981!important;
+  border-color:rgba(16,185,129,.45)!important;}
+</style>
+<div id="lightbox" class="lightbox" hidden>
+  <img id="lightbox-img" alt="full size view">
+  <div class="lightbox-cap" id="lightbox-cap">click anywhere or press Esc to close</div>
+</div>
+
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+/* Click any <img class="zoomable"> to view it full size. Device profile
+   photos are tiny (~96px) thumbnails — they are shown enlarged, with the
+   TRUE original resolution labelled. One delegated handler, every page. */
+(function(){
+  var lb=document.getElementById('lightbox'),
+      img=document.getElementById('lightbox-img'),
+      cap=document.getElementById('lightbox-cap');
+  function close(){lb.hidden=true;img.removeAttribute('src');img.style.width='';}
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t&&t.tagName==='IMG'&&t.classList.contains('zoomable')&&t.getAttribute('src')){
+      var who=t.dataset.caption?t.dataset.caption+' — ':'';
+      img.onload=function(){
+        var w=img.naturalWidth||0,h=img.naturalHeight||0,small=w>0&&w<260;
+        img.style.width=small?Math.round(w*(280/w))+'px':'';
+        cap.textContent=who+'original '+w+'×'+h+' px'
+          +(small?' · shown enlarged':'')+' · click anywhere or Esc to close';
+      };
+      img.src=t.dataset.full||t.src;
+      lb.hidden=false;
+    }
+  });
+  lb.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!lb.hidden)close();});
+})();
+</script>
+<script>
+/* Universal copy-to-clipboard. Any <button data-copy="#selector"> copies the
+   text of the matched element. One delegated handler, works on every page. */
+(function(){
+  function fallback(text){
+    var ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-copy]');
+    if(!b) return;
+    var el=document.querySelector(b.getAttribute('data-copy'));
+    if(!el) return;
+    var text=el.innerText||el.textContent||'';
+    function done(){
+      if(!b.dataset.label) b.dataset.label=b.textContent;
+      b.textContent='✓ Copied';
+      b.classList.add('copied');
+      setTimeout(function(){b.textContent=b.dataset.label;b.classList.remove('copied');},1500);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done,function(){fallback(text);done();});
+    }else{ fallback(text); done(); }
+  });
+})();
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
