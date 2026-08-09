@@ -60,6 +60,10 @@ tr:hover td{background:var(--bg-2)}
 .note{background:var(--bg-2);border-left:3px solid var(--accent);
   border-radius:0 8px 8px 0;padding:12px 15px;color:var(--text-2);font-size:13px;margin:20px 0}
 .empty{text-align:center;padding:44px 20px;color:var(--text-3)}
+.credits{margin-top:38px;padding-top:16px;border-top:1px solid var(--border-soft);
+  display:flex;flex-wrap:wrap;gap:6px 26px;font-size:12px;color:var(--text-3)}
+.credits b{color:var(--text-2);font-weight:600}
+.credits a{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -72,6 +76,17 @@ tr:hover td{background:var(--bg-2)}
     </div>
   </div>
   {% block content %}{% endblock %}
+
+  <footer class="credits">
+    <div>
+      <b>Android analyser &amp; launcher</b> —
+      <a href="https://www.linkedin.com/in/mihir-choudhary/" target="_blank" rel="noopener">Mihir Choudhary</a>
+    </div>
+    <div>
+      <b>iOS analyser</b> —
+      <a href="https://www.linkedin.com/in/sujay-adkesar-a90725224/" target="_blank" rel="noopener">Sujay Adkesar</a>
+    </div>
+  </footer>
 </div>
 </body>
 </html>

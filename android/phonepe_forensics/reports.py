@@ -260,6 +260,22 @@ header p{{margin:0;color:#e9d5ff}}
 main{{padding:32px 48px;max-width:1280px;margin:0 auto}}
 section{{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:22px 26px;margin:22px 0}}
 section h2{{margin:0 0 16px;font-size:18px;color:#a78bfa;letter-spacing:.3px;text-transform:uppercase;font-weight:600}}
+nav.tabs{{display:flex;flex-wrap:wrap;gap:6px;padding:0 48px;background:#0c0e16;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:9}}
+nav.tabs button{{background:none;border:0;border-bottom:2px solid transparent;color:#9ca3af;padding:13px 14px;font:600 13px/1 inherit;cursor:pointer}}
+nav.tabs button:hover{{color:#e5e7eb}}
+nav.tabs button.on{{color:#c4b5fd;border-bottom-color:#8b5cf6}}
+nav.tabs .count{{color:#6b7280;font-weight:400;margin-left:5px}}
+.tfilter{{margin:0 0 10px}}
+.tfilter input{{width:100%;max-width:340px;padding:7px 11px;border-radius:8px;border:1px solid #374151;background:#0c0e16;color:#e5e7eb;font:13px inherit}}
+.tw{{overflow-x:auto}}
+table.sortable th{{cursor:pointer;user-select:none;white-space:nowrap}}
+table.sortable th:hover{{color:#c4b5fd}}
+table.sortable th.asc::after{{content:' \\2191';color:#8b5cf6}}
+table.sortable th.desc::after{{content:' \\2193';color:#8b5cf6}}
+tr.hid{{display:none}}
+.avatar{{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:7px}}
+.noscript{{background:#3f2d0b;border:1px solid #a16207;border-radius:10px;padding:10px 14px;margin:14px 48px;color:#fde68a;font-size:13px}}
+@media print{{nav.tabs{{display:none}} section{{break-inside:avoid}} .tfilter{{display:none}}}}
 .kv{{display:grid;grid-template-columns:240px 1fr;gap:8px 16px}}
 .kv b{{color:#9ca3af;font-weight:500}}
 .kv span{{color:#f9fafb}}
@@ -293,6 +309,9 @@ small{{color:#6b7280}}
 <p>Evidence root: {case_root}</p>
 <p>All timestamps are UTC.</p>
 </header>
+<nav class="tabs" id="tabs" data-order='{tab_order}'></nav>
+<noscript><div class="noscript">Scripting is off, so the tab bar, filters and
+column sorting are inactive — every section is still present below, in full.</div></noscript>
 <main>
 {body}
 </main>
@@ -510,7 +529,8 @@ def export_html_report(case_data: Dict[str, Any], out_dir: str, case_root: str =
         case_name=html.escape(str(custody.get("case_name") or "Unnamed case")),
         tool=html.escape(f"{TOOL_NAME} {TOOL_VERSION}"),
         case_root=html.escape(case_root or "—"),
-        body=body,
+        tab_order=html.escape(json.dumps(_TAB_ORDER), quote=False).replace("'", "&#39;"),
+        body=body + _REPORT_JS,
     )
     path = os.path.join(out_dir, "evidence_report.html")
     with open(path, "w", encoding="utf-8") as fh:
@@ -518,12 +538,137 @@ def export_html_report(case_data: Dict[str, Any], out_dir: str, case_root: str =
     return path
 
 
+# The report's behaviour, appended to the body rather than embedded in the
+# template: str.format() would choke on every brace in it.
+_REPORT_JS = """<script>
+(function () {
+  // Tabs. Sections are tagged with data-tab and all remain in the document; this
+  // only toggles visibility, so browser find, print and copy still see the whole
+  // report. "All" is offered because an examiner reading end-to-end should not
+  // have to click through seven panes.
+  var secs = [].slice.call(document.querySelectorAll('section[data-tab]'));
+  var nav  = document.getElementById('tabs');
+  if (nav && secs.length) {
+    var order = JSON.parse(nav.getAttribute('data-order') || '[]');
+    var present = order.filter(function (t) {
+      return secs.some(function (s) { return s.getAttribute('data-tab') === t[0]; });
+    });
+    function show(key) {
+      secs.forEach(function (s) {
+        s.style.display = (key === '*' || s.getAttribute('data-tab') === key) ? '' : 'none';
+      });
+      [].forEach.call(nav.children, function (b) {
+        b.classList.toggle('on', b.getAttribute('data-key') === key);
+      });
+    }
+    function add(key, label, n) {
+      var b = document.createElement('button');
+      b.setAttribute('data-key', key);
+      b.innerHTML = label + (n !== null ? ' <span class="count">' + n + '</span>' : '');
+      b.onclick = function () { show(key); };
+      nav.appendChild(b);
+    }
+    add('*', 'All', secs.length);
+    present.forEach(function (t) {
+      add(t[0], t[1], secs.filter(function (s) {
+        return s.getAttribute('data-tab') === t[0];
+      }).length);
+    });
+    show('*');
+  }
+
+  // Per-table filter.
+  [].forEach.call(document.querySelectorAll('input[data-filter]'), function (inp) {
+    var tbl = inp.parentNode.nextElementSibling.querySelector('table');
+    if (!tbl) return;
+    var rows = [].slice.call(tbl.tBodies[0].rows);
+    inp.addEventListener('input', function () {
+      var q = inp.value.trim().toLowerCase();
+      rows.forEach(function (r) {
+        r.classList.toggle('hid', !!q && r.textContent.toLowerCase().indexOf(q) < 0);
+      });
+    });
+  });
+
+  // Click-to-sort. Numbers and dates sort as values, everything else as text;
+  // comparing a number against a string would otherwise order by digit.
+  [].forEach.call(document.querySelectorAll('table.sortable'), function (tbl) {
+    [].forEach.call(tbl.tHead.rows[0].cells, function (th, i) {
+      th.addEventListener('click', function () {
+        var body = tbl.tBodies[0];
+        var rows = [].slice.call(body.rows);
+        var desc = th.classList.contains('asc');
+        [].forEach.call(tbl.tHead.rows[0].cells, function (c) {
+          c.classList.remove('asc', 'desc');
+        });
+        th.classList.add(desc ? 'desc' : 'asc');
+        function val(r) {
+          var t = (r.cells[i] ? r.cells[i].textContent : '').trim();
+          var n = parseFloat(t.replace(/[^0-9.eE+-]/g, ''));
+          return (t !== '' && !isNaN(n) && /[0-9]/.test(t)) ? n : t.toLowerCase();
+        }
+        rows.sort(function (a, b) {
+          var x = val(a), y = val(b);
+          if (typeof x === 'number' && typeof y === 'number') return x - y;
+          return String(x) < String(y) ? -1 : String(x) > String(y) ? 1 : 0;
+        });
+        if (desc) rows.reverse();
+        rows.forEach(function (r) { body.appendChild(r); });
+      });
+    });
+  });
+})();
+</script>
+"""
+
+
 # ---------------------------------------------------------------------------
 # HTML helpers
 # ---------------------------------------------------------------------------
 
-def _section(title: str, body: str) -> str:
-    return f"<section><h2>{html.escape(title)}</h2>{body}</section>"
+# Which tab each section lands in, matched on a distinctive word in its title.
+# Kept as a table rather than an argument at all 17 call sites so that adding a
+# section does not mean touching two places — an untagged one simply falls into
+# Overview, which is the right default.
+_TAB_ORDER = [
+    ("overview",     "Overview"),
+    ("transactions", "Transactions"),
+    ("chat",         "Chat & Contacts"),
+    ("identity",     "Identity & Accounts"),
+    ("findings",     "Findings"),
+    ("recovery",     "Deleted Records"),
+    ("custody",      "Custody & Integrity"),
+]
+_TAB_RULES = [
+    ("custody",      ("custody", "hash manifest", "integrity", "extraction problem")),
+    ("transactions", ("transaction", "counterpart", "yearly", "volume", "ledger")),
+    ("chat",         ("chat", "contact", "conversation", "message")),
+    ("identity",     ("identity", "account", "vpa", "bank", "device", "payment")),
+    ("recovery",     ("deleted", "carved", "recovered")),
+    ("findings",     ("signal", "finding", "suspicious")),
+]
+
+
+def _tab_for(title: str) -> str:
+    low = title.lower()
+    for tab, needles in _TAB_RULES:
+        if any(n in low for n in needles):
+            return tab
+    return "overview"
+
+
+def _section(title: str, body: str, tab: Optional[str] = None) -> str:
+    """One report section, tagged with the tab it belongs to.
+
+    Tabs are a presentation layer over one file: every section is always present
+    in the document and the nav only controls which are visible. That keeps the
+    report searchable with the browser's own find, printable in full, and
+    readable with scripting disabled — none of which holds for a report that
+    loads its panes on demand.
+    """
+    tab = tab or _tab_for(title)
+    return (f'<section data-tab="{html.escape(tab)}">'
+            f"<h2>{html.escape(title)}</h2>{body}</section>")
 
 
 def _kv_block(kv: Dict[str, Any]) -> str:
@@ -545,7 +690,10 @@ def _metric_grid(kv: Dict[str, Any]) -> str:
 def _table(rows: List[Dict[str, Any]], cols: List[str]) -> str:
     if not rows:
         return "<p class='muted'>No records.</p>"
-    head = "".join(f"<th>{html.escape(c)}</th>" for c in cols)
+    # A filter box appears above any table long enough to need one. Sorting is
+    # click-to-sort on the header. Both are inert without scripting, and the rows
+    # remain plain <tr> so the table still prints and copies as a table.
+    head = "".join(f"<th data-col='{i}'>{html.escape(c)}</th>" for i, c in enumerate(cols))
     body = []
     for r in rows:
         cells = []
@@ -553,13 +701,15 @@ def _table(rows: List[Dict[str, Any]], cols: List[str]) -> str:
             v = r.get(c)
             cells.append(f"<td>{html.escape(_stringify(v))}</td>")
         body.append("<tr>" + "".join(cells) + "</tr>")
-    return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
+    filt = ("<div class='tfilter'><input type='search' placeholder='Filter these "
+            f"{len(rows)} rows…' data-filter></div>" if len(rows) > 8 else "")
+    return (filt + "<div class='tw'><table class='sortable'><thead><tr>"
+            f"{head}</tr></thead><tbody>{''.join(body)}</tbody></table></div>")
 
 
 def _txn_table(rows: List[Dict[str, Any]]) -> str:
     if not rows:
         return "<p class='muted'>No transactions found.</p>"
-    head = "<th>When</th><th>Direction</th><th>Amount</th><th>Counterparty</th><th>Type</th><th>State</th><th>Note</th><th>ID</th>"
     body = []
     for t in rows:
         d = t.get("direction") or ""
@@ -582,7 +732,17 @@ def _txn_table(rows: List[Dict[str, Any]]) -> str:
             f"<td><small>{html.escape(str(t.get('global_payment_id') or '')[:20])}</small></td>"
             "</tr>"
         )
-    return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
+    # This is the table an examiner spends most time in, so it gets the same
+    # filter and click-to-sort as the generic ones. It builds its own markup for
+    # the direction tag and amount colouring, which is why it has to opt in here
+    # rather than inheriting from _table().
+    head_cells = "".join(
+        f"<th data-col='{i}'>{c}</th>" for i, c in enumerate(
+            ["When", "Direction", "Amount", "Counterparty", "Type", "State", "Note", "ID"]))
+    filt = ("<div class='tfilter'><input type='search' placeholder='Filter these "
+            f"{len(rows)} transactions…' data-filter></div>" if len(rows) > 8 else "")
+    return (filt + "<div class='tw'><table class='sortable'><thead><tr>"
+            f"{head_cells}</tr></thead><tbody>{''.join(body)}</tbody></table></div>")
 
 
 def _money(v: Any) -> str:

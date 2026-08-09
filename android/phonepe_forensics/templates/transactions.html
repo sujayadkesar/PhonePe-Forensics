@@ -78,7 +78,9 @@
       </div>
 
       <div class="filter-cell">
-        <label class="filter-label">Date from</label>
+        <label class="filter-label">Date from
+          <span style="color:var(--accent)">({{ ts_zones[ts_zone_key].label }})</span>
+        </label>
         <input type="date" name="date_from" value="{{ filters.date_from }}">
       </div>
 

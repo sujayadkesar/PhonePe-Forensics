@@ -1123,3 +1123,11 @@ pre.code::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
 
 .research-note  { background:var(--warn-bg); border:1px solid rgba(251,191,36,.25); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:var(--warn); margin-top:10px; }
 .research-nav   { display:flex; justify-content:space-between; margin-top:36px; padding-top:18px; border-top:1px solid var(--border); }
+
+/* Contributor credits in the sidebar footer — see README Credits. */
+.footer .credit-line { margin-top: 5px; font-size: 10.5px; line-height: 1.35; }
+.footer .credit-line a { color: var(--text-3); text-decoration: none; }
+.footer .credit-line a:hover { color: var(--accent); text-decoration: underline; }
+
+.footer .credit-line b { color: var(--text-2); font-weight: 600; }
+.footer .credit-line + .credit-line { margin-top: 6px; }

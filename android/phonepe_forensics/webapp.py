@@ -19,6 +19,7 @@ import logging
 import os
 import secrets
 import sys
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
@@ -132,11 +133,152 @@ def _filter_inr(value: Any) -> str:
     return f"₹ {v:,.2f}"
 
 
+# ---------------------------------------------------------------------------
+# Timestamp display preference — format and timezone, chosen independently
+# ---------------------------------------------------------------------------
+#
+# Presentation only. Every value is rendered from the record's `epoch_ms`, so
+# neither setting can change what the evidence says — only how this screen
+# writes it down. Exports ignore both and stay ISO-8601 UTC.
+#
+# Format and zone are separate because they are separate questions: preferring
+# day-first dates says nothing about which jurisdiction's clock you want to read
+# them in. Bundling them meant a combinatorial list that still missed most pairs.
+#
+# The zone abbreviation is appended by every format except the raw epoch. That
+# is not decoration — "07/03/2026 14:30" is indistinguishable between IST and
+# UTC, and the gap is 5 hours 30.
+
+TS_FORMATS: Dict[str, Dict[str, str]] = {
+    "iso":        {"label": "ISO-8601",          "pattern": "%Y-%m-%dT%H:%M:%S",
+                   "note": "Machine-sortable. Written with the offset, e.g. +05:30."},
+    "ymd":        {"label": "YYYY-MM-DD",        "pattern": "%Y-%m-%d %H:%M:%S",
+                   "note": "Sorts correctly as text; unambiguous worldwide."},
+    "dmy":        {"label": "DD/MM/YYYY",        "pattern": "%d/%m/%Y %H:%M:%S",
+                   "note": "Day-first, as used in India, the UK and most of Europe."},
+    "dMy":        {"label": "DD/MMM/YYYY",       "pattern": "%d/%b/%Y %H:%M:%S",
+                   "note": "Named month, so 07/03 can never be read as 3 July."},
+    "d_mon_y":    {"label": "DD MMM YYYY",       "pattern": "%d %b %Y, %H:%M:%S",
+                   "note": "Spaced and readable — reads well in a written report."},
+    "mon_d_y":    {"label": "MMM DD, YYYY",      "pattern": "%b %d, %Y, %I:%M:%S %p",
+                   "note": "Month-first with a named month, 12-hour clock."},
+    "mdy":        {"label": "MM/DD/YYYY",        "pattern": "%m/%d/%Y %I:%M:%S %p",
+                   "note": "Numeric month-first, US convention."},
+    "full":       {"label": "Weekday, DD MMM YYYY", "pattern": "%a, %d %b %Y, %H:%M:%S",
+                   "note": "Includes the day of week — useful for pattern-of-life."},
+    "date_only":  {"label": "Date only",         "pattern": "%d %b %Y",
+                   "note": "Drops the clock entirely. Use with care: two events on "
+                           "one day become indistinguishable."},
+    "epoch_ms":   {"label": "Unix epoch (ms)",   "pattern": "",
+                   "note": "The raw stored integer. Timezone does not apply."},
+}
+DEFAULT_TS_FORMAT = "iso"
+
+# Zones carry real rules, not fixed offsets, so historical DST is handled: a
+# 2026-03-07 event in New York renders EST, a July one EDT.
+TS_ZONES: Dict[str, Dict[str, str]] = {
+    "UTC":              {"label": "UTC", "note": "How every value is stored. The safe default."},
+    "Asia/Kolkata":     {"label": "India (IST, +5:30)", "note": ""},
+    "Asia/Dubai":       {"label": "Gulf (+4)", "note": ""},
+    "Asia/Singapore":   {"label": "Singapore (+8)", "note": ""},
+    "Europe/London":    {"label": "UK (GMT/BST)", "note": ""},
+    "America/New_York": {"label": "US Eastern (EST/EDT)", "note": ""},
+}
+DEFAULT_TS_ZONE = "UTC"
+
+
+def _ts_format_key() -> str:
+    key = session.get("ts_format")
+    return key if key in TS_FORMATS else DEFAULT_TS_FORMAT
+
+
+def _ts_zone_key() -> str:
+    key = session.get("ts_zone")
+    return key if key in TS_ZONES else DEFAULT_TS_ZONE
+
+
+def _zone(name: str):
+    try:
+        from zoneinfo import ZoneInfo
+        return ZoneInfo(name)
+    except Exception:
+        # No tzdata on this machine: fall back to UTC rather than guessing an
+        # offset, and the label below will still say UTC so nothing is implied.
+        return timezone.utc
+
+
+def _render_ts(epoch_ms: Any, fmt_key: str, zone_key: str) -> str:
+    if isinstance(epoch_ms, bool):
+        return ""
+    try:
+        ms = int(epoch_ms)
+    except (TypeError, ValueError):
+        return ""
+    if fmt_key == "epoch_ms":
+        return str(ms)
+    try:
+        dt = datetime.fromtimestamp(ms / 1000.0, tz=timezone.utc).astimezone(_zone(zone_key))
+    except (OverflowError, OSError, ValueError):
+        return ""
+    if fmt_key == "iso":
+        return dt.isoformat()
+    spec = TS_FORMATS.get(fmt_key) or TS_FORMATS[DEFAULT_TS_FORMAT]
+    out = dt.strftime(spec["pattern"])
+    # %Z is empty for some zones; fall back to the numeric offset so a rendered
+    # time is never left without one.
+    zlabel = dt.strftime("%Z") or dt.strftime("%z")
+    return f"{out} {zlabel}".strip()
+
+
 @app.template_filter("ts")
 def _filter_ts(value: Any) -> str:
+    fmt, zone = _ts_format_key(), _ts_zone_key()
     if isinstance(value, dict):
+        if value.get("epoch_ms") is not None:
+            return _render_ts(value["epoch_ms"], fmt, zone)
         return value.get("display") or value.get("iso") or ""
+    # Many views carry a pre-formatted `*_iso` string rather than the timestamp
+    # dict. Parse it back so the setting reaches those too — otherwise it would
+    # appear to work on some pages and silently do nothing on the timeline.
+    if isinstance(value, str) and value:
+        try:
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return value
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return _render_ts(int(dt.timestamp() * 1000), fmt, zone)
     return value or ""
+
+
+def _local_redirect(target: Optional[str], fallback_endpoint: str = "page_dashboard") -> str:
+    """Only ever redirect within this app.
+
+    `next` comes from the request and `Referer` from the browser, so neither may
+    be handed to redirect() unchecked — that is an open redirect, and on a tool
+    whose whole premise is that it never leaves the workstation, bouncing the
+    analyst to an external site is worth refusing outright. A bare path is the
+    only accepted shape: `//evil.example` is protocol-relative and would resolve
+    to another host, so a second leading slash disqualifies it too.
+    """
+    if target:
+        parts = urlsplit(target)
+        if not parts.scheme and not parts.netloc and target.startswith("/") \
+                and not target.startswith("//"):
+            return target
+    return url_for(fallback_endpoint)
+
+
+@app.route("/settings/time-format", methods=["POST"])
+def set_time_format():
+    """Either control posts here; each only sets the field it sent."""
+    fmt = request.form.get("ts_format")
+    if fmt in TS_FORMATS:
+        session["ts_format"] = fmt
+    zone = request.form.get("ts_zone")
+    if zone in TS_ZONES:
+        session["ts_zone"] = zone
+    return redirect(_local_redirect(request.form.get("next") or request.referrer))
 
 
 @app.template_filter("yes_no")
@@ -170,6 +312,21 @@ def _filter_count(value: Any) -> int:
         return len(value)
     except Exception:
         return 0
+
+
+@app.context_processor
+def _inject_time_format():
+    """Available to every page so the choosers can live in the shared header."""
+    fmt, zone = _ts_format_key(), _ts_zone_key()
+    sample = 1772442000000        # a fixed instant, so the previews are comparable
+    return {
+        "ts_formats": TS_FORMATS, "ts_format_key": fmt,
+        "ts_zones": TS_ZONES, "ts_zone_key": zone,
+        # Rendered previews: each format shown in the chosen zone, each zone shown
+        # in the chosen format, so both menus preview what you would actually get.
+        "ts_format_examples": {k: _render_ts(sample, k, zone) for k in TS_FORMATS},
+        "ts_zone_examples": {z: _render_ts(sample, fmt, z) for z in TS_ZONES},
+    }
 
 
 @app.context_processor
@@ -234,7 +391,9 @@ def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str)
         writer.writerow(out)
     return Response(
         buf.getvalue(),
-        mimetype="text/csv; charset=utf-8",
+        # Werkzeug appends the charset itself, so naming it here produced
+        # `text/csv; charset=utf-8; charset=utf-8` on every CSV export.
+        mimetype="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{safe_filename(filename)}"'},
     )
 
@@ -593,11 +752,19 @@ def _filter_transactions(txns: List[Dict[str, Any]], args) -> Dict[str, Any]:
     sort = args.get("sort", "date_desc")  # date_desc, date_asc, amount_desc, amount_asc
 
     def _epoch_ms(dt_str: str, end_of_day: bool = False) -> Optional[int]:
+        """A typed date means that date on the clock the analyst is reading.
+
+        This used to hardcode UTC. Once the display zone became selectable that
+        was wrong by the zone's offset: with IST on screen, asking for the 7th
+        returned 05:30 on the 7th to 05:30 on the 8th, so events looked missing
+        at one end and stray at the other. The date is now anchored in the same
+        zone the table is rendered in.
+        """
         if not dt_str:
             return None
         try:
-            from datetime import datetime, timezone
-            dt = datetime.strptime(dt_str.strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            dt = datetime.strptime(dt_str.strip(), "%Y-%m-%d").replace(
+                tzinfo=_zone(_ts_zone_key()))
             if end_of_day:
                 dt = dt.replace(hour=23, minute=59, second=59, microsecond=999000)
             return int(dt.timestamp() * 1000)

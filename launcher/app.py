@@ -9,12 +9,13 @@ tools' cookies, redirects and absolute asset paths (`/static/...`,
 byte-identical.
 
 Neither tool is modified. The only launcher-side change to what a tool returns
-is a small "back to launcher" bar appended to HTML responses — injected into the
-response body in flight, never into a template file.
+is a navigation block injected into the top of its sidebar — added to the
+response body in flight, never to a template file.
 """
 from __future__ import annotations
 
 import os
+import re
 import secrets
 import urllib.error
 import urllib.request
@@ -45,18 +46,35 @@ _HOP_BY_HOP = {
     "te", "trailers", "transfer-encoding", "upgrade",
 }
 
-_BACK_BAR = """
-<div id="__launcher_bar" style="position:fixed;left:0;right:0;bottom:0;z-index:2147483646;
-     display:flex;align-items:center;gap:10px;padding:7px 14px;
-     background:#0c0e16;border-top:1px solid #1e2638;
-     font:12px/1.4 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color:#8a91a4">
-  <a href="/__launcher/" style="color:#f3f4f6;text-decoration:none;font-weight:600">&larr; Launcher</a>
-  <span style="color:#5b6478">|</span>
-  <span>Analysing as <b style="color:#8b5cf6">{label}</b></span>
-  <span style="margin-left:auto;color:#5b6478">PhonePe Forensics</span>
+# Both analysers open their sidebar with exactly this tag, which makes it a
+# reliable anchor for injecting a nav entry without editing either template.
+_SIDEBAR_ANCHOR = '<aside class="sidebar">'
+
+# The way back belongs in the sidebar, next to every other navigation control —
+# that is where an analyst looks. A thin strip pinned to the bottom edge is
+# present but not findable, and in the Android layout it collides with the
+# tool's own floating status pill.
+_SIDEBAR_BLOCK = """
+<div id="__launcher_nav" style="margin:12px 12px 4px;padding:11px 12px;border-radius:10px;
+     background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(109,40,217,.10));
+     border:1px solid rgba(139,92,246,.42);
+     font:12px/1.45 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <div style="font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:#8a91a4">
+    Analysing
+  </div>
+  <div style="font-size:14px;font-weight:700;color:#f3f4f6;margin:2px 0 9px">{label}</div>
+  <a href="/__launcher/" style="display:block;text-align:center;padding:7px 10px;
+     border-radius:8px;background:#8b5cf6;color:#fff;font-weight:600;text-decoration:none">
+    &larr; Back to Launcher
+  </a>
+  <a href="/__launcher/cases" style="display:block;text-align:center;margin-top:6px;
+     padding:6px 10px;border-radius:8px;border:1px solid #1e2638;background:#111726;
+     color:#cbd1de;text-decoration:none">
+    Switch case / platform
+  </a>
 </div>
-<div style="height:34px"></div>
 """
+
 
 
 # ---------------------------------------------------------------------------
@@ -159,6 +177,12 @@ def proxy(path: str):
     headers = {k: v for k, v in request.headers.items()
                if k.lower() not in _HOP_BY_HOP and k.lower() != "host"}
     headers["Accept-Encoding"] = "identity"
+    if "Cookie" in request.headers:
+        unwrapped = _cookie_to_upstream(request.headers["Cookie"], tool.key)
+        if unwrapped:
+            headers["Cookie"] = unwrapped
+        else:
+            headers.pop("Cookie", None)
     # Having verified the real origin above, rewrite it to the backend's own so
     # the tool sees the same-origin request it is entitled to expect.
     if "Origin" in request.headers:
@@ -182,12 +206,48 @@ def proxy(path: str):
                                message=f"The {tool.label} analyser stopped responding.",
                                detail=str(exc)), 502
 
-    out = [(k, v) for k, v in raw_headers.items()
-           if k.lower() not in _HOP_BY_HOP and k.lower() != "content-length"]
+    out = []
+    for k, v in raw_headers.items():
+        if k.lower() in _HOP_BY_HOP or k.lower() == "content-length":
+            continue
+        if k.lower() == "set-cookie":
+            v = _cookie_from_upstream(v, tool.key)
+        out.append((k, v))
     ctype = raw_headers.get("Content-Type", "")
     if "text/html" in ctype.lower() and payload:
         payload = _inject_bar(payload, tool.label)
     return Response(payload, status=status, headers=out)
+
+
+
+def _cookie_to_upstream(header: str, key: str) -> str:
+    """Browser -> analyser: unwrap this tool's cookies, hide everyone else's.
+
+    Both analysers are Flask apps and both name their session cookie `session`.
+    Proxied onto one origin they are the same cookie, so whichever replied last
+    overwrote the other's — visiting iOS silently reset the Android analyser's
+    display settings, and a cleared cookie deleted them outright. Each tool's
+    cookies are therefore stored under a per-tool prefix and unwrapped here, so
+    from inside each analyser nothing has changed.
+    """
+    out = []
+    for part in header.split(";"):
+        part = part.strip()
+        if not part or part.startswith("pp_launcher="):
+            continue                      # the launcher's own; no tool needs it
+        name = part.split("=", 1)[0]
+        if name.startswith(key + "__"):
+            out.append(part[len(key) + 2:])
+        elif "__" in name:
+            continue                      # another tool's — must not leak across
+        else:
+            out.append(part)
+    return "; ".join(out)
+
+
+def _cookie_from_upstream(value: str, key: str) -> str:
+    """Analyser -> browser: store this tool's cookie under its own name."""
+    return re.sub(r"^\s*([^=;\s]+)=", lambda m: f"{key}__{m.group(1)}=", value, count=1)
 
 
 def _rewrite_referer(referer: str, base_url: Optional[str]) -> str:
@@ -204,12 +264,24 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def _inject_bar(payload: bytes, label: str) -> bytes:
-    bar = _BACK_BAR.format(label=label).encode("utf-8")
-    lowered = payload.lower()
-    idx = lowered.rfind(b"</body>")
+    """Add the way back to a proxied page, without touching either template.
+
+    A single placement: a block at the top of the analyser's sidebar, where its
+    other navigation already lives. A pinned strip along the bottom edge was
+    tried and removed — it was easy to miss and collided with the Android
+    layout's own floating status pill.
+
+    Pages with no sidebar (error pages) therefore get nothing injected; the
+    launcher stays reachable at /__launcher/ and the browser's back button
+    works, which is enough for a page you land on by accident.
+    """
+    anchor = _SIDEBAR_ANCHOR.encode("utf-8")
+    idx = payload.find(anchor)
     if idx == -1:
-        return payload + bar
-    return payload[:idx] + bar + payload[idx:]
+        return payload
+    block = _SIDEBAR_BLOCK.format(label=label).encode("utf-8")
+    cut = idx + len(anchor)
+    return payload[:cut] + block + payload[cut:]
 
 
 @app.errorhandler(404)

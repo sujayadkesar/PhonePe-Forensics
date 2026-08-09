@@ -1,14 +1,27 @@
-# PhonePe Android Forensics
+# PhonePe Forensics — iOS & Android
 
-**An offline analyser for PhonePe Android app data.** Point it at an extracted
-`com.phonepe.app` folder and it reconstructs transactions, chat, contacts, the split/bill
-ledger and identity into a unified timeline, a social-financial graph and suspicious-signal
-findings — in a browser, with the source of every field one click away.
+**An offline analyser for PhonePe app data, on both platforms.** Open the launcher, pick
+whether you are parsing a fresh extraction or reopening a parsed case, choose iOS or Android,
+and the matching analyser takes over — transactions, chat, contacts, the split/bill ledger and
+identity, reconstructed into a unified timeline, a social-financial graph and suspicious-signal
+findings, with the source of every field one click away.
 
 It is **read-only by construction**: the evidence directory is hashed before parsing and is
 never written to.
 
+```bash
+pip install -r requirements.txt
+python launch.py                 # then open the printed URL
+```
+
 ![Forensic dashboard](docs/screenshots/01-dashboard.png)
+
+> **Attribution.** The **iOS analyser in `ios/` is [Sujay Adkesar](https://github.com/sujayadkesar)'s
+> work**, from [PhonePe-Forensics](https://github.com/sujayadkesar/PhonePe-Forensics), vendored
+> here under its MIT licence (`ios/LICENSE`) with its original README kept as
+> `ios/README.upstream.md`. The Android analyser and the launcher are this repository's. See
+> [Credits](#credits) — this is not a rewrite of his tool, it is his tool, running alongside
+> a second one.
 
 > ⚠️ **Handles real personal data.** A PhonePe acquisition contains a person's complete
 > financial, social and identity history. Use only on evidence you are authorised to examine.
@@ -17,9 +30,32 @@ never written to.
 
 ---
 
+## The two analysers
+
+| | Parses | Lives in |
+|---|---|---|
+| **Android** | `com.phonepe.app` application-data directory from a rooted / full-filesystem extraction | repository root |
+| **iOS** | PhonePe iOS app container | `ios/` |
+
+They share a design but are separate programs: each has its own extractors, its own case
+registry, and runs in its own process. The launcher puts them behind one address and one
+case list. Either still runs standalone:
+
+```bash
+python run.py                # Android only
+cd ios && python run.py      # iOS only
+```
+
+Everything below documents the **Android** analyser, which is the one written here. For the
+iOS analyser's own documentation see `ios/README.upstream.md`.
+
+---
+
 ## Contents
 
 **Getting started**
+- [The two analysers](#the-two-analysers)
+- [The launcher](#the-launcher)
 - [What this is (and is not)](#what-this-is-and-is-not)
 - [Quick start](#quick-start)
 - [What you feed it](#what-you-feed-it)
@@ -68,19 +104,45 @@ extraction and needs to understand it.
 
 ---
 
+## The launcher
+
+`python launch.py` serves one address for both analysers.
+
+| Screen | Purpose |
+|---|---|
+| `/__launcher/` | Parse a new extraction, or open a parsed case. Shows each analyser's status. |
+| `/__launcher/parse` | Pick iOS or Android; lands in that analyser's own **New Case** screen. |
+| `/__launcher/cases` | Both case registries merged into one list, tagged by platform. |
+| everything else | Proxied to whichever analyser the session selected. |
+
+**Neither analyser is modified to make this work.** They ship a package of the same name, so
+they cannot share one interpreter; each runs as its own process and the launcher reverse-proxies
+to it. Same-origin means their cookies, redirects and asset paths keep working untouched, and a
+"Back to Launcher" block is injected into the proxied page rather than into either template.
+
+Two details that matter if you change it: the launcher performs the cross-origin check itself
+before re-presenting a request to the backend as same-origin (skipping that would make it a CSRF
+laundry), and its session cookie is named `pp_launcher` because both analysers call theirs
+`session` and would otherwise overwrite it.
+
+Full design notes: [`launcher/README.md`](launcher/README.md).
+
 ## Quick start
 
 Requires **Python 3.9+**. The only runtime dependency is Flask.
 
 ```bash
-git clone https://github.com/Mihir-Choudhary/Andriod-Phonepe-Forensics.git
-cd Andriod-Phonepe-Forensics
+git clone https://github.com/Mihir-Choudhary/Android-Phonepe-Forensics.git
+cd Android-Phonepe-Forensics
 pip install -r requirements.txt
-python run.py 127.0.0.1:8754
+python launch.py 127.0.0.1:8750        # both analysers
+# or a single analyser directly:
+#   python run.py 127.0.0.1:8754       # Android
+#   cd ios && python run.py            # iOS
 ```
 
-Open the printed URL → **+ New Case** → point it at the extracted `com.phonepe.app` folder →
-**Process**.
+Open the printed URL → choose **Parse an extraction** → pick the platform → point it at the
+extracted folder → **Process**.
 
 Everything runs locally. The tool makes no network requests, and binding to `127.0.0.1` keeps
 it off the network entirely.
@@ -258,7 +320,14 @@ engine rather than reimplementing it.
 ## Repository layout
 
 ```
-run.py                       entry point — python run.py 127.0.0.1:8754
+launch.py                    unified entry point — both analysers behind one address
+launcher/                    platform chooser, combined case list, reverse proxy
+ios/                         the iOS analyser (Sujay Adkesar's, vendored — see Credits)
+  phonepe_forensics/         his engine + extractors
+  LICENSE                    his MIT licence, kept with the code
+  README.upstream.md         his original README
+
+run.py                       Android analyser alone — python run.py 127.0.0.1:8754
 
 phonepe_forensics/           platform-agnostic engine
   core/common.py             SQLiteReader, evidence snapshots, timestamps, hashing
@@ -476,24 +545,28 @@ name, subject and root are injected into *every* page.
 
 ## Credits
 
-This tool was **inspired by [Sujay Adkesar](https://github.com/sujayadkesar)'s
-[PhonePe-Forensics](https://github.com/sujayadkesar/PhonePe-Forensics)**. That repository was the
-reference used to code this Android tool and to understand the PhonePe forensic architecture —
-the normalized data contract, the correlator / timeline / social-graph engine, the hunt console
-and the report layer.
+**The iOS analyser is [Sujay Adkesar](https://github.com/sujayadkesar)'s work.** It is his
+[PhonePe-Forensics](https://github.com/sujayadkesar/PhonePe-Forensics) project, vendored into
+`ios/` and running here unchanged in behaviour — his extractors, his correlator, his hunt
+console, his report layer. It is included under its MIT licence, which is kept at `ios/LICENSE`
+alongside his original README at `ios/README.upstream.md`.
 
-That design is why an Android port was tractable at all: because every consumer reads only
-`case.data`, adding a platform meant writing new extractors rather than a second tool. Full
-credit and thanks to Sujay for the original work.
+His repository was also the reference used to build the Android analyser, and one decision of
+his is why a second platform was tractable at all: the **normalized `case.data` contract**, which
+puts every platform-specific parser on one side of a boundary and every consumer — timeline,
+social graph, findings, hunt, reports — on the other. Adding Android meant writing new
+extractors, not a second tool. Full credit and thanks to him for the original work.
 
-> 🔜 **Coming soon:** this Android tool will be **merged back into Sujay's repo** so there is a
-> **single tool that handles both iOS and Android** instead of two. You'll pick the platform on
-> launch and the analyser loads the matching parser and layout.
+What this repository adds: the Android analyser, the launcher, and a set of fixes to the shared
+engine (see `STATE.md`).
 
 ## Upstream & license
 
-Vendored from `github.com/sujayadkesar/PhonePe-Forensics` at commit `007473a`, then reduced to
-an Android-only distribution. The parser and shared engine were copied rather than submoduled,
-so fixes made upstream after that commit must be re-applied here.
+`ios/` is vendored from `github.com/sujayadkesar/PhonePe-Forensics` at commit `007473a`, with
+forensic-integrity fixes applied on top (timestamps carrying their zone, formula-injection
+neutralised in CSV exports, path-containment and SQL-console scoping, and others — all listed in
+the commit that introduced them). It was copied rather than submoduled, so fixes made upstream
+after that commit are not here automatically.
 
-See [`LICENSE`](LICENSE).
+Both this repository and the vendored analyser are MIT licensed. See [`LICENSE`](LICENSE) and
+[`ios/LICENSE`](ios/LICENSE).

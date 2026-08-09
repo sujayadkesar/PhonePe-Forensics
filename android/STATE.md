@@ -8,6 +8,25 @@ Absolute dates throughout. All tool-emitted timestamps are UTC by design.
 
 ---
 
+## 0. Handoff note — read before anything else (2026-08-09)
+
+This project no longer has an acquisition attached to it, and the next session will not have
+one. **That is fine.** `notes/make_demo_acquisition.py` builds a synthetic acquisition from
+PhonePe's real table shapes, and everything except real-data parsing quirks, carving and iOS
+can be exercised against it. `CONTINUE.md` opens with the exact commands and with a baseline
+that is safe to quote anywhere.
+
+The repository also changed shape. It was an Android analyser; on branch
+`unified-ios-android` it is **one tool covering both platforms** — the Android analyser at the
+root, the iOS analyser vendored under `ios/` (Sujay Adkesar's, MIT, attribution in the README
+and `ios/LICENSE`), and a launcher in front of both. Sections 1–6 below still describe the
+Android analyser, which remains accurate for that part; `launcher/README.md` covers the rest.
+
+Two things about this file specifically: everything below §6 is a record of audits run against
+an acquisition that is no longer present, so treat those numbers as history rather than as
+something to re-verify. And the rule at the top of §6 — no subject figures, names, numbers or
+acquisition paths in tracked files — still binds.
+
 ## 1. What this project is
 
 A local, read-only DFIR web tool (Flask, `python run.py 127.0.0.1:8754`) that parses a

@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{% block title %}PhonePe iOS Forensics{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+{# No remote assets. This is an offline forensic tool examining a subject's
+   financial and social history, so it must not reach a third party on every page
+   load: that discloses when and from where an examination is running, and on an
+   isolated workstation each page stalls on a DNS timeout instead. The font
+   stacks in app.css already fall back to Inter/JetBrains Mono if installed
+   locally, then to system faces. #}
 </head>
 <body class="dark">
 <div class="layout">
@@ -96,6 +99,16 @@
   <div class="footer">
     <div>v1.0.0</div>
     <div class="muted">Read-only forensic tool</div>
+    <div class="credit-line">
+      Android &amp; launcher ·
+      <a href="https://www.linkedin.com/in/mihir-choudhary/"
+         target="_blank" rel="noopener"><b>Mihir Choudhary</b></a>
+    </div>
+    <div class="credit-line">
+      iOS analyser ·
+      <a href="https://www.linkedin.com/in/sujay-adkesar-a90725224/"
+         target="_blank" rel="noopener"><b>Sujay Adkesar</b></a>
+    </div>
   </div>
 </aside>
 

@@ -2,40 +2,118 @@
 
 **Read order on resume:** `STATE.md` → this file → newest in `notes/sessions/`.
 
+*Session logs quoting subject values are gitignored, so a clone carries only the shareable ones. If `notes/sessions/` looks sparse, that is why — nothing is missing from `STATE.md` or this file because of it.*
+
 ---
 
-## Next action
+## Start here — you have no evidence, and you do not need any
 
-**All forty-one issues found on 2026-07-30 (four audit passes plus review follow-ups)
-are fixed and verified against
-the real acquisition** (details: `notes/sessions/2026-07-30.md`). Nothing is outstanding.
+**There is no PhonePe acquisition on this machine.** Everything in this repository can be
+built, run, parsed and verified without one, because the project ships a generator for a
+fabricated acquisition. Use it; do not go looking for evidence, and do not assume a finding
+is untestable because you cannot see real data.
 
-*The count is A–J (10) + K–R (8) + S–W (5) + X–AB (5) + AC–AE (3) + AC2/AC3 (2) + AF–AM (8)
-= 41. Count the letter ranges before writing a total here; an earlier revision of this line
-said "twenty-seven" against 28 recorded defects.*
+```bash
+pip install -r requirements.txt
 
-Suggested next steps, in order of value:
+python notes/make_demo_acquisition.py /tmp/demo        # build a synthetic acquisition
+python notes/smoke_test.py /tmp/demo/com.phonepe.app --export /tmp/exp --json /tmp/r.json
+python launch.py 127.0.0.1:8750                        # then open /__launcher/
+```
 
-1. **Committed** on branch `forensic-fidelity-audit-2026-07-30` (27 files, +2,558 / −147).
-   Not pushed and no PR opened — that is the next call if it is wanted. `notes/sessions/` is
-   gitignored, so the session log lives only in the working tree; it quotes real subject values.
-2. **Chase the one real lead the fixes exposed:** exactly one payment reference now falls
-   inside the live ledger's retained period yet has no `transaction_core` row — the single
-   case local retention does not explain, down from a headline of 81. It is named in the
-   `uncorroborated_transactions` finding's `sample_inside_retained_period`, and in the
-   gitignored session log.
-3. Consider whether `search.db`'s FTS index (`fts_search` / `idx_mapper`, 8,416 docs each)
-   is worth surfacing. Deliberately left alone: it is an app-built index over app content,
-   not user search history — `recent_search` (1 row) is the user's actual searches. It is
-   reachable through the raw-table browser meanwhile.
-4. Consider a notifications section in the HTML report. The 977 decoded notifications are in
-   `notification_messages.csv`, the master JSON, the timeline and PPQL, but the HTML exhibit
-   does not summarise them. Same for the 38 consents (now in `consents.csv` + PPQL).
-5. `ads_db.ad_response` (34 impressions with request times) is still unread — timestamped
-   device-activity events if that is ever wanted; advertising plumbing otherwise.
+`notes/make_demo_acquisition.py` fills PhonePe's **real table shapes**
+(`notes/demo_schema.sql`, CREATE statements only) with invented rows — a subject called
+`Test Subject`, counterparties `Demo Payee One` / `Demo Merchant Ltd`, numbers in the
+`9876500000` documentation range. Using the real schema is the point: the fixture goes
+through the same extractors, correlator, carver and templates as evidence does, so it
+exercises real behaviour rather than a mock.
 
-**Do not read "0 schema gaps" as "everything was read"** — see the coverage caveat in
-`STATE.md` §6 and re-run the `has_table`-vs-`raw_tables` cross-check on any new acquisition.
+### What the fixture can and cannot prove
+
+| Provable on the fixture | Not provable without a real acquisition |
+|---|---|
+| Every route serves; no 500s | Parsing quirks of real PhonePe payloads |
+| Extraction, correlation, timeline, graph, findings | Carving (a freshly-created DB has no deleted rows — it correctly recovers **0**) |
+| PPQL, exports, HTML report | Masked→real recovery at scale |
+| Launcher, both analysers, case switching | Anything about **iOS** — see the gap below |
+| Time format/zone controls, date filters | Volume behaviour (the fixture is tiny) |
+
+### Regression baseline — safe to quote anywhere
+
+`python notes/smoke_test.py /tmp/demo/com.phonepe.app` exits **0** with 0 module failures,
+0 derived failures, 0 route failures, 3 degradations (sources the fixture deliberately omits).
+
+| | |
+|---|---|
+| transactions | 6 — 1 IN, 5 OUT, one `ERRORED`, one `EXPENSE_SETTLEMENT` with no payment leg |
+| `initiation_mode` | 1 QR_SCAN, 1 INTENT, rest unstated |
+| chat | 2 threads, 5 messages, 2 payment cards (one referencing a txn absent from `transaction_core`) |
+| ledger | 1 ledger, 2 expenses, 3 members with balances |
+| timeline | 18 events across 6 sources |
+| findings | 4 |
+| deleted records | **0** — correct, and it exercises the "empty carve is not proof" finding |
+| HTML report | ~18 KB, 10 tables, 9 sortable, **0 external references** |
+
+Numbers from the real acquisition are deliberately **not** recorded in tracked files. See the
+rule at the top of `STATE.md` §6.
+
+## What this repository is now
+
+One tool covering **both platforms**, on branch `unified-ios-android`:
+
+```
+launch.py          unified entry point — both analysers behind one address
+launcher/          platform chooser, combined case list, reverse proxy
+ios/               the iOS analyser, vendored from Sujay Adkesar's PhonePe-Forensics
+                   (MIT, ios/LICENSE, his README at ios/README.upstream.md)
+run.py             the Android analyser alone
+phonepe_forensics/ shared engine   ·   phonepe_android/ Android parser
+```
+
+The launcher runs each analyser as its **own process** — both ship a package named
+`phonepe_forensics`, so one interpreter cannot hold both — and reverse-proxies to the selected
+one. Neither analyser was modified to make that work; the "Back to Launcher" block is injected
+into the proxied response. Design notes: `launcher/README.md`.
+
+## Repository state
+
+| | |
+|---|---|
+| Remote | `github.com/Mihir-Choudhary/Android-Phonepe-Forensics` (renamed; the `Andriod` spelling redirects) |
+| Branch | `unified-ios-android` — pushed, `main` untouched |
+| Fork of upstream | `Mihir-Choudhary/PhonePe-Forensics` holds `fix/forensic-integrity` and `feat/unified-launcher`, both still applying cleanly to his `main`. No PRs opened. |
+
+## Verify like this, or you will ship a broken command
+
+**Clone the pushed branch into an empty directory and run every documented command as a
+stranger would.** Testing in a working directory hides untracked and left-over files. This is
+not theoretical: `ios/run.py` was never vendored, so `cd ios && python run.py` — documented in
+the README — failed on a fresh clone, while every launcher test passed, because the launcher
+imports each app object directly and never touches `run.py`.
+
+```bash
+git clone --branch unified-ios-android <remote> /tmp/verify && cd /tmp/verify
+python run.py 127.0.0.1:8840          # Android alone
+cd ios && python run.py 127.0.0.1:8841   # iOS alone
+python launch.py 127.0.0.1:8842       # both
+```
+
+## Known gaps — do not report these as new
+
+1. **iOS parsing is untested against a real iOS acquisition.** The iOS analyser boots, serves
+   all 71 routes and proxies correctly, and the shared-engine fixes are unit-verified — but no
+   iOS container has ever been through it here. Say so rather than implying coverage.
+2. **Avatar inlining in the HTML report is not implemented.** The upstream iOS `v2` report
+   inlines avatars and bank logos as base64; this one does not, because the acquisition used
+   had `external_image_count: 0` and there was nothing to test against.
+3. **The upstream `v2` report has a per-record raw viewer** this one lacks. A genuine feature
+   gap, not a cosmetic one.
+4. **The timeline date filter is verified structurally, not by clicking.** Rows carry
+   `data-epoch` and the JS reads it, proven by inspection; the browser interaction was never
+   driven headlessly.
+5. **Engine drift.** `ios/` is a vendored copy, so a fix to the shared engine does not reach it
+   automatically. Anything changed in `phonepe_forensics/` may need mirroring into
+   `ios/phonepe_forensics/`.
 
 ## Audit techniques that actually found bugs (reuse these)
 

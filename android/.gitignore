@@ -33,7 +33,13 @@ scratchpad/
 # Per-session run logs. These quote real values out of the acquisition under
 # examination (transaction ids, amounts, counterparty counts) so they are working
 # notes only — STATE.md and CONTINUE.md are the committable summaries.
-notes/sessions/
+# Session logs quote real subject values, so they stay out by default. Excluding
+# the *files* rather than the directory matters: git does not descend into an
+# excluded directory, so a negation inside one can never re-include anything —
+# and a cloned session is told to read the newest session log, which would then
+# never be there.
+notes/sessions/*
+!notes/sessions/2026-08-09.md
 
 # Python
 __pycache__/

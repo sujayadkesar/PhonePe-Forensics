@@ -38,7 +38,12 @@
       <option value="Yatra">Travel</option>
       <option value="Background">Background tasks</option>
     </select>
-    <span class="muted small" style="white-space:nowrap">From</span>
+    {# Say which clock the range is read in — otherwise a range typed against an
+       IST table but evaluated in UTC looks like the filter is broken. #}
+    <span class="muted small" style="white-space:nowrap"
+          title="Times below are read in the display timezone">From
+      <b style="color:var(--accent)">{{ ts_zones[ts_zone_key].label }}</b>
+    </span>
     <input type="datetime-local" id="tlFrom" style="min-width:0;width:185px">
     <span class="muted small" style="white-space:nowrap">To</span>
     <input type="datetime-local" id="tlTo" style="min-width:0;width:185px">
@@ -63,8 +68,11 @@
       <thead><tr><th>When</th><th>Source</th><th>Kind</th><th>Title</th><th class="right">Amount</th><th>Link</th></tr></thead>
       <tbody>
         {% for e in events %}
-          <tr data-amount="{{ e.amount_inr if e.amount_inr is not none else '' }}">
-            <td class="mono small">{{ e.when_iso }}</td>
+          {# data-epoch carries the machine value so the date filter below never
+             has to parse whatever format the user chose to display. #}
+          <tr data-amount="{{ e.amount_inr if e.amount_inr is not none else '' }}"
+              data-epoch="{{ e.when_ms if e.when_ms is not none else '' }}">
+            <td class="mono small">{{ e.when_iso|ts }}</td>
             <td><span class="tag">{{ e.source }}</span></td>
             <td class="mono small">{{ e.kind }}</td>
             <td>{{ e.title }}</td>
@@ -105,14 +113,49 @@
   var amtB     = document.getElementById('tlAmtB');
   var total    = rows.length;
 
+  // The zone the table is currently rendered in, so typed filter values can be
+  // anchored to the same clock. Real zone rules, not a fixed offset: the offset
+  // on the date being filtered is what matters, and it changes across DST.
+  var DISPLAY_TZ = {{ ts_zone_key|tojson }};
+
+  function tzOffsetMs(utcMs) {
+    try {
+      var f = new Intl.DateTimeFormat('en-US', {
+        timeZone: DISPLAY_TZ, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      var p = {};
+      f.formatToParts(new Date(utcMs)).forEach(function (x) { p[x.type] = x.value; });
+      var asUTC = Date.UTC(+p.year, +p.month - 1, +p.day,
+                           (+p.hour) % 24, +p.minute, +p.second);
+      return asUTC - utcMs;
+    } catch (e) {
+      return 0;                      // no Intl / unknown zone: behave as UTC
+    }
+  }
+
+  // "2026-03-07T14:30" understood as wall-clock time in DISPLAY_TZ -> epoch ms.
+  // Applied twice because the offset itself depends on the instant, which the
+  // first pass only approximates — that second pass is what makes the hour
+  // either side of a DST change come out right.
+  function zonedToUtcMs(localValue) {
+    var naive = new Date(localValue + ':00Z').getTime();
+    if (isNaN(naive)) return null;
+    var ms = naive - tzOffsetMs(naive);
+    return naive - tzOffsetMs(ms);
+  }
+
   // Precompute per-row data once at load.
-  // when_iso is always UTC (+00:00) so new Date() parses it correctly as UTC.
+  // The timestamp comes from data-epoch, not from the cell text: the cell is
+  // rendered in whatever format the analyst picked (DD/MM/YYYY, IST, epoch…)
+  // and parsing that back would break the range filter the moment they switch.
   var rowData = rows.map(function (r) {
     var cells = r.querySelectorAll('td');
-    var iso   = cells[0] ? cells[0].textContent.trim() : '';
+    var ep    = r.getAttribute('data-epoch');
     var raw   = r.getAttribute('data-amount');
     return {
-      ms  : iso ? new Date(iso.replace(' ', 'T') + 'Z').getTime() : NaN,
+      ms  : (ep !== null && ep !== '') ? parseInt(ep, 10) : NaN,
       src : cells[1] ? cells[1].textContent.trim() : '',
       text: r.textContent.toLowerCase(),
       amt : (raw !== null && raw !== '') ? parseFloat(raw) : NaN
@@ -136,9 +179,12 @@
     var a   = amtA.value !== '' ? parseFloat(amtA.value) : null;
     var b   = amtB.value !== '' ? parseFloat(amtB.value) : null;
 
-    // :00Z forces datetime-local value to UTC, matching when_iso (+00:00).
-    var fromMs = fromInp.value ? new Date(fromInp.value + ':00Z').getTime() : null;
-    var toMs   = toInp.value   ? new Date(toInp.value   + ':00Z').getTime() + 59000 : null;
+    // What the analyst types is a time on the clock they are reading, which is
+    // the selected display zone — not UTC. Forcing ':00Z' here was correct only
+    // while the table was always UTC; with IST selected it shifted every range
+    // by 5h30 and rows silently fell outside it.
+    var fromMs = fromInp.value ? zonedToUtcMs(fromInp.value) : null;
+    var toMs   = toInp.value   ? zonedToUtcMs(toInp.value) + 59000 : null;
 
     rangeErr.style.display = (fromMs !== null && toMs !== null && fromMs > toMs) ? '' : 'none';
 

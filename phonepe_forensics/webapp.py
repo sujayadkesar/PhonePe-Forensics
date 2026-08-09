@@ -227,7 +227,9 @@ def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str)
         writer.writerow(out)
     return Response(
         buf.getvalue(),
-        mimetype="text/csv; charset=utf-8",
+        # Werkzeug appends the charset itself, so naming it here produced
+        # `text/csv; charset=utf-8; charset=utf-8` on every CSV export.
+        mimetype="text/csv",
         headers={"Content-Disposition":
                  f'attachment; filename="{safe_filename(filename)}"'},
     )

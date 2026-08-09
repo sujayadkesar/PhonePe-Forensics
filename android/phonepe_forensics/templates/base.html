@@ -114,6 +114,16 @@
   <div class="footer">
     <div>v1.0.0</div>
     <div class="muted">Read-only forensic tool</div>
+<div class="credit-line">
+      Android &amp; launcher ·
+      <a href="https://www.linkedin.com/in/mihir-choudhary/"
+         target="_blank" rel="noopener"><b>Mihir Choudhary</b></a>
+    </div>
+    <div class="credit-line">
+      iOS analyser ·
+      <a href="https://www.linkedin.com/in/sujay-adkesar-a90725224/"
+         target="_blank" rel="noopener"><b>Sujay Adkesar</b></a>
+    </div>
   </div>
 </aside>
 
@@ -124,6 +134,51 @@
       <p class="muted">{% block subheading %}{% endblock %}</p>
     </div>
     <div class="topbar-actions">
+      {# Two independent controls: how a timestamp is written, and which clock
+         it is written in. They are separate questions — preferring day-first
+         dates says nothing about which jurisdiction you want to read them in.
+         Display only; the stored value is always UTC and is never rewritten. #}
+      {% if ts_formats %}
+      <details class="ts-picker">
+        <summary title="Date format">
+          📅 <span class="ts-current">{{ ts_formats[ts_format_key].label }}</span>
+        </summary>
+        <form method="post" action="{{ url_for('set_time_format') }}" class="ts-menu">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <div class="ts-menu-head">Date &amp; time format</div>
+          {% for key, f in ts_formats.items() %}
+            <button type="submit" name="ts_format" value="{{ key }}"
+                    class="ts-opt {% if key == ts_format_key %}is-active{% endif %}">
+              <span class="ts-opt-label">{{ f.label }}{% if key == ts_format_key %} ✓{% endif %}</span>
+              <span class="ts-opt-eg mono">{{ ts_format_examples[key] }}</span>
+              <span class="ts-opt-note">{{ f.note }}</span>
+            </button>
+          {% endfor %}
+        </form>
+      </details>
+
+      <details class="ts-picker">
+        <summary title="Timezone the times are shown in">
+          🌐 <span class="ts-current">{{ ts_zones[ts_zone_key].label }}</span>
+        </summary>
+        <form method="post" action="{{ url_for('set_time_format') }}" class="ts-menu">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <div class="ts-menu-head">Display timezone</div>
+          {% for key, z in ts_zones.items() %}
+            <button type="submit" name="ts_zone" value="{{ key }}"
+                    class="ts-opt {% if key == ts_zone_key %}is-active{% endif %}">
+              <span class="ts-opt-label">{{ z.label }}{% if key == ts_zone_key %} ✓{% endif %}</span>
+              <span class="ts-opt-eg mono">{{ ts_zone_examples[key] }}</span>
+              {% if z.note %}<span class="ts-opt-note">{{ z.note }}</span>{% endif %}
+            </button>
+          {% endfor %}
+          <div class="ts-menu-foot">
+            Values are stored in UTC and converted for display only. Every rendered
+            time carries its zone, and exports stay ISO-8601 UTC regardless.
+          </div>
+        </form>
+      </details>
+      {% endif %}
       {% block topbar_actions %}{% endblock %}
     </div>
   </header>
