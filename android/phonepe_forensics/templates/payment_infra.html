@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Payment Infrastructure — PhonePe Android Forensics{% endblock %}
+{% block heading %}Payment Infrastructure{% endblock %}
+{% block subheading %}Bank accounts, UPI VPAs, PSPs, cards, wallets and PSP-supported bank catalogue.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Linked accounts</div><div class="mvalue">{{ pi.summary.linked_account_count }}</div></div>
+  <div class="metric"><div class="mlabel">VPA prefixes</div><div class="mvalue">{{ pi.summary.linked_vpa_count }}</div></div>
+  <div class="metric"><div class="mlabel">Active PSPs</div><div class="mvalue">{{ pi.summary.psp_count }}</div></div>
+  <div class="metric"><div class="mlabel">Linked cards</div><div class="mvalue">{{ pi.summary.card_count }}</div></div>
+  <div class="metric"><div class="mlabel">External wallets</div><div class="mvalue">{{ pi.summary.external_wallet_count }}</div></div>
+  <div class="metric"><div class="mlabel">Bank catalogue</div><div class="mvalue">{{ pi.summary.supported_bank_count }}</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Linked Bank Accounts</div>
+    {% if pi.linked_accounts %}
+    <table>
+      <thead><tr><th>Holder</th><th>Account #</th><th>Alias</th><th>Type</th><th>Primary</th><th>Updated</th></tr></thead>
+      <tbody>
+      {% for a in pi.linked_accounts %}
+        <tr>
+          <td>{{ a.account_holder or '—' }}</td>
+          <td class="mono">{{ a.account_no_masked or '—' }}</td>
+          <td class="mono">{{ a.account_alias or '—' }}</td>
+          <td>{{ a.account_type }}</td>
+          <td>{{ a.is_primary|yes_no }}</td>
+          <td class="mono small">{{ a.updated_at|ts }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No accounts.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">UPI VPA prefixes</div>
+    <div class="row">
+      {% for v in pi.linked_vpas %}<span class="tag accent mono">{{ v }}</span>{% endfor %}
+    </div>
+    <div class="divider"></div>
+    <div class="card-title">PSP Handles</div>
+    <table>
+      <thead><tr><th>Handle</th><th>Active</th></tr></thead>
+      <tbody>
+      {% for p in pi.psp_handles %}
+        <tr><td class="mono">{{ p.handle }}</td><td>{{ p.active|yes_no }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">UPI Lite</div>
+    {% if pi.upi_lite %}
+    <div class="kv">
+      <b>Eligible</b><span>{{ pi.upi_lite.eligible|yes_no }}</span>
+      <b>Auto-topup</b><span>{{ pi.upi_lite.auto_topup|yes_no }}</span>
+      <b>Offline-eligible</b><span>{{ pi.upi_lite.offline_eligible|yes_no }}</span>
+      <b>Withdrawal</b><span>{{ pi.upi_lite.withdrawal|yes_no }}</span>
+    </div>
+    {% else %}<p class="muted">No UPI Lite record.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">UPI Container</div>
+    {% if pi.upi_container %}
+    <div class="kv">
+      <b>Bank ID</b><span class="mono">{{ pi.upi_container.bank_id }}</span>
+      <b>IFSC</b><span class="mono">{{ pi.upi_container.ifsc }}</span>
+      <b>Active</b><span>{{ pi.upi_container.active|yes_no }}</span>
+      <b>Linked</b><span>{{ pi.upi_container.linked|yes_no }}</span>
+      <b>Limit (paise)</b><span class="mono">{{ pi.upi_container.limit_paise }}</span>
+      <b>Max limit</b><span class="mono">{{ pi.upi_container.max_limit_paise }}</span>
+    </div>
+    {% else %}<p class="muted">No UPI container record.</p>{% endif %}
+    {% if pi.upi_international %}
+    <div class="divider"></div>
+    <div class="card-title">UPI International</div>
+    <div class="kv">
+      <b>Active</b><span>{{ pi.upi_international.active|yes_no }}</span>
+      <b>Eligible</b><span>{{ pi.upi_international.eligible|yes_no }}</span>
+      <b>Processing</b><span>{{ pi.upi_international.processing|yes_no }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if pi.wallet %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Gift Voucher Wallet (eGV)</div>
+  <div class="kv">
+    <b>Balance</b><span>{{ pi.wallet.balance_inr|inr }}</span>
+    <b>As of</b><span>{{ pi.wallet.timestamp|ts }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% if pi.external_wallets %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">External / Loyalty Wallets</div>
+  <table>
+    <thead><tr><th>Name</th><th>Provider</th><th class="right">Balance</th><th>State</th><th>Active</th><th>Phone</th></tr></thead>
+    <tbody>
+    {% for w in pi.external_wallets %}
+      <tr>
+        <td>{{ w.name or '—' }}</td>
+        <td class="mono small">{{ w.provider or '—' }}</td>
+        <td class="right amount-pos">{{ w.balance_inr|inr if w.balance_inr is not none else '—' }}</td>
+        <td>{{ w.state or '—' }}</td>
+        <td>{{ w.active|yes_no }}</td>
+        <td class="mono">{{ w.phone or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if pi.linked_cards %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Linked Cards</div>
+  <table>
+    <thead><tr><th>Alias</th><th>Type</th><th>Issuer</th><th>Bank</th><th>Masked #</th><th>Holder</th><th>Status</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for c in pi.linked_cards %}
+      <tr>
+        <td>{{ c.alias or '—' }}</td>
+        <td>{{ c.type or '—' }}</td>
+        <td>{{ c.issuer or '—' }}</td>
+        <td>{{ c.bank_code or '—' }}</td>
+        <td class="mono">{{ c.masked or '—' }}</td>
+        <td>{{ c.holder or '—' }}</td>
+        <td>{{ c.status or '—' }}</td>
+        <td class="mono small">{{ c.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if pi.approvers_recent %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Recent Approvers (UPI Mandate / Family)</div>
+  <table>
+    <thead><tr><th>Approver VPA</th><th>Contact name</th><th>Phone</th><th>Type</th><th>Linking</th><th>Expiry</th><th>Consent needed</th></tr></thead>
+    <tbody>
+    {% for a in pi.approvers_recent %}
+      <tr>
+        <td class="mono">{{ a.approver_vpa or '—' }}</td>
+        <td>{{ a.contact_name or '—' }}</td>
+        <td class="mono">{{ a.contact_number or '—' }}</td>
+        <td>{{ a.type }}</td>
+        <td>{{ a.linking_type }}</td>
+        <td class="mono small">{{ a.expiry|ts }}</td>
+        <td>{{ a.consent_needed|yes_no }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">PSP Bank Catalogue ({{ pi.supported_banks|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter bank…" data-filter-input data-filter-target="#bnkTable" data-filter-counter="#bnkCount">
+    <span class="muted small" id="bnkCount" style="margin-left:auto">{{ pi.supported_banks|length }} / {{ pi.supported_banks|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="bnkTable">
+    <thead><tr><th>Name</th><th>IFSC prefix</th><th>UPI</th><th>Mandate</th><th>CC-on-UPI</th><th>Lite</th><th>Partner</th><th>Active</th></tr></thead>
+    <tbody>
+    {% for b in pi.supported_banks %}
+      <tr>
+        <td>{{ b.name }}</td>
+        <td class="mono">{{ b.ifsc_prefix or '—' }}</td>
+        <td>{{ b.upi|yes_no }}</td>
+        <td>{{ b.upi_mandate|yes_no }}</td>
+        <td>{{ b.ccupi|yes_no }}</td>
+        <td>{{ b.lite|yes_no }}</td>
+        <td>{{ b.partner|yes_no }}</td>
+        <td>{{ b.active|yes_no }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

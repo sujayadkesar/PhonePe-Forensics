@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Media — PhonePe Android Forensics{% endblock %}
+{% block heading %}Media Evidence{% endblock %}
+{% block subheading %}QR codes, P2P transaction backgrounds, contact profile pictures.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">QR codes</div><div class="mvalue">{{ media.summary.qr_count }}</div></div>
+  <div class="metric"><div class="mlabel">Background categories</div><div class="mvalue">{{ media.summary.background_categories }}</div></div>
+  <div class="metric"><div class="mlabel">Background assets</div><div class="mvalue">{{ media.summary.background_assets }}</div></div>
+  <div class="metric"><div class="mlabel">Contact DPs</div><div class="mvalue">{{ media.summary.contact_dp_count }}</div></div>
+</div>
+
+{% if media.qr_codes %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">User's QR Codes</div>
+  <p class="muted small">The folder hash is the SHA-256 of the encoded UPI URI; decode the PNG to recover <span class="mono">upi://pay?pa=…&pn=…</span>.</p>
+  <div class="gallery">
+    {% for q in media.qr_codes %}
+      <div class="gallery-item">
+        <img src="{{ url_for('api_file', p=q.path) }}" alt="QR" loading="lazy">
+        <div class="gallery-label">{{ q.filename }}<br><span class="mono">{{ q.content_hash|truncate(16) }}</span></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if media.background_categories %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">P2P Transaction Backgrounds (categorical evidence of payment context)</div>
+  {% for c in media.background_categories %}
+    <h3 style="margin-top:18px">{{ c.category }} <span class="muted small">· {{ c.assets|length }} files</span></h3>
+    <div class="gallery">
+      {% for a in c.assets[:24] %}
+        <div class="gallery-item">
+          {% if a.path.endswith('.png') or a.path.endswith('.jpg') or a.path.endswith('.jpeg') %}
+            <img src="{{ url_for('api_file', p=a.path) }}" alt="{{ a.variant }}" loading="lazy">
+          {% else %}
+            <div style="height:84px;display:grid;place-items:center;color:var(--text-3);font-size:11px">{{ a.variant|truncate(14) }}</div>
+          {% endif %}
+          <div class="gallery-label">{{ a.variant|truncate(28) }}<br>{{ a.size }} B</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if media.contact_dps_external %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Contact Profile Pictures (cached externally)</div>
+  <p class="muted small">These are the visual identities of all contacts the subject has interacted with on PhonePe.</p>
+  <div class="gallery">
+    {% for img in media.contact_dps_external[:300] %}
+      <div class="gallery-item">
+        <img src="{{ url_for('api_file', p=img.path) }}" alt="{{ img.name }}" loading="lazy">
+        <div class="gallery-label">{{ img.name|truncate(18) }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

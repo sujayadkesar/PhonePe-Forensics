@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Contacts — PhonePe Android Forensics{% endblock %}
+{% block heading %}Contacts{% endblock %}
+{% block subheading %}{{ contacts.summary.cyclops_total }} distinct PhonePe contacts
+(from {{ contacts.summary.cyclops_source_rows or contacts.summary.cyclops_total }} source rows —
+one person can appear in phone_contacts, vpa_contacts and paymentProfileCache) ·
+{{ contacts.summary.phonebook_total }} phonebook entries.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">PhonePe contacts</div><div class="mvalue">{{ contacts.summary.cyclops_total }}</div></div>
+  <div class="metric"><div class="mlabel">Phonebook entries</div><div class="mvalue">{{ contacts.summary.phonebook_total }}</div></div>
+  <div class="metric" title="{{ contacts.summary.on_phonepe_basis }}"><div class="mlabel">On PhonePe</div><div class="mvalue pos">{{ contacts.summary.on_phonepe_count }}</div><div class="msub">stated by a source row</div></div>
+  <div class="metric"><div class="mlabel">Deleted contacts</div><div class="mvalue">{{ contacts.summary.deleted_contacts }}</div></div>
+  <div class="metric"><div class="mlabel">Cached profile pics</div><div class="mvalue">{{ contacts.summary.external_image_count }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">PhonePe verified contacts (phone_contacts)</div>
+  </div>
+  <div class="filter-bar">
+    <input type="text" id="cyc-q" placeholder="Search name, phone, VPA…">
+    <label class="ctxn-toggle"><input type="checkbox" id="cyc-only-txn"> Only contacts with transactions</label>
+    <span class="muted small" id="cycCount" style="margin-left:auto"></span>
+  </div>
+  <div class="tbl-wrap-scroll">
+  <table id="cyclopsTable" class="contacts-table">
+    <thead><tr>
+      <th style="width:42px"></th>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>VPA</th>
+      <th>UPI state</th>
+    </tr></thead>
+    <tbody>
+      {% for c in contacts.cyclops_contacts %}
+      <tr
+          data-search="{{ ((c.verified_name or '') ~ ' ' ~ (c.phone or '') ~ ' ' ~ (c.external_vpa or ''))|lower }}">
+        <td>
+          {% set nm = c.verified_name or c.external_vpa_name or '?' %}
+          <span class="dp" data-initials="{{ (nm[:2])|upper }}">
+          </span>
+        </td>
+        <td>
+          {% if c.chat_group_id %}
+            <a href="{{ url_for('page_chat_group', group_id=c.chat_group_id) }}" target="_blank" rel="noopener"
+               title="Open this contact's chat thread in a new tab">{{ c.verified_name or c.external_vpa_name or '—' }} <span class="chat-link-ico">💬↗</span></a>
+          {% else %}
+            {{ c.verified_name or c.external_vpa_name or '—' }}
+          {% endif %}
+        </td>
+        <td class="mono small">{{ c.phone or '—' }}</td>
+        <td class="mono small">{{ c.external_vpa or '—' }}</td>
+                                        <td>{% if c.upi_state %}<span class="tag {{ c.upi_state|lower }}">{{ c.upi_state }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Device Phonebook</div>
+  <div class="filter-bar">
+    <input type="text" id="pb-q" placeholder="Search name or number…">
+    <label class="ctxn-toggle"><input type="checkbox" id="pb-only-txn"> Only contacts with transactions</label>
+    <span class="muted small" id="pbCount" style="margin-left:auto"></span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:520px;overflow-y:auto">
+  <table id="pbTable" class="contacts-table">
+    <thead><tr>
+      <th style="width:42px"></th>
+      <th>Saved name</th>
+      <th>Phone</th>
+      <th>Country</th>
+    </tr></thead>
+    <tbody>
+      {% for c in contacts.phonebook_contacts %}
+      {% set ph = c.normalized or c.raw_number %}
+      <tr
+          data-search="{{ ((c.full_name or '') ~ ' ' ~ (ph or ''))|lower }}">
+        <td>
+          <span class="dp" data-initials="{{ ((c.full_name or '?')[:2])|upper }}">
+          </span>
+        </td>
+        <td>
+          {% if c.chat_group_id %}
+            <a href="{{ url_for('page_chat_group', group_id=c.chat_group_id) }}" target="_blank" rel="noopener"
+               title="Open this contact's chat thread in a new tab">{{ c.full_name or '—' }} <span class="chat-link-ico">💬↗</span></a>
+          {% else %}{{ c.full_name or '—' }}{% endif %}
+        </td>
+        <td class="mono small">{{ ph or '—' }}</td>
+        <td>{{ c.country_code or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% if contacts.external_data and contacts.external_data.images %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Cached Profile Pictures</div>
+  <p class="muted small">{{ contacts.external_data.image_count }} JPEG/PNG blobs stored in the contacts store.</p>
+  <div class="gallery">
+    {% for img in contacts.external_data.images[:240] %}
+      <div class="gallery-item">
+        <img src="{{ url_for('api_file', p=img.path) }}" alt="{{ img.name }}" loading="lazy">
+        <div class="gallery-label">{{ img.name|truncate(28) }}<br>{{ img.size }} B</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if contacts.source_conflicts %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Contradictions in the source data
+    <span class="badge-pill badge-warn">{{ contacts.source_conflicts|count }}</span>
+  </div>
+  <p class="muted small">
+    The acquisition stores many people twice — once as <span class="mono">9876543210</span> and
+    once as <span class="mono">+919876543210</span>, under one connection id — and for these
+    people the two rows <b>disagree</b>. Both rows are listed in the tables above exactly as
+    stored; neither is preferred here, because the evidence does not say which is current.
+    Counts treat “on PhonePe” as true if any row for that person states it.
+  </p>
+  <table>
+    <thead><tr><th>Field</th><th>Conflicting values</th><th>Phone</th></tr></thead>
+    <tbody>
+    {% for c in contacts.source_conflicts %}
+      <tr>
+        <td class="mono small">{{ c.field }}</td>
+        <td>{% for v in c.conflicting_values %}<span class="tag med">{{ v or '(empty)' }}</span> {% endfor %}</td>
+        <td class="mono pii">{{ c.phones|join(', ') or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if contacts.non_contacts %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Non-Contacts ({{ contacts.non_contacts|count }})</div>
+  <p class="muted small">
+    From <span class="mono">phonepe_core.nonContact</span> — connections the subject interacted
+    with that are <b>not</b> saved contacts. <span class="mono">CONTACT_SEARCH</span> rows are
+    numbers looked up inside PhonePe; <span class="mono">GROUPS</span> rows are people met
+    through a group. A number here that appears in no contact table is an association the
+    address book does not show.
+  </p>
+  <table>
+    <thead><tr><th>Phone</th><th>Seen via</th><th>Known</th><th>Hidden</th><th>In phonebook</th><th>Connection id</th></tr></thead>
+    <tbody>
+    {% for c in contacts.non_contacts %}
+      <tr>
+        <td class="mono pii">{{ c.phone or '—' }}</td>
+        <td><span class="tag">{{ c.use_case }}</span></td>
+        <td>{{ c.known|yes_no }}</td>
+        <td>{{ c.hidden|yes_no }}</td>
+        <td>{{ c.is_phone_contact|yes_no }}</td>
+        <td class="mono small">{{ c.connect_id }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<style>
+.contacts-table td { vertical-align:middle; }
+.dp {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border-radius:50%; overflow:hidden;
+  background:linear-gradient(135deg,#3b3266,#5b4a9e);
+  color:#fff; font-size:11px; font-weight:700; position:relative; flex-shrink:0;
+}
+.dp::before { content:attr(data-initials); position:absolute; }
+.dp img { width:100%; height:100%; object-fit:cover; position:relative; z-index:1; }
+.ctxn-toggle { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-2); cursor:pointer; white-space:nowrap; }
+.chat-link-ico { font-size:10px; opacity:.55; margin-left:2px; white-space:nowrap; }
+a:hover .chat-link-ico { opacity:1; }
+</style>
+
+<script>
+(function(){
+  function wire(tableId, qId, toggleId, counterId){
+    const table = document.getElementById(tableId);
+    const q = document.getElementById(qId);
+    const toggle = document.getElementById(toggleId);
+    const counter = document.getElementById(counterId);
+    if(!table) return;
+    const rows = [...table.tBodies[0].rows];
+    function apply(){
+      const needle = (q.value||'').trim().toLowerCase();
+      const onlyTxn = toggle.checked;
+      let shown = 0;
+      rows.forEach(r=>{
+        const okQ = !needle || (r.dataset.search||'').indexOf(needle) >= 0;
+        const okT = !onlyTxn || r.dataset.hasTxn === '1';
+        const vis = okQ && okT;
+        r.style.display = vis ? '' : 'none';
+        if(vis) shown++;
+      });
+      counter.textContent = shown + ' / ' + rows.length;
+    }
+    q.addEventListener('input', apply);
+    toggle.addEventListener('change', apply);
+    apply();
+  }
+  wire('cyclopsTable','cyc-q','cyc-only-txn','cycCount');
+  wire('pbTable','pb-q','pb-only-txn','pbCount');
+})();
+</script>
+
+
+{% endblock %}

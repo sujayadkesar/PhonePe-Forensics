@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Database Inventory — PhonePe Android Forensics{% endblock %}
+{% block heading %}Database Inventory{% endblock %}
+{% block subheading %}Every SQLite database with hashes, table list, row counts and deletion signals (chain of custody).{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('page_db_sql') }}" class="btn primary">⏵ SQL Console</a>{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-title">SQLite Databases ({{ inventory|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter…" data-filter-input data-filter-target="#dbTable" data-filter-counter="#dbCount">
+    <span class="muted small" id="dbCount" style="margin-left:auto">{{ inventory|length }} / {{ inventory|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="dbTable">
+    <thead>
+      <tr>
+        <th>Path</th>
+        <th class="right">Size</th>
+        <th class="right">Tables</th>
+        <th class="right">Rows</th>
+        <th>WAL</th>
+        <th>SHM</th>
+        <th>Deletion intensity</th>
+        <th>SHA-256</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for db in inventory %}
+      <tr>
+        <td class="mono small">{{ db.rel_path }}</td>
+        <td class="right mono small">{{ db.size }}</td>
+        <td class="right mono">{{ db.tables|length }}</td>
+        <td class="right mono">{% set total = namespace(t=0) %}{% for t in db.tables %}{% if t.rows|int > 0 %}{% set total.t = total.t + (t.rows|int) %}{% endif %}{% endfor %}{{ total.t }}</td>
+        <td>{{ db.wal_present|yes_no }}</td>
+        <td>{{ db.shm_present|yes_no }}</td>
+        <td>{% if db.deletion %}<span class="tag {{ db.deletion.deletion_intensity }}">{{ db.deletion.deletion_intensity }}</span> <span class="muted mono small">({{ db.deletion.freelist_pages }}/{{ db.deletion.total_pages }})</span>{% endif %}</td>
+        <td class="mono small">{{ db.sha256|truncate(20) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Files & DataStore — PhonePe Android Forensics{% endblock %}
+{% block heading %}Files & DataStore{% endblock %}
+{% block subheading %}All {{ files.summary.file_count or 0 }} files under files/ · {{ files.summary.datastore_keys or 0 }} DataStore keys · {{ files.summary.json_docs or 0 }} JSON docs parsed.{% endblock %}
+
+{% block content %}
+{% if files.datastore %}
+<div class="card">
+  <div class="card-title">Jetpack DataStore (parsed)</div>
+  {% for name, kv in files.datastore.items() %}
+    {% if kv %}
+    <details style="border:1px solid var(--border,#2a2a3a);border-radius:8px;margin-bottom:6px;padding:6px 10px">
+      <summary style="cursor:pointer"><span class="mono small">{{ name }}</span> <span class="muted small">· {{ kv|count }} keys</span></summary>
+      <table style="margin-top:8px"><tbody>
+      {% for k, v in kv.items() %}<tr><td class="mono small" style="width:35%">{{ k }}</td><td class="small" style="word-break:break-all">{{ v|string|truncate(300) }}</td></tr>{% endfor %}
+      </tbody></table>
+    </details>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">File Index</div>
+  <div class="filter-bar"><input type="text" placeholder="Filter path…" data-filter-input data-filter-target="#fTable"></div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="fTable">
+    <thead><tr><th>Path</th><th>Size</th><th>Type</th></tr></thead>
+    <tbody>
+    {% for f in files.files %}
+      <tr><td class="mono small">{{ f.path }}</td><td>{{ f.size }}</td><td>{{ f.ext }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

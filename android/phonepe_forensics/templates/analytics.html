@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Analytics — PhonePe Android Forensics{% endblock %}
+{% block heading %}Behavioural Analytics{% endblock %}
+{% block subheading %}KN, Analytics and Dash event queues. Pending events here never reached PhonePe servers — they are exclusively local evidence.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">KN events</div><div class="mvalue">{{ analytics.summary.kn_event_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Analytics pending</div><div class="mvalue">{{ analytics.summary.foxtrot_pending_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Auth Analytics pending</div><div class="mvalue">{{ analytics.summary.auth_foxtrot_pending_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Dash pending</div><div class="mvalue">{{ analytics.summary.dash_pending_count or 0 }}</div></div>
+</div>
+
+{% if analytics.summary.kn_funnel_breakdown %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">KN funnel breakdown</div>
+  <table>
+    <thead><tr><th>Funnel</th><th class="right">Events</th></tr></thead>
+    <tbody>
+    {% for k, v in analytics.summary.kn_funnel_breakdown.items() %}
+      <tr><td class="mono">{{ k }}</td><td class="right mono">{{ v }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">KN events ({{ analytics.kn_events|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter event…" data-filter-input data-filter-target="#knTable" data-filter-counter="#knCount">
+    <span class="muted small" id="knCount" style="margin-left:auto">{{ analytics.kn_events|length }} / {{ analytics.kn_events|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="knTable">
+    <thead><tr><th>Event</th><th>Identifier</th><th>Funnel info preview</th></tr></thead>
+    <tbody>
+    {% for e in analytics.kn_events %}
+      <tr>
+        <td class="mono small">{{ e.event_name }}</td>
+        <td>{{ e.identifier }}</td>
+        <td class="mono small">{{ e.funnel_info_preview }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Analytics pending events</div>
+    <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>When</th><th>ID</th><th class="right">Failures</th><th class="right">Bytes</th></tr></thead>
+      <tbody>
+      {% for e in analytics.foxtrot_pending %}
+        <tr>
+          <td class="mono small">{{ e.timestamp|ts }}</td>
+          <td class="mono small">{{ (e.id or '')|truncate(20) }}</td>
+          <td class="right mono">{{ e.failure_count }}</td>
+          <td class="right mono">{{ e.data_size }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Auth Analytics pending</div>
+    <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>When</th><th>ID</th><th class="right">Failures</th><th class="right">Bytes</th></tr></thead>
+      <tbody>
+      {% for e in analytics.auth_foxtrot_pending %}
+        <tr>
+          <td class="mono small">{{ e.timestamp|ts }}</td>
+          <td class="mono small">{{ (e.id or '')|truncate(20) }}</td>
+          <td class="right mono">{{ e.failure_count }}</td>
+          <td class="right mono">{{ e.data_size }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

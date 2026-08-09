@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="lead">
+  Two analysers, one address. Parse a fresh extraction, or reopen a case either tool
+  has already processed. Both analysers run unmodified — this page only decides which
+  one you are talking to.
+</p>
+
+<div class="grid">
+  <a class="pick" href="{{ url_for('parse_pick') }}">
+    <h2>Parse an extraction &rarr;</h2>
+    <p>Point the analyser at a new iOS or Android acquisition and process it.</p>
+  </a>
+  <a class="pick" href="{{ url_for('cases') }}">
+    <h2>Open a parsed case &rarr;</h2>
+    <p>{% if case_count %}{{ case_count }} case{{ '' if case_count == 1 else 's' }} already
+       processed, across both platforms.{% else %}Nothing processed yet.{% endif %}</p>
+  </a>
+</div>
+
+<div class="card" style="margin-top:26px">
+  <div class="small muted" style="text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">
+    Analysers
+  </div>
+  <table>
+    <tbody>
+    {% for t in tools %}
+      <tr>
+        <td style="width:90px"><span class="tag {{ t.key }}">{{ t.label }}</span></td>
+        <td>
+          {{ t.blurb }}
+          {% if t.last_error %}
+            <div class="small" style="color:var(--danger);margin-top:4px">{{ t.last_error }}</div>
+          {% endif %}
+        </td>
+        <td style="width:150px" class="small">
+          {% if t.running %}
+            <span style="color:var(--success)">&#9679; running</span>
+            <span class="muted mono">:{{ t.port }}</span>
+          {% else %}
+            <span class="muted">&#9675; stopped</span>
+          {% endif %}
+        </td>
+        <td style="width:170px;text-align:right">
+          <a class="btn" href="{{ url_for('open_tool', key=t.key) }}">Open {{ t.label }}</a>
+          {% if t.running %}
+          <form method="post" action="{{ url_for('stop_tool', key=t.key) }}" style="display:inline">
+            <button class="btn" type="submit">Stop</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="note">
+  An analyser starts the first time you open it and keeps running until you stop it or
+  quit the launcher, so switching platforms does not discard a loaded case.
+</div>
+{% endblock %}

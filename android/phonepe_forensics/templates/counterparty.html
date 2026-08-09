@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Counterparty Lookup — PhonePe Android Forensics{% endblock %}
+{% block heading %}Counterparty Lookup{% endblock %}
+{% block subheading %}Search by name, phone number, or UPI VPA. Returns transactions, chat messages, contact records and rewards.{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <form method="get">
+    <div class="filter-bar">
+      <input type="text" name="q" placeholder="name / phone / VPA — e.g. 9999900000 or name@psp"
+             value="{{ q or '' }}" autofocus style="min-width:360px">
+      <button type="submit" class="btn primary">Search</button>
+    </div>
+  </form>
+</div>
+
+{% if profile is not none and q %}
+<div class="metric-grid" style="margin-top:18px">
+  <div class="metric"><div class="mlabel">Matched contacts</div><div class="mvalue">{{ profile.summary.matched_contact_count }}</div></div>
+  <div class="metric"><div class="mlabel">Transactions</div><div class="mvalue">{{ profile.summary.transaction_count }}</div></div>
+  <div class="metric"><div class="mlabel">Chat messages</div><div class="mvalue">{{ profile.summary.chat_message_count }}</div></div>
+  <div class="metric"><div class="mlabel">Rewards linked</div><div class="mvalue">{{ profile.summary.reward_count }}</div></div>
+  <div class="metric"><div class="mlabel">Received from</div><div class="mvalue pos">{{ profile.summary.total_received_inr|inr }}</div></div>
+  <div class="metric"><div class="mlabel">Sent to</div><div class="mvalue neg">{{ profile.summary.total_sent_inr|inr }}</div></div>
+  <div class="metric"><div class="mlabel">Net</div><div class="mvalue {% if profile.summary.net_inr > 0 %}pos{% else %}neg{% endif %}">{{ profile.summary.net_inr|inr }}</div></div>
+</div>
+
+{% if profile.matched_contacts %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Matched Contacts</div>
+  <table>
+    <thead><tr><th>Name</th><th>Phone</th><th>VPA</th><th>State</th><th>Source</th></tr></thead>
+    <tbody>
+      {% for c in profile.matched_contacts %}
+      <tr>
+        <td>{{ c.verified_name or c.full_name or c.external_vpa_name or '—' }}</td>
+        <td class="mono">{{ c.phone or c.normalized or c.raw_number or '—' }}</td>
+        <td class="mono">{{ c.external_vpa or '—' }}</td>
+        <td>{{ c.upi_state or '' }}</td>
+        <td><span class="tag">{% if c.connect_id %}the contacts store{% else %}Phonebook{% endif %}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if profile.transactions %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Transactions ({{ profile.transactions|length }})</div>
+  <div class="tbl-wrap-scroll">
+  <table>
+    <thead><tr><th>Date</th><th>Type</th><th>Dir</th><th class="right">Amount</th><th>State</th><th>UTR</th><th>Note</th><th>ID</th></tr></thead>
+    <tbody>
+      {% for t in profile.transactions %}
+      <tr>
+        <td class="mono small">{{ t.created_at|ts }}</td>
+        <td><span class="tag">{{ t.type }}</span></td>
+        <td><span class="tag {{ (t.direction or '')|lower }}">{{ t.direction }}</span></td>
+        <td class="right amount-{% if t.direction=='IN' %}pos{% else %}neg{% endif %}">{{ t.amount_inr|inr }}</td>
+        <td>{{ t.state }}</td>
+        <td class="mono small">{{ t.utr or '—' }}</td>
+        <td class="small">{{ (t.note or '')|truncate(60) }}</td>
+        <td class="mono small"><a href="{{ url_for('page_transaction_detail', txn_id=t.global_payment_id) }}">{{ (t.global_payment_id or '')|truncate(20) }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% if profile.chat_messages %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Chat Messages ({{ profile.chat_messages|length }})</div>
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Dir</th>
+        <th>From / To</th>
+        <th>Group</th>
+        <th>Type</th>
+        <th class="right">Amount</th>
+        <th>UTR</th>
+        <th>Message / Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in profile.chat_messages %}
+      {% set is_out = m.direction == 'OUT' %}
+      {% set is_in  = m.direction == 'IN' %}
+      <tr class="msg-row {% if is_out %}out{% elif is_in %}in{% endif %}">
+        <td class="mono small">{{ m.created_at|ts }}</td>
+        <td>
+          {% if is_out %}<span class="dir-pill out">↑ Sent</span>
+          {% elif is_in %}<span class="dir-pill in">↓ Recv</span>
+          {% else %}<span class="dir-pill unk">?</span>{% endif %}
+        </td>
+        <td>
+          {% if is_out %}
+            <span class="muted small">You →</span> <b>{{ m.other_party_name or m.receiver_name or m.group_name or '—' }}</b>
+          {% elif is_in %}
+            <b>{{ m.other_party_name or m.sender_name or m.group_name or '—' }}</b> <span class="muted small">→ You</span>
+          {% else %}
+            {{ m.sender_name or m.group_name or '—' }}
+          {% endif %}
+        </td>
+        <td class="small">{{ m.group_name or '—' }}</td>
+        <td><span class="tag">{{ m.type }}</span></td>
+        <td class="right">
+          {% if m.amount_inr %}
+            <span class="amount-{% if is_out %}neg{% else %}pos{% endif %}">{{ m.amount_inr|inr }}</span>
+          {% endif %}
+        </td>
+        <td class="mono small">{{ m.utr or '—' }}</td>
+        <td class="small">{{ (m.text_message or m.note or m.gift_message or '')|truncate(80) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+.dir-pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.04em; }
+.dir-pill.out { background:rgba(139,92,246,.18); color:#c4b5fd; }
+.dir-pill.in  { background:rgba(52,211,153,.16); color:var(--success); }
+.dir-pill.unk { background:rgba(255,255,255,.06); color:var(--text-4); }
+tr.msg-row.out td { border-left:2px solid rgba(139,92,246,.35); }
+tr.msg-row.in  td { border-left:2px solid rgba(52,211,153,.30); }
+</style>
+{% endif %}
+
+{% if profile.rewards %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Linked Rewards</div>
+  <table>
+    <thead><tr><th>Title</th><th>State</th><th class="right">Amount</th><th>Linked txn</th></tr></thead>
+    <tbody>
+      {% for r in profile.rewards %}
+      <tr>
+        <td>{{ r.title or r.type }}</td>
+        <td>{{ r.state }}</td>
+        <td class="right amount-pos">{{ r.amount_inr|inr if r.amount_inr is not none else '—' }}</td>
+        <td class="mono small">{{ r.linked_transaction or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% elif q %}
+<div class="empty-state"><p class="muted">No data found for "{{ q }}".</p></div>
+{% endif %}
+
+{% endblock %}

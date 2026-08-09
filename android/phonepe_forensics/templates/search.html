@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}App Search — PhonePe Android Forensics{% endblock %}
+{% block heading %}In-App Search History{% endblock %}
+{% block subheading %}Recent in-app searches, indexed entities, and the deep-link sitemap (130 entries).{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Recent searches</div><div class="mvalue">{{ search.summary.recent_search_count }}</div></div>
+  <div class="metric"><div class="mlabel">Sitemap entries</div><div class="mvalue">{{ search.summary.sitemap_count }}</div></div>
+  <div class="metric"><div class="mlabel">Indexed entities</div><div class="mvalue">{{ search.summary.entity_count }}</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Recent searches</div>
+    {% if search.recent_searches %}
+    <table>
+      <thead><tr><th>When</th><th>Entity</th><th>Field</th><th>Entry</th></tr></thead>
+      <tbody>
+      {% for s in search.recent_searches %}
+        <tr>
+          <td class="mono small">{{ s.timestamp|ts }}</td>
+          <td>{{ s.entity }}</td>
+          <td class="mono small">{{ s.field_id }}</td>
+          <td class="mono small">{{ s.entry_id|truncate(28) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No recent searches.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">Indexed entity counts</div>
+    <table>
+      <thead><tr><th>Entity</th><th class="right">Count</th></tr></thead>
+      <tbody>
+      {% for e in search.indexed_entities %}
+        <tr><td>{{ e.entity }}</td><td class="right mono">{{ e.count }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Sitemap (deep-link routes)</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter…" data-filter-input data-filter-target="#sitemapTable">
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="sitemapTable">
+    <thead><tr><th>ID</th><th>Use case</th><th>Deep link</th><th>Keywords</th></tr></thead>
+    <tbody>
+    {% for s in search.sitemap %}
+      <tr>
+        <td class="mono small">{{ s.id }}</td>
+        <td>{{ s.use_case or '—' }}</td>
+        <td class="mono small">{{ s.deeplink }}</td>
+        <td class="small">{{ s.keywords or '' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

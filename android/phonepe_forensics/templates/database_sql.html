@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}SQL Console — PhonePe Android Forensics{% endblock %}
+{% block heading %}SQL Console{% endblock %}
+{% block subheading %}Run read-only SELECT / PRAGMA / EXPLAIN / WITH queries against the databases in this case. Results capped at {{ row_limit or 1000 }} rows.{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <form method="get">
+    <div class="filter-bar">
+      <select name="db" style="min-width:480px">
+        <option value="">— select database —</option>
+        {% for db in inventory %}
+          <option value="{{ db.path }}" {% if db.path == db_path %}selected{% endif %}>{{ db.rel_path }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn primary">Run</button>
+    </div>
+    <textarea name="sql" rows="5" style="width:100%;background:var(--bg-2);color:var(--text-1);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:13px"
+              placeholder="SELECT name FROM sqlite_master WHERE type='table';">{{ sql or '' }}</textarea>
+  </form>
+</div>
+
+{% if error %}
+<div class="finding high" style="margin-top:18px"><div class="finding-meta">SQL error</div><div class="finding-title">{{ error }}</div></div>
+{% endif %}
+
+{% if result is not none %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">
+    Result ({{ result|length }} rows{% if truncated %}, capped{% endif %})
+  </div>
+  {% if truncated %}
+  <p class="muted small">Showing the first {{ row_limit }} rows only — narrow the query
+     with your own WHERE or LIMIT to see the rest.</p>
+  {% endif %}
+  {% if result %}
+  <div class="tbl-wrap-scroll" style="max-height:65vh;overflow-y:auto">
+  <table>
+    <thead><tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for row in result %}
+        <tr>{% for c in columns %}<td class="mono small">{{ (row[c]|string)|truncate(120) if row[c] is not none else '' }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}<p class="muted">Query returned 0 rows.</p>{% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

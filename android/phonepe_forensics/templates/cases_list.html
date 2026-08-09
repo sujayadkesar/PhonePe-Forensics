@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Case Manager — PhonePe Android Forensics{% endblock %}
+{% block heading %}Case Manager{% endblock %}
+{% block subheading %}PhonePe Android acquisitions registered in this workspace. Create a case to begin analysis.{% endblock %}
+{% block topbar_actions %}
+<a href="{{ url_for('page_case_new') }}" class="btn primary">+ New Case</a>
+{% endblock %}
+
+{% block content %}
+
+{% if not cases %}
+<div class="empty-state">
+  <div class="empty-icon">◫</div>
+  <div class="empty-title">No cases yet</div>
+  <div class="empty-sub">Create your first case to load a PhonePe Android acquisition and begin forensic analysis.</div>
+  <a href="{{ url_for('page_case_new') }}" class="btn primary" style="margin-top:16px">+ Create First Case</a>
+</div>
+{% else %}
+
+<div class="case-grid">
+  {% for c in cases %}
+  <div class="case-card-tile {% if active_case_id == c.id %}active{% endif %}">
+    <div class="case-tile-header">
+      <div class="case-tile-name">
+        <span class="plat-badge plat-android">Android</span>
+        {{ c.name }}
+      </div>
+      {% if active_case_id == c.id %}
+        <span class="badge-ok">Active</span>
+      {% elif c.status == 'loaded' %}
+        <span class="badge-info">Processed</span>
+      {% else %}
+        <span class="badge-muted">Registered</span>
+      {% endif %}
+    </div>
+
+    {% if c.get('subject_name') %}
+    <div class="case-tile-subject">
+      {{ c.subject_name }}{% if c.get('subject_upi_id') %} · <span class="mono">{{ c.subject_upi_id }}</span>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if c.get('investigator') %}
+    <div class="muted small">Investigator: {{ c.investigator }}</div>
+    {% endif %}
+
+    {% if c.get('metrics') %}
+    <div class="case-tile-metrics">
+      <span><b>{{ c.metrics.get('transactions', 0) }}</b> txn</span>
+      <span><b>{{ c.metrics.get('messages', 0) }}</b> msg</span>
+      <span><b>{{ c.metrics.get('phonebook_contacts', 0) }}</b> contacts</span>
+    </div>
+    {% endif %}
+
+    {% if c.mode == 'single_root' and c.single_root %}
+    <div class="muted small mono" style="margin-top:6px;word-break:break-all">{{ c.single_root }}</div>
+    {% elif c.mode == 'three_paths' and c.app_domain %}
+    <div class="muted small mono" style="margin-top:6px;word-break:break-all">{{ c.app_domain }}</div>
+    {% endif %}
+
+    {% if c.get('validation') and c.validation.get('issues') %}
+    <div class="case-tile-issues">
+      {% for issue in c.validation.issues %}
+        <div class="small" style="color:var(--warn)">⚠ {{ issue }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="case-tile-actions">
+      <a href="{{ url_for('page_case_detail', case_id=c.id) }}" class="btn">Details</a>
+      {% if active_case_id != c.id %}
+      <form method="post" action="{{ url_for('page_case_activate', case_id=c.id) }}" style="display:inline">
+        <button type="submit" class="btn primary">{% if c.status == 'loaded' %}Switch to{% else %}Process + Activate{% endif %}</button>
+      </form>
+      {% else %}
+      <a href="{{ url_for('page_dashboard') }}" class="btn primary">Open Dashboard →</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('page_case_delete', case_id=c.id) }}" style="display:inline"
+            onsubmit="return confirm('Remove \'{{ c.name }}\' from the registry? Evidence folders will NOT be deleted.')">
+        <button type="submit" class="btn danger">Remove</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}
+
+<style>
+.ws-banner { display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:11px 16px; margin-bottom:18px; font-size:13px; color:var(--text-2); }
+.ws-banner a { font-size:12px; }
+.case-tile-name .plat-badge { margin-left:0; margin-right:7px; }
+</style>
+{% endblock %}

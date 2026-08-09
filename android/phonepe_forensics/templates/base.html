@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}PhonePe Forensics{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+{# No remote assets. This is an offline forensic tool examining a subject's
+   financial and social history, so it must not reach a third party on every
+   page load — that leaks when and where an examination is running, and stalls
+   on an air-gapped workstation. The stylesheet's font stack already falls back
+   to system faces. #}
+<link rel="icon" href="data:,">
+</head>
+<body class="dark{% if ui_platform %} platform-{{ ui_platform }}{% endif %}">
+<div class="layout">
+<aside class="sidebar">
+  <a href="{{ url_for('page_cases') }}" class="brand" style="text-decoration:none;color:inherit">
+    <div class="brand-mark">PP</div>
+    <div class="brand-text">
+      <div class="brand-title">PhonePe Forensics
+        <span class="plat-badge plat-android">Android</span>
+      </div>
+      <div class="brand-sub">Android Acquisition Analyser</div>
+    </div>
+  </a>
+
+  {% if case_loaded %}
+  <div class="case-card">
+    <div class="case-card-label">Active Case</div>
+    <div class="case-card-root" title="{{ case_root }}">{{ active_case_name or 'case' }}</div>
+    {% if subject_name %}<div class="muted small mono" style="margin-top:4px">{{ subject_name }} · {{ subject_upi or '—' }}</div>{% endif %}
+    <div class="case-card-stats">
+      <span><b>{{ nav_metrics.transactions }}</b> txn</span>
+      <span><b>{{ nav_metrics.messages }}</b> msg</span>
+      <span><b>{{ nav_metrics.contacts }}</b> contacts</span>
+      {% if nav_metrics.findings %}<span class="badge-warn"><b>{{ nav_metrics.findings }}</b> flags</span>{% endif %}
+    </div>
+    <a href="{{ url_for('page_cases') }}" class="muted small" style="margin-top:8px;display:inline-block">switch case →</a>
+  </div>
+  {% else %}
+  <div class="case-card" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.3)">
+    <div class="case-card-label" style="color:#fca5a5">No Active Case</div>
+    <a href="{{ url_for('page_cases') }}" class="btn primary" style="margin-top:8px;width:100%;justify-content:center">Open Case Manager</a>
+  </div>
+  {% endif %}
+
+  <nav class="nav">
+    <div class="nav-section">Cases</div>
+    <a href="{{ url_for('page_cases') }}" class="nav-item">⌂ All Cases</a>
+    <a href="{{ url_for('page_case_new') }}" class="nav-item">+ New Case</a>
+
+    {% if case_loaded %}
+    <div class="nav-section">Overview</div>
+    <a href="{{ url_for('page_dashboard') }}" class="nav-item">▣ Dashboard</a>
+    <a href="{{ url_for('page_timeline') }}" class="nav-item">≡ Unified Timeline</a>
+    <a href="{{ url_for('page_hunt') }}" class="nav-item">⌖ Hunting (PPQL)</a>
+    <a href="{{ url_for('page_findings') }}" class="nav-item">⚑ Suspicious Signals</a>
+    <a href="{{ url_for('page_counterparty') }}" class="nav-item">⌕ Counterparty Lookup</a>
+
+    <div class="nav-section">Identity & Auth</div>
+    <a href="{{ url_for('page_identity') }}" class="nav-item">◉ Identity Profile</a>
+    <a href="{{ url_for('page_payment_infra') }}" class="nav-item">◫ Payment Infrastructure</a>
+    <a href="{{ url_for('page_audit') }}" class="nav-item">▤ Audit & Lifecycle</a>
+
+    <div class="nav-section">Financial</div>
+    <a href="{{ url_for('page_transactions') }}" class="nav-item">₹ Transactions</a>
+    <a href="{{ url_for('page_ledger') }}" class="nav-item">⇄ Split / Bill Ledger</a>
+    <a href="{{ url_for('page_financial') }}" class="nav-item">◊ Rewards / MF / Vouchers</a>
+    <a href="{{ url_for('page_travel') }}" class="nav-item">→ User Journeys</a>
+
+    <div class="nav-section">Social</div>
+    <a href="{{ url_for('page_contacts') }}" class="nav-item">○ Contacts</a>
+    <a href="{{ url_for('page_chat') }}" class="nav-item">⌬ Chat & Groups</a>
+    <a href="{{ url_for('page_social_graph') }}" class="nav-item">⌖ Social Graph</a>
+    <a href="{{ url_for('page_notifications') }}" class="nav-item">▫ Push / PubSub</a>
+
+    {% if platform == 'android' %}
+    <div class="nav-section">Android Sources</div>
+    <a href="{{ url_for('page_sms') }}" class="nav-item">✉ SMS Inbox (Inference)</a>
+    <a href="{{ url_for('page_miniapps') }}" class="nav-item">▢ Mini-apps (Switch)</a>
+    {% endif %}
+
+    <div class="nav-section">Behaviour</div>
+    <a href="{{ url_for('page_analytics') }}" class="nav-item">▥ Analytics Events</a>
+    <a href="{{ url_for('page_search') }}" class="nav-item">⌕ App Search History</a>
+    <a href="{{ url_for('page_recommendations') }}" class="nav-item">▦ Recommendations</a>
+    <a href="{{ url_for('page_config') }}" class="nav-item">⚙ Config & Experiments</a>
+    <a href="{{ url_for('page_webkit') }}" class="nav-item">⌗ WebKit & Cookies</a>
+
+    <div class="nav-section">Media</div>
+    <a href="{{ url_for('page_media') }}" class="nav-item">◳ QR & Backgrounds & DPs</a>
+
+    <div class="nav-section">Recovery</div>
+    {% if platform == 'android' %}
+    <a href="{{ url_for('page_deleted') }}" class="nav-item">⌦ Deleted Records</a>
+    {% endif %}
+
+    <div class="nav-section">Raw Data</div>
+    {% if platform == 'android' %}
+    <a href="{{ url_for('page_raw_tables') }}" class="nav-item">{ } All Tables (raw)</a>
+    <a href="{{ url_for('page_prefs') }}" class="nav-item">⚙ Shared Prefs</a>
+    <a href="{{ url_for('page_files') }}" class="nav-item">▦ Files & DataStore</a>
+    <a href="{{ url_for('page_provenance') }}" class="nav-item">⛓ Provenance / Sources</a>
+    {% endif %}
+    <a href="{{ url_for('page_db_browser') }}" class="nav-item">▢ Database Inventory</a>
+    <a href="{{ url_for('page_db_sql') }}" class="nav-item">⏵ SQL Console</a>
+
+    <div class="nav-section">Reports</div>
+    <a href="{{ url_for('page_exports') }}" class="nav-item">↧ Exports</a>
+    {% endif %}
+  </nav>
+
+  <div class="footer">
+    <div>v1.0.0</div>
+    <div class="muted">Read-only forensic tool</div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>{% block heading %}{% endblock %}</h1>
+      <p class="muted">{% block subheading %}{% endblock %}</p>
+    </div>
+    <div class="topbar-actions">
+      {% block topbar_actions %}{% endblock %}
+    </div>
+  </header>
+  <div class="content">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        <div class="flash-stack">
+          {% for cat, m in msgs %}
+            <div class="flash flash-{{ cat }}">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</div>
+
+<!-- ── shared avatar (DP) styling — used on every page ───────────────── -->
+<style>
+.dp{display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  background:linear-gradient(135deg,#3b3266,#5b4a9e);
+  color:#fff;font-size:11px;font-weight:700;position:relative;}
+.dp::before{content:attr(data-initials);position:absolute;}
+.dp img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1;}
+.dp-lg{width:64px;height:64px;font-size:22px;}
+.dp-xl{width:88px;height:88px;font-size:30px;}
+img.zoomable{cursor:zoom-in;}
+.dp img.zoomable{cursor:zoom-in;}
+/* ── global full-size image lightbox ──────────────────────────────── */
+.lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;cursor:zoom-out;}
+.lightbox[hidden]{display:none;}
+.lightbox img{max-width:92vw;max-height:84vh;border-radius:10px;
+  box-shadow:0 12px 48px rgba(0,0,0,.6);object-fit:contain;background:#15151f;}
+.lightbox-cap{color:rgba(255,255,255,.6);font-size:12px;font-family:var(--mono,monospace);}
+/* copy-to-clipboard button feedback */
+.btn.copied,button.copied{
+  background:rgba(16,185,129,.2)!important;color:#10b981!important;
+  border-color:rgba(16,185,129,.45)!important;}
+/* ── privacy / redaction toggle (OFF by default — nothing hidden) ──── */
+#privacy-toggle{position:fixed;right:18px;bottom:18px;z-index:9000;
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  padding:9px 14px;border-radius:24px;border:1px solid rgba(255,255,255,.14);
+  background:#15151f;color:#cbd5e1;font-size:12px;font-weight:600;
+  box-shadow:0 6px 20px rgba(0,0,0,.45);font-family:Inter,system-ui,sans-serif;}
+#privacy-toggle:hover{border-color:#5b4a9e;}
+#privacy-toggle .pt-dot{width:9px;height:9px;border-radius:50%;background:#10b981;}
+body.redacted #privacy-toggle{color:#fbbf24;border-color:rgba(245,158,11,.5);}
+body.redacted #privacy-toggle .pt-dot{background:#f59e0b;}
+/* when redaction is ON, blur ONLY PII (names, phones, accounts, VPAs, UTRs, device IDs,
+   tokens) + profile photos. Timestamps, amounts, types, states, counts are NOT blurred.
+   PII cells are tagged by .pii (added to PII table columns via JS + key fields directly). */
+body.redacted .pii{filter:blur(5px);transition:filter .08s;border-radius:3px;}
+body.redacted .pii:hover{filter:none;}
+body.redacted .dp img{filter:blur(9px);}
+body.redacted .dp:hover img{filter:none;}
+@media print{body.redacted .pii{filter:blur(6px)!important;}}
+</style>
+<div id="lightbox" class="lightbox" hidden>
+  <img id="lightbox-img" alt="full size view">
+  <div class="lightbox-cap" id="lightbox-cap">click anywhere or press Esc to close</div>
+</div>
+
+<!-- ── privacy / redaction toggle — OFF by default (all data visible) ── -->
+<button id="privacy-toggle" title="Redaction is OFF by default — all data is shown. Toggle to blur identifiers & photos for safe screenshots/sharing. Hover any blurred value to peek.">
+  <span class="pt-dot"></span><span class="pt-label">Showing all data</span>
+</button>
+<script>
+(function(){
+  var KEY='pp_redact', btn=document.getElementById('privacy-toggle'),
+      lbl=btn.querySelector('.pt-label');
+  function apply(on){
+    document.body.classList.toggle('redacted', on);
+    lbl.textContent = on ? 'Redacted — hover to peek' : 'Showing all data';
+  }
+  // default OFF: only redact if the user previously turned it on
+  apply(localStorage.getItem(KEY)==='1');
+  btn.addEventListener('click',function(){
+    var on=!document.body.classList.contains('redacted');
+    try{ localStorage.setItem(KEY, on?'1':'0'); }catch(_){}
+    apply(on);
+  });
+})();
+</script>
+<script>
+/* Tag PII table cells so redaction blurs ONLY sensitive columns. A column is PII if its header
+   matches a name/phone/account/VPA/UTR/contact/device pattern AND is not a safe column
+   (created/updated/time/amount/type/state/count/balance/give/receive…). Runs once on load. */
+(function(){
+  var PII=/(name|holder|\bmember|payer|counterpart|\bfrom\b|\bto\b|sender|receiver|phone|mobile|\bvpa\b|upi\s*id|account|a\/c|\butr\b|address|contact|subject|party|email|destination|device|token|members)/i;
+  var SAFE=/(created|updated|when|\btime|date|amount|\btype|state|status|\bdir\b|category|\bcount\b|size|version|score|rank|priority|stage|percent|balance|\bgive\b|\breceive\b|inr|qty|rows?|export|action\b)/i;
+  function tag(){
+    document.querySelectorAll('table').forEach(function(tbl){
+      var ths=tbl.querySelectorAll('thead th'); if(!ths.length) return;
+      var cols=[];
+      ths.forEach(function(th,i){var t=(th.textContent||'').trim(); if(t&&PII.test(t)&&!SAFE.test(t))cols.push(i);});
+      if(!cols.length) return;
+      tbl.querySelectorAll('tbody tr').forEach(function(tr){
+        for(var i=0;i<cols.length;i++){var td=tr.children[cols[i]]; if(td)td.classList.add('pii');}
+      });
+    });
+  }
+  if(document.readyState!=='loading') tag(); else document.addEventListener('DOMContentLoaded',tag);
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+/* Click any <img class="zoomable"> to view it full size. Device profile
+   photos are tiny (~96px) thumbnails — they are shown enlarged, with the
+   TRUE original resolution labelled. One delegated handler, every page. */
+(function(){
+  var lb=document.getElementById('lightbox'),
+      img=document.getElementById('lightbox-img'),
+      cap=document.getElementById('lightbox-cap');
+  function close(){lb.hidden=true;img.removeAttribute('src');img.style.width='';}
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t&&t.tagName==='IMG'&&t.classList.contains('zoomable')&&t.getAttribute('src')){
+      var who=t.dataset.caption?t.dataset.caption+' — ':'';
+      img.onload=function(){
+        var w=img.naturalWidth||0,h=img.naturalHeight||0,small=w>0&&w<260;
+        img.style.width=small?Math.round(w*(280/w))+'px':'';
+        cap.textContent=who+'original '+w+'×'+h+' px'
+          +(small?' · shown enlarged':'')+' · click anywhere or Esc to close';
+      };
+      img.src=t.dataset.full||t.src;
+      lb.hidden=false;
+    }
+  });
+  lb.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!lb.hidden)close();});
+})();
+</script>
+<script>
+/* Universal copy-to-clipboard. Any <button data-copy="#selector"> copies the
+   text of the matched element. One delegated handler, works on every page. */
+(function(){
+  function fallback(text){
+    var ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-copy]');
+    if(!b) return;
+    var el=document.querySelector(b.getAttribute('data-copy'));
+    if(!el) return;
+    var text=el.innerText||el.textContent||'';
+    function done(){
+      if(!b.dataset.label) b.dataset.label=b.textContent;
+      b.textContent='✓ Copied';
+      b.classList.add('copied');
+      setTimeout(function(){b.textContent=b.dataset.label;b.classList.remove('copied');},1500);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done,function(){fallback(text);done();});
+    }else{ fallback(text); done(); }
+  });
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}SMS Inbox — PhonePe Android Forensics{% endblock %}
+{% block heading %}SMS Inbox (Transaction Inference){% endblock %}
+{% block subheading %}Bank/OTP SMS PhonePe ingested for inference — an Android-only evidence source, cross-checked against the transaction ledger.{% endblock %}
+
+{% block content %}
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">SMS captured</div><div class="mvalue">{{ sms.summary.sms_count or 0 }}</div></div>
+  {% if corr %}
+  <div class="metric"><div class="mlabel">Txns confirmed by SMS</div><div class="mvalue">{{ corr.confirmed_count or 0 }}</div><div class="msub">corroborated</div></div>
+  <div class="metric"><div class="mlabel">Txns w/o SMS</div><div class="mvalue {% if corr.uncorroborated_count %}badge-warn{% endif %}">{{ corr.uncorroborated_count or 0 }}</div><div class="msub">possible deletion</div></div>
+  <div class="metric"><div class="mlabel">Financial SMS w/o txn</div><div class="mvalue">{{ corr.sms_only_count or 0 }}</div><div class="msub">activity outside app</div></div>
+  {% endif %}
+</div>
+
+{% if corr and corr.matches %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">SMS ⇄ Transaction Corroboration ({{ corr.matches|count }} matched)</div>
+  <div class="muted small" style="margin-bottom:8px">A transaction independently confirmed by a bank SMS (matched on amount + time window) is strong anti-tampering evidence.</div>
+  <div class="tbl-wrap-scroll" style="max-height:40vh;overflow-y:auto">
+  <table>
+    <thead><tr><th>Txn time</th><th>Amount</th><th>Direction</th><th>Counterparty</th><th>SMS sender</th><th>SMS snippet</th></tr></thead>
+    <tbody>
+    {% for m in corr.matches %}
+      <tr>
+        <td class="mono small">{{ m.txn_time }}</td>
+        <td class="mono">{{ m.amount_inr|inr }}</td>
+        <td><span class="tag {{ (m.direction or '')|lower }}">{{ m.direction }}</span></td>
+        <td>{{ m.counterparty }}</td>
+        <td class="mono small">{{ m.sms_sender }}</td>
+        <td class="small">{{ m.sms_snippet }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">All SMS ({{ sms.messages|count }})</div>
+  <div class="filter-bar"><input type="text" placeholder="Filter sender or body…" data-filter-input data-filter-target="#smsTable"></div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="smsTable">
+    <thead><tr><th>Received</th><th>Sender</th><th>Body</th></tr></thead>
+    <tbody>
+    {% for m in sms.messages %}
+      <tr>
+        <td class="mono small">{{ m.received_at|ts }}</td>
+        <td class="mono small">{{ m.address }}</td>
+        <td class="small">{{ m.body }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% if sms.summary.sender_breakdown %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Top SMS Senders</div>
+  <table>
+    <thead><tr><th>Sender</th><th>Count</th></tr></thead>
+    <tbody>{% for s, n in sms.summary.sender_breakdown.items() %}<tr><td class="mono small">{{ s }}</td><td>{{ n }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

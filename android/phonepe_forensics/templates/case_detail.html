@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ meta.name }} — Case Details{% endblock %}
+{% block heading %}{{ meta.name }}{% endblock %}
+{% block subheading %}
+  {% if meta.status == 'loaded' %}Evidence processed and ready for analysis.
+  {% else %}Case registered — click Process Evidence to extract artifacts.{% endif %}
+{% endblock %}
+
+{% block topbar_actions %}
+{% if is_active %}
+  <a href="{{ url_for('page_dashboard') }}" class="btn primary">Open Dashboard →</a>
+{% else %}
+  <form method="post" action="{{ url_for('page_case_activate', case_id=meta.id) }}" style="display:inline">
+    <button class="btn primary">Activate Case</button>
+  </form>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2" style="gap:18px;align-items:start">
+
+  <!-- left: metadata + actions -->
+  <div>
+    <div class="card">
+      <div class="card-title">Case Information</div>
+      <table class="kv-table">
+        <tr><td class="kv-key">Case ID</td><td class="mono">{{ meta.id }}</td></tr>
+        <tr><td class="kv-key">Investigator</td><td>{{ meta.investigator or '—' }}</td></tr>
+        <tr><td class="kv-key">Status</td>
+            <td>{% if is_active %}<span class="badge-ok">Active</span>
+                {% elif meta.status == 'loaded' %}<span class="badge-info">Processed</span>
+                {% else %}<span class="badge-muted">Registered</span>{% endif %}</td></tr>
+        <tr><td class="kv-key">Mode</td><td class="mono">{{ meta.mode }}</td></tr>
+        {% if meta.get('subject_name') %}
+        <tr><td class="kv-key">Subject</td><td>{{ meta.subject_name }}</td></tr>
+        {% endif %}
+        {% if meta.get('subject_upi_id') %}
+        <tr><td class="kv-key">Subject UPI</td><td class="mono">{{ meta.subject_upi_id }}</td></tr>
+        {% endif %}
+        {% if meta.get('notes') %}
+        <tr><td class="kv-key">Notes</td><td>{{ meta.notes }}</td></tr>
+        {% endif %}
+        {% if meta.get('created_at_ms') %}
+        <tr><td class="kv-key">Registered</td><td class="mono">{{ (meta.created_at_ms / 1000)|int }}</td></tr>
+        {% endif %}
+        {% if meta.get('loaded_at_ms') %}
+        <tr><td class="kv-key">Last processed</td><td class="mono">{{ (meta.loaded_at_ms / 1000)|int }}</td></tr>
+        {% endif %}
+      </table>
+    </div>
+
+    {% if meta.get('metrics') %}
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Extracted Metrics</div>
+      <div class="metric-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="metric"><div class="mlabel">Transactions</div><div class="mvalue accent">{{ meta.metrics.get('transactions', 0) }}</div></div>
+        <div class="metric"><div class="mlabel">Chat Messages</div><div class="mvalue">{{ meta.metrics.get('messages', 0) }}</div></div>
+        <div class="metric"><div class="mlabel">Contacts</div><div class="mvalue">{{ meta.metrics.get('phonebook_contacts', 0) }}</div></div>
+        <div class="metric"><div class="mlabel">Flags</div><div class="mvalue {% if meta.metrics.get('findings') %}neg{% endif %}">{{ meta.metrics.get('findings', 0) }}</div></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- actions -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-title" style="margin-bottom:12px">Actions</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <form method="post" action="{{ url_for('page_case_process', case_id=meta.id) }}">
+          <button class="btn primary" style="width:100%">
+            {% if meta.status == 'loaded' %}⟳ Re-process Evidence{% else %}▶ Process Evidence{% endif %}
+          </button>
+          <p class="muted small" style="margin-top:4px">
+            Parses all SQLite databases, plists and blobs. May take 30–120 s for large acquisitions.
+          </p>
+        </form>
+
+        {% if not is_active %}
+        <form method="post" action="{{ url_for('page_case_activate', case_id=meta.id) }}">
+          <button class="btn" style="width:100%">Activate (load cached)</button>
+        </form>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('page_case_delete', case_id=meta.id) }}"
+              onsubmit="return confirm('Remove this case from the registry? Evidence folders will NOT be deleted.')">
+          <button class="btn danger" style="width:100%">✕ Remove from Registry</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- right: paths + validation -->
+  <div>
+    <div class="card">
+      <div class="card-title">Evidence Path</div>
+      <div class="path-display">
+        <div class="path-display-label">PhonePe app data directory (com.phonepe.app)</div>
+        <div class="path-display-val mono">{{ meta.single_root or meta.app_domain or '—' }}</div>
+      </div>
+    </div>
+
+    {% if meta.get('validation') %}
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Path Validation</div>
+      {% if meta.validation.get('valid') %}
+        <div style="color:var(--success);margin-bottom:8px">✓ Paths validated at registration</div>
+      {% else %}
+        <div style="color:var(--danger);margin-bottom:8px">✗ Validation issues found</div>
+      {% endif %}
+      {% if meta.validation.get('issues') %}
+        {% for issue in meta.validation.issues %}
+          <div class="small" style="color:var(--warn);margin-bottom:4px">⚠ {{ issue }}</div>
+        {% endfor %}
+      {% endif %}
+      {% if meta.validation.get('summary') %}
+        <div class="kv-table" style="margin-top:8px">
+          {% for k, v in meta.validation.summary.items() %}
+          {% if v %}
+          <div style="margin-bottom:3px"><span class="muted small">{{ k }}:</span>
+          <span class="mono small">{{ v }}</span></div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Quick Help</div>
+      <p class="muted small">
+        <b>Why process again?</b> Re-processing re-reads all databases from disk. Use this if you
+        updated or corrected the evidence folder after the first extraction.
+      </p>
+      <p class="muted small" style="margin-top:8px">
+        <b>Remove vs Delete</b> — Removing a case only clears the registry entry.
+        The evidence folders on disk are never touched.
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

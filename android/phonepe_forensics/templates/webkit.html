@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}WebKit & Cookies — PhonePe Android Forensics{% endblock %}
+{% block heading %}WebKit & Cookies{% endblock %}
+{% block subheading %}WebView cookies, observed domains, LocalStorage and IndexedDB entries.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Cookies</div><div class="mvalue">{{ webkit.summary.cookie_count }}</div></div>
+  <div class="metric"><div class="mlabel">Web domains observed</div><div class="mvalue">{{ webkit.summary.resource_load_domains }}</div></div>
+  <div class="metric"><div class="mlabel">LocalStorage files</div><div class="mvalue">{{ webkit.summary.local_storage_files }}</div></div>
+  <div class="metric"><div class="mlabel">IndexedDB entries</div><div class="mvalue">{{ webkit.summary.indexed_db_entries }}</div></div>
+</div>
+
+{% if webkit.cookies %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Cookies (Chromium WebView cookie store)</div>
+  <p class="muted small">SHA-256: <span class="mono">{{ webkit.cookies_sha256 }}</span></p>
+  <table>
+    <thead><tr><th>Domain</th><th>Name</th><th>Path</th><th>Flags</th><th>Created</th><th>Expires</th><th>Value</th></tr></thead>
+    <tbody>
+    {% for c in webkit.cookies %}
+      <tr>
+        <td class="mono small">{{ c.domain }}</td>
+        <td class="mono small">{{ c.name }}</td>
+        <td class="mono small">{{ c.path }}</td>
+        <td class="small">{% for f in c.flags %}<span class="tag">{{ f }}</span>{% endfor %}</td>
+        <td class="mono small">{{ c.creation_iso or '—' }}</td>
+        <td class="mono small">{{ c.expiry_iso or '—' }}</td>
+        <td class="mono small">{{ (c.value or '')|truncate(40) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if webkit.resource_load_stats %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">WebKit ResourceLoadStatistics — domains observed in PhonePe WebViews</div>
+  <table>
+    <thead><tr><th>Domain</th><th>User-interacted</th><th>Last interaction</th><th>Last seen</th></tr></thead>
+    <tbody>
+    {% for r in webkit.resource_load_stats %}
+      <tr>
+        <td class="mono">{{ r.domain }}</td>
+        <td>{{ r.had_user_interaction|yes_no }}</td>
+        <td class="mono small">{{ r.last_user_interaction|ts }}</td>
+        <td class="mono small">{{ r.last_seen|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if webkit.local_storage or webkit.indexed_db %}
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">LocalStorage</div>
+    <table>
+      <thead><tr><th>File</th><th class="right">Size</th></tr></thead>
+      <tbody>
+      {% for ls in webkit.local_storage %}<tr><td class="mono small">{{ ls.name }}</td><td class="right mono">{{ ls.size }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">IndexedDB</div>
+    <table>
+      <thead><tr><th>Name</th><th>Type</th></tr></thead>
+      <tbody>
+      {% for d in webkit.indexed_db %}<tr><td class="mono small">{{ d.name }}</td><td>{{ 'Directory' if d.is_dir else 'File' }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

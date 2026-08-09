@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Recovered Deleted Records — PhonePe Android Forensics{% endblock %}
+{% block heading %}Recovered Deleted Records{% endblock %}
+{% block subheading %}Rows carved from freed space, WAL frames and rollback journals — data the app deleted but the database has not yet overwritten.{% endblock %}
+{% block topbar_actions %}
+{% if deleted.records %}<a href="{{ url_for('export_deleted_csv') }}" class="btn primary">↧ CSV</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Recovered</div><div class="mvalue">{{ deleted.summary.recovered_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Extent confirmed</div><div class="mvalue">{{ deleted.summary.high_confidence or 0 }}</div><div class="msub">start+end known structurally</div></div>
+  <div class="metric"><div class="mlabel">Values suspect</div><div class="mvalue">{{ deleted.summary.value_suspect or 0 }}</div><div class="msub">field outside its column's range</div></div>
+  <div class="metric"><div class="mlabel">Partial</div><div class="mvalue">{{ deleted.summary.partial or 0 }}</div><div class="msub">leading field reconstructed</div></div>
+  <div class="metric"><div class="mlabel">Ambiguous</div><div class="mvalue">{{ deleted.summary.ambiguous or 0 }}</div><div class="msub">fits &gt;1 table</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">How to read this page</div>
+  <p class="muted small">
+    Every row below is a <b>reconstruction</b>, not a row the database still holds — the live
+    tables are unchanged and these are excluded from them. A record is listed only when it is
+    absent from the live table, so a stale copy of a row that still exists is never reported as
+    a deletion.
+  </p>
+  <p class="muted small">
+    <b>Confidence</b> is <span class="tag">high</span> when the record's extent was confirmed
+    structurally — an intact header, or an end that lines up exactly with the next freed cell —
+    and <span class="tag med">medium</span> when the field boundaries had to be inferred and
+    could be off by a byte. <b>Partial</b> means SQLite's freeblock header overwrote the record's
+    first serial type; the value is recovered from the surviving bytes but its type is gone.
+  </p>
+  <p class="muted small">
+    <b>Pool</b> is where the bytes came from: <span class="mono">freelist</span> (a released page),
+    <span class="mono">freeblock</span> (a released cell inside a live page),
+    <span class="mono">page-slack</span> (a page's unallocated middle),
+    <span class="mono">pre-wal-image</span> / <span class="mono">wal-superseded</span> (a page
+    version the WAL replaced), <span class="mono">journal</span> (a rollback pre-image).
+  </p>
+</div>
+
+{% for db, info in deleted.databases.items() %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">{{ db }}</div>
+  <div class="kv">
+    <b>Recovered</b><span>{{ info.summary.recovered_count }}</span>
+    <b>Freed content</b><span>{{ 'retained — recoverable records were found' if info.summary.freed_content_retained else 'nothing recoverable (reused, overwritten, or zeroed on deletion)' }}</span>
+    <b>Freelist pages</b><span>{{ info.summary.freelist_pages }}</span>
+    <b>WAL present</b><span>{{ info.summary.wal_present|yes_no }}</span>
+    <b>Regions scanned</b><span>{{ info.summary.regions_scanned }}</span>
+    <b>SHA-256</b><span class="mono small">{{ info.summary.sha256 }}</span>
+  </div>
+  {% if info.notes %}
+  <div class="muted small" style="margin-top:8px">{% for n in info.notes %}{{ n }}<br>{% endfor %}</div>
+  {% endif %}
+</div>
+{% endfor %}
+
+{% if deleted.records %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Recovered records ({{ records|length }} shown of {{ deleted.records|length }})</div>
+  <form method="get" class="filter-bar" style="margin-bottom:12px">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search recovered content…">
+    <select name="table">
+      <option value="">All tables</option>
+      {% for t in tables %}<option value="{{ t }}" {% if t == table_filter %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+    <button class="btn" type="submit">Filter</button>
+  </form>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow:auto">
+  <table>
+    <thead><tr>
+      <th>Table</th><th>Confidence</th><th>Pool</th><th>Provenance</th><th>Recovered values</th>
+    </tr></thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td class="mono small">
+          {{ r.table or (r.candidate_tables|join(' / ')) }}
+          {% if r.ambiguous %}<br><span class="tag med">ambiguous</span>{% endif %}
+        </td>
+        <td>
+          <span class="tag {% if r.confidence == 'high' %}accent{% else %}med{% endif %}"
+                title="Confidence in the record's EXTENT — where it began and ended. Not a claim about the values.">extent: {{ r.confidence }}</span>
+          {% if r.value_confidence %}
+            <br><span class="tag small {% if r.value_confidence == 'low' %}med{% endif %}"
+                  title="Confidence that the decoded fields sit in the right columns.">values: {{ r.value_confidence }}</span>
+          {% endif %}
+          {% if r.implausible_columns %}
+            <br><span class="tag med" title="These columns hold a value outside the range the live table uses — the fields are probably shifted by one.">shifted?</span>
+            <span class="mono small">{{ r.implausible_columns|join(', ') }}</span>
+          {% endif %}
+          {% if r.partial %}<br><span class="tag small">partial</span>{% endif %}
+          {% if r.truncated %}<br><span class="tag small">truncated</span>{% endif %}
+        </td>
+        <td class="mono small">{{ r.pool }}</td>
+        <td class="mono small">
+          {{ r.source_file }}<br>page {{ r.page }} @ {{ r.file_offset }}
+        </td>
+        <td class="small">
+          <div class="kv" style="grid-template-columns:180px 1fr;gap:2px 10px">
+            {% for c in r.columns %}
+              {% if r.row.get(c) is not none %}
+                <b class="mono small">{{ c }}</b><span class="mono small">{{ (r.row.get(c)|string)|truncate(220) }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% if r.lost_leading_columns %}
+            <div class="muted small" style="margin-top:4px">
+              type lost for: {{ r.lost_leading_columns|join(', ') }}
+            </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% else %}
+<div class="card" style="margin-top:18px">
+  <p class="muted">No deleted records were recoverable. That is not proof nothing was deleted —
+     freed space is reused over time, and where <span class="mono">secure_delete</span> is on it
+     is zeroed immediately.</p>
+</div>
+{% endif %}
+
+{% endblock %}

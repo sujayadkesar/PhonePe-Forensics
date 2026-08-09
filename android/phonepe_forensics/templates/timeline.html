@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Timeline — PhonePe Android Forensics{% endblock %}
+{% block heading %}Unified Timeline{% endblock %}
+{% block subheading %}
+{% if truncated %}
+  Showing the most recent {{ events|length }} of
+  {% if matched != total %}{{ matched }} matching ({{ total }} total){% else %}{{ total }}{% endif %}
+  chronologically merged events — raise the cap with <span class="mono">?limit=</span>.
+{% else %}
+  {{ events|length }} chronologically merged events from every evidence database{% if matched != total %},
+  filtered from {{ total }}{% endif %}.
+{% endif %}
+{% endblock %}
+{% block topbar_actions %}
+<a href="?limit=500" class="btn subtle">Top 500</a>
+<a href="?limit=2000" class="btn subtle">Top 2000</a>
+<a href="?limit=10000" class="btn subtle">All</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="filter-bar">
+    <input type="text" id="tlSearch" placeholder="Filter by source / title / detail…" style="flex:1;min-width:180px">
+    <select id="tlSource">
+      <option value="">Source: any</option>
+      <option value="Transactions">Transactions</option>
+      <option value="Chat">Chat</option>
+      <option value="Notifications">Push topics</option>
+      <option value="Analytics">KN events</option>
+      <option value="Analytics-Pending">Analytics queue</option>
+      <option value="Auth-Events">Auth events</option>
+      <option value="Rewards">Rewards</option>
+      <option value="Sync">Sync activity</option>
+      <option value="Recommendations">Recommendations</option>
+      <option value="AppSearch">Search</option>
+      <option value="WebKit">WebKit</option>
+      <option value="Yatra">Travel</option>
+      <option value="Background">Background tasks</option>
+    </select>
+    <span class="muted small" style="white-space:nowrap">From</span>
+    <input type="datetime-local" id="tlFrom" style="min-width:0;width:185px">
+    <span class="muted small" style="white-space:nowrap">To</span>
+    <input type="datetime-local" id="tlTo" style="min-width:0;width:185px">
+    <button type="button" class="btn subtle" id="tlClearDates" style="white-space:nowrap;font-size:12px;padding:7px 11px">× Clear dates</button>
+    <span id="tlRangeErr" style="display:none;color:var(--danger);font-size:12px;white-space:nowrap">⚠ From is after To</span>
+    <select id="tlAmtOp">
+      <option value="">Amount: any</option>
+      <option value="gt">more than</option>
+      <option value="lt">less than</option>
+      <option value="eq">equal to</option>
+      <option value="between">between</option>
+    </select>
+    <input type="number" id="tlAmtA" placeholder="₹" min="0" step="0.01"
+           style="min-width:0;width:105px;display:none">
+    <span id="tlAmtAnd" class="muted small" style="display:none;white-space:nowrap">and</span>
+    <input type="number" id="tlAmtB" placeholder="₹" min="0" step="0.01"
+           style="min-width:0;width:105px;display:none">
+    <span class="muted small" id="tlCount" style="margin-left:auto;white-space:nowrap">{{ events|length }} / {{ events|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:74vh;overflow-y:auto">
+    <table id="tlTable">
+      <thead><tr><th>When</th><th>Source</th><th>Kind</th><th>Title</th><th class="right">Amount</th><th>Link</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+          <tr data-amount="{{ e.amount_inr if e.amount_inr is not none else '' }}">
+            <td class="mono small">{{ e.when_iso }}</td>
+            <td><span class="tag">{{ e.source }}</span></td>
+            <td class="mono small">{{ e.kind }}</td>
+            <td>{{ e.title }}</td>
+            <td class="right">{% if e.amount_inr %}<span class="amount-pos">{{ e.amount_inr|inr }}</span>{% endif %}</td>
+            <td class="mono small">
+              {% if e.link_id %}
+                {% if e.source == 'Transactions' %}
+                  <a href="{{ url_for('page_transaction_detail', txn_id=e.link_id) }}">{{ e.link_id|truncate(20) }}</a>
+                {% else %}
+                  {{ e.link_id|truncate(20) }}
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var table    = document.getElementById('tlTable');
+  var rows     = Array.from(table.querySelectorAll('tbody tr'));
+  var search   = document.getElementById('tlSearch');
+  var srcSel   = document.getElementById('tlSource');
+  var fromInp  = document.getElementById('tlFrom');
+  var toInp    = document.getElementById('tlTo');
+  var clearBtn = document.getElementById('tlClearDates');
+  var counter  = document.getElementById('tlCount');
+  var rangeErr = document.getElementById('tlRangeErr');
+  var amtOp    = document.getElementById('tlAmtOp');
+  var amtA     = document.getElementById('tlAmtA');
+  var amtAnd   = document.getElementById('tlAmtAnd');
+  var amtB     = document.getElementById('tlAmtB');
+  var total    = rows.length;
+
+  // Precompute per-row data once at load.
+  // when_iso is always UTC (+00:00) so new Date() parses it correctly as UTC.
+  var rowData = rows.map(function (r) {
+    var cells = r.querySelectorAll('td');
+    var iso   = cells[0] ? cells[0].textContent.trim() : '';
+    var raw   = r.getAttribute('data-amount');
+    return {
+      ms  : iso ? new Date(iso.replace(' ', 'T') + 'Z').getTime() : NaN,
+      src : cells[1] ? cells[1].textContent.trim() : '',
+      text: r.textContent.toLowerCase(),
+      amt : (raw !== null && raw !== '') ? parseFloat(raw) : NaN
+    };
+  });
+
+  // Show/hide amount inputs based on selected operator.
+  function syncAmtInputs() {
+    var op = amtOp.value;
+    amtA.style.display   = (op !== '')        ? '' : 'none';
+    amtAnd.style.display = (op === 'between') ? '' : 'none';
+    amtB.style.display   = (op === 'between') ? '' : 'none';
+    if (op === '') { amtA.value = ''; amtB.value = ''; }
+    if (op !== 'between') amtB.value = '';
+  }
+
+  function applyFilters() {
+    var q   = search.value.trim().toLowerCase();
+    var src = srcSel.value;
+    var op  = amtOp.value;
+    var a   = amtA.value !== '' ? parseFloat(amtA.value) : null;
+    var b   = amtB.value !== '' ? parseFloat(amtB.value) : null;
+
+    // :00Z forces datetime-local value to UTC, matching when_iso (+00:00).
+    var fromMs = fromInp.value ? new Date(fromInp.value + ':00Z').getTime() : null;
+    var toMs   = toInp.value   ? new Date(toInp.value   + ':00Z').getTime() + 59000 : null;
+
+    rangeErr.style.display = (fromMs !== null && toMs !== null && fromMs > toMs) ? '' : 'none';
+
+    var shown = 0;
+    rows.forEach(function (r, i) {
+      var d  = rowData[i];
+      var ok = true;
+
+      if (q   && !d.text.includes(q))                         ok = false;
+      if (src && d.src !== src)                                ok = false;
+      if (fromMs !== null && (isNaN(d.ms) || d.ms < fromMs))  ok = false;
+      if (toMs   !== null && (isNaN(d.ms) || d.ms > toMs))    ok = false;
+
+      if (op) {
+        if (isNaN(d.amt)) {
+          ok = false;                                  // no amount - hide when filter is active
+        } else if (op === 'gt' && a !== null) {
+          if (d.amt <= a) ok = false;
+        } else if (op === 'lt' && a !== null) {
+          if (d.amt >= a) ok = false;
+        } else if (op === 'eq' && a !== null) {
+          if (Math.abs(d.amt - a) > 0.005) ok = false; // half-paisa tolerance for float precision
+        } else if (op === 'between' && a !== null && b !== null) {
+          var lo = Math.min(a, b), hi = Math.max(a, b); // order-independent
+          if (d.amt < lo || d.amt > hi) ok = false;
+        }
+      }
+
+      r.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+
+    counter.textContent = shown + ' / ' + total;
+  }
+
+  amtOp.addEventListener('change', function () { syncAmtInputs(); applyFilters(); });
+  amtA.addEventListener('input',   applyFilters);
+  amtB.addEventListener('input',   applyFilters);
+  search.addEventListener('input',   applyFilters);
+  srcSel.addEventListener('change',  applyFilters);
+  fromInp.addEventListener('change', applyFilters);
+  toInp.addEventListener('change',   applyFilters);
+
+  clearBtn.addEventListener('click', function () {
+    fromInp.value = '';
+    toInp.value   = '';
+    applyFilters();
+  });
+})();
+</script>
+{% endblock %}

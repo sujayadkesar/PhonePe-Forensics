@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Provenance / Sources — PhonePe Android Forensics{% endblock %}
+{% block heading %}Provenance / Data Sources{% endblock %}
+{% block subheading %}Exactly where every surfaced value comes from — database → table → column, or the JSON path inside a payload. The chain-of-custody / "is this real?" map.{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px">
+  <p class="muted small" style="margin:0">
+    Notation: <span class="mono">db.table.column</span> · <span class="mono">→</span> fallback waterfall ·
+    <span class="mono">JSON:</span> path inside a decoded blob. Source strings describe the actual
+    extraction logic, verified against the acquisition. Every SQLite table is also directly
+    queryable in the <a href="{{ url_for('page_db_sql') }}">SQL Console</a>.
+  </p>
+</div>
+
+<div class="filter-bar"><input type="text" placeholder="Filter field or source…" data-filter-input data-filter-target="#provTbl"></div>
+
+{% for module, info in prov.items() %}
+<div class="card" style="margin-top:14px">
+  <div class="card-title">{{ module }}</div>
+  <div class="muted small" style="margin-bottom:6px">
+    <b>Source:</b> <span class="mono">{{ info.source }}</span>
+    {% if info.blob %}<br><b>Blob:</b> {{ info.blob }}{% endif %}
+  </div>
+  <table id="provTbl">
+    <thead><tr><th style="width:30%">Field</th><th>Source path</th></tr></thead>
+    <tbody>
+    {% for field, src in info.fields.items() %}
+      <tr><td class="mono small">{{ field }}</td><td class="small mono" style="word-break:break-word">{{ src }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ page.database }} · {{ page.table }} — PhonePe Android Forensics{% endblock %}
+{% block heading %}{{ page.table }}{% endblock %}
+{% block subheading %}{{ page.database }} · {{ page.row_count }} row(s) · read directly from the evidence database{% endblock %}
+{% block topbar_actions %}
+<a href="{{ url_for('page_raw_tables') }}" class="btn">← All tables</a>
+<a href="{{ url_for('page_raw_table_csv', db=page.database, table=page.table) }}" class="btn primary">↧ CSV</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    Rows {{ page.offset + 1 }}–{{ page.offset + page.rows|length }} of {{ page.row_count }}
+  </div>
+  <p class="muted small">Cells are truncated for display; hover for more, or export the CSV
+     for the full values.</p>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr>{% for c in page.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for r in page.rows %}
+        <tr>{% for c in page.columns %}
+          {% set v = r.get(c) %}
+          <td class="mono small" title="{{ v|string|truncate(2000) }}">
+            {{ (v|string)|truncate(160) if v is not none else '—' }}
+          </td>
+        {% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="row" style="gap:8px;margin-top:12px">
+    {% if page.offset > 0 %}
+      <a class="btn small" href="{{ url_for('page_raw_table_browse', db=page.database, table=page.table, offset=[0, page.offset - page.limit]|max) }}">← Previous</a>
+    {% endif %}
+    {% if page.has_more %}
+      <a class="btn small" href="{{ url_for('page_raw_table_browse', db=page.database, table=page.table, offset=page.offset + page.limit) }}">Next →</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

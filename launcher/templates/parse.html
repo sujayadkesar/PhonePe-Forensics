@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block heading %}Parse an extraction{% endblock %}
+{% block subheading %}Which platform is this acquisition from?{% endblock %}
+{% block content %}
+<div class="bar"><a class="back" href="{{ url_for('home') }}">&larr; Launcher</a></div>
+
+<div class="grid">
+  {% for t in tools %}
+  <a class="pick" href="{{ url_for('open_tool', key=t.key, to='/cases/new') }}">
+    <h2><span class="tag {{ t.key }}">{{ t.label }}</span></h2>
+    <p style="margin-top:10px">{{ t.blurb }}</p>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="note">
+  You land in that analyser's own <b>New Case</b> screen, where you point it at the
+  extracted folder and process it. Everything from there on is the analyser itself —
+  use the bar at the bottom of the page to come back here.
+</div>
+{% endblock %}

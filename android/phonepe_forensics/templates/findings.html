@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Findings — PhonePe Android Forensics{% endblock %}
+{% block heading %}Suspicious Signals{% endblock %}
+{% block subheading %}Heuristic flags. Each finding is informational and warrants manual review.{% endblock %}
+
+{% block content %}
+
+{% if not findings %}
+  <div class="empty-state">
+    <div class="empty-state-icon">✓</div>
+    <p>No suspicious signals raised. The acquisition looks consistent across modules.</p>
+  </div>
+{% else %}
+  {% for f in findings %}
+    <div class="finding {{ f.severity }}">
+      <div class="finding-meta">{{ f.severity }} · {{ f.category }}</div>
+      <div class="finding-title">{{ f.title }}</div>
+      {% if f.detail %}
+        <pre class="json-tree" style="margin-top:8px;max-height:240px">{{ f.detail|tojson(indent=2) }}</pre>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% endblock %}

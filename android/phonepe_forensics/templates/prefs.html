@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Shared Prefs — PhonePe Android Forensics{% endblock %}
+{% block heading %}Shared Preferences{% endblock %}
+{% block subheading %}All {{ prefs.summary.pref_file_count or 0 }} shared_prefs/*.xml files · {{ prefs.summary.total_keys or 0 }} keys. Expand a file to view its contents.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="filter-bar"><input type="text" placeholder="Filter file name…" data-filter-input data-filter-target="#prefList"></div>
+  <div id="prefList">
+  {% for fname, kv in prefs.prefs.items() %}
+    <details class="pref-file" style="border:1px solid var(--border,#2a2a3a);border-radius:8px;margin-bottom:6px;padding:6px 10px">
+      <summary style="cursor:pointer"><span class="mono">{{ fname }}</span> <span class="muted small">· {{ kv|count }} keys</span></summary>
+      <table style="margin-top:8px">
+        <thead><tr><th style="width:38%">Key</th><th>Value</th></tr></thead>
+        <tbody>
+        {% for k, v in kv.items() %}
+          <tr><td class="mono small">{{ k }}</td><td class="small" style="word-break:break-all">{{ v|string|truncate(400) }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </details>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

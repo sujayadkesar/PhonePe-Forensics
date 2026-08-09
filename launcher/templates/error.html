@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block heading %}{{ code or 502 }}{% endblock %}
+{% block subheading %}Launcher{% endblock %}
+{% block content %}
+<div class="bar"><a class="back" href="{{ url_for('home') }}">&larr; Launcher</a></div>
+<div class="card">
+  <p>{{ message }}</p>
+  {% if detail %}<pre class="mono small muted" style="white-space:pre-wrap;margin:12px 0 0">{{ detail }}</pre>{% endif %}
+</div>
+{% endblock %}
