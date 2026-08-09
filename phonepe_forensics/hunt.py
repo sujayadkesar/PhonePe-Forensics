@@ -398,6 +398,11 @@ class _Parser:
             return {"cmd": "sort", "field": field, "direction": direction}
         if cmd in ("head", "tail", "limit"):
             n = int(self.expect("NUM")[1])
+            # Python slicing turns `head -2` into a silent truncation and
+            # `tail 0` into rows[-0:], which is every row — the opposite of
+            # what was asked. Reject the input rather than answer wrongly.
+            if n < 0:
+                raise SyntaxError(f"row count must be zero or greater, got {n}")
             return {"cmd": cmd, "n": n}
         if cmd in ("table", "fields"):
             cols = [self.expect("ID")[1]]
@@ -647,6 +652,25 @@ def _agg_value(records: List[Dict[str, Any]], agg: Dict[str, Any]) -> Any:
 # Public runner
 # ---------------------------------------------------------------------------
 
+def _sort_key(value: Any, descending: bool):
+    """Order rows without letting NULLs win, and without raising on mixed types.
+
+    The previous key was `(v is None, v or "")` with `reverse=True` for desc,
+    which reverses the null flag too — so `sort amount_inr desc | head 5` handed
+    back five rows that have no amount. Nulls must sort last in BOTH directions,
+    so the rank is inverted when the sort is reversed. Numbers and strings are
+    also kept in separate buckets: comparing them raises TypeError in Python 3.
+    """
+    null_rank = -1 if descending else 2
+    if value is None or value == "":
+        return (null_rank, 0.0, "")
+    if isinstance(value, bool):
+        return (1, float(value), "")
+    if isinstance(value, (int, float)):
+        return (0, float(value), "")
+    return (1, 0.0, str(value))
+
+
 def run_query(query: str, indexes: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
     """Parse and run a PPQL query against the indexes."""
     if not query or not query.strip():
@@ -692,14 +716,13 @@ def run_query(query: str, indexes: Dict[str, List[Dict[str, Any]]]) -> Dict[str,
                 rows = [r for r in rows if _full_text_match(r, op["term"])]
             elif cmd == "sort":
                 rev = op["direction"] == "desc"
-                def key(r, f=op["field"]):
-                    v = r.get(f)
-                    return (v is None, v if v is not None else "")
-                rows.sort(key=key, reverse=rev)
+                rows.sort(key=lambda r, f=op["field"]: _sort_key(r.get(f), rev),
+                          reverse=rev)
             elif cmd in ("head", "limit"):
                 rows = rows[: op["n"]]
             elif cmd == "tail":
-                rows = rows[-op["n"]:]
+                # rows[-0:] is the whole list, so zero has to be special-cased.
+                rows = rows[-op["n"]:] if op["n"] else []
             elif cmd == "table":
                 derived_columns = list(op["fields"])
                 rows = [{k: r.get(k) for k in derived_columns} for r in rows]

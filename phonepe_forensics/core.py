@@ -34,6 +34,12 @@ APPLE_EPOCH_OFFSET = 978_307_200          # seconds from Unix epoch to 2001-01-0
 NSDATE_REASONABLE_MIN = 100_000_000        # ~1973 in NSDate seconds
 NSDATE_REASONABLE_MAX = 2_000_000_000      # ~2033 in NSDate seconds
 
+# Sanity bounds on the final Unix-seconds value, applied after interpretation.
+# Without an upper bound, a value of 1e15 is read as milliseconds and rendered
+# as a year-33658 event that then sorts to the top of the timeline.
+TS_REASONABLE_MIN_S = 100_000_000          # 1973-03-03
+TS_REASONABLE_MAX_S = 4_102_444_800        # 2100-01-01
+
 
 def _to_dt(ts_seconds: float) -> datetime:
     return datetime.fromtimestamp(ts_seconds, tz=timezone.utc)
@@ -73,14 +79,25 @@ def normalize_timestamp(value: Any) -> Optional[Dict[str, Any]]:
     else:
         return None
 
+    # A corrupt or misinterpreted column otherwise renders as a perfectly
+    # plausible-looking date in the year 33658. Anything outside the range a
+    # phone's data can legitimately fall in is rejected rather than displayed.
+    if not (TS_REASONABLE_MIN_S <= epoch_s <= TS_REASONABLE_MAX_S):
+        return None
+
     try:
         dt = _to_dt(epoch_s)
     except (OSError, ValueError, OverflowError):
         return None
     return {
         "epoch_ms": int(epoch_s * 1000),
-        "iso": dt.strftime("%Y-%m-%d %H:%M:%S"),
-        "display": dt.strftime("%Y-%m-%d %H:%M:%S"),
+        # `iso` is real ISO-8601 with an explicit +00:00 offset, and `display`
+        # says UTC out loud. Every timestamp this tool emits is UTC, but saying
+        # so is what stops a report being read in local time — in IST that is a
+        # silent 5:30 error. The two fields were previously byte-identical and
+        # neither carried a zone.
+        "iso": dt.isoformat(),
+        "display": dt.strftime("%Y-%m-%d %H:%M:%S") + " UTC",
         "source": source,
     }
 
@@ -475,6 +492,11 @@ def decode_txn_id(txn_id: Optional[str]) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 def safe_int(v: Any, default: int = 0) -> int:
+    # bool is an int subclass, so a True in an amount or timestamp column would
+    # otherwise read as the value 1 — i.e. 0.01 in a paise column. A boolean is
+    # not a number here; treat it as absent.
+    if isinstance(v, bool):
+        return default
     try:
         return int(v)
     except (TypeError, ValueError):

@@ -15,9 +15,15 @@ from __future__ import annotations
 import csv
 import io
 import json
+import logging
 import os
+import re
+import secrets
 import sys
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlsplit
+
+from jinja2 import Undefined
 
 from flask import (
     Flask, Response, abort, jsonify, redirect, render_template, request,
@@ -41,12 +47,51 @@ app.config["JSON_SORT_KEYS"] = False
 # edits only appear after a full server restart.
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
-app.secret_key = os.environ.get("PP_FORENSICS_SECRET", "phonepe-forensics-local-dev")
+# A shipped default is a known signing key: anyone can forge a session cookie for
+# a workstation that never set the env var. Fall back to a per-process random key
+# instead — sessions then end with the process, which for a local single-analyst
+# tool is the right trade.
+app.secret_key = os.environ.get("PP_FORENSICS_SECRET") or secrets.token_hex(32)
+
+log = logging.getLogger(__name__)
+
+
+@app.before_request
+def _guard_state_changing_requests():
+    """Reject cross-origin state changes.
+
+    The server binds to localhost, but any page the analyst has open in the same
+    browser can POST to it. Without this check a visited web page could delete
+    the case registry.
+    """
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return None
+    source = request.headers.get("Origin") or request.headers.get("Referer")
+    if not source:
+        return None
+    parsed, here = urlsplit(source), urlsplit(request.host_url)
+    if (parsed.hostname, parsed.port) != (here.hostname, here.port):
+        log.warning("Rejected cross-origin %s %s from %s",
+                    request.method, request.path, source)
+        return jsonify({"ok": False, "error": "cross-origin request rejected"}), 403
+    return None
 
 
 # ---------------------------------------------------------------------------
 # Helpers / filters
 # ---------------------------------------------------------------------------
+
+def _int_arg(name: str, default: int, minimum: int = 0, maximum: int = 1_000_000) -> int:
+    """Read an integer query parameter without letting `?limit=abc` become a 500."""
+    raw = request.args.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return default
+    return max(minimum, min(maximum, value))
+
 
 def _active() -> Case:
     case = manager.get_active_case()
@@ -85,6 +130,22 @@ def _filter_ts(value: Any) -> str:
 
 @app.template_filter("yes_no")
 def _filter_yes_no(value: Any) -> str:
+    # Absent is not "No". A missing column or JSON key rendered as "No" states a
+    # negative fact the evidence does not hold. Undefined arrives here whenever a
+    # template reads a key the extractor never set, so catch it alongside None.
+    if value is None or isinstance(value, Undefined):
+        return "\u2014"
+    # shared_prefs XML and some JSON payloads store booleans as text, and every
+    # non-empty string is truthy — so "false" would otherwise read as Yes.
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in ("true", "yes", "1"):
+            return "Yes"
+        if v in ("false", "no", "0"):
+            return "No"
+        if not v:
+            return "\u2014"
+        return value
     return "Yes" if value else "No"
 
 
@@ -131,6 +192,25 @@ def _inject():
 # CSV export helpers
 # ---------------------------------------------------------------------------
 
+_CSV_INJECT = ("=", "+", "-", "@", "\t", "\r")
+
+
+def csv_safe(value):
+    """Neutralise spreadsheet formula injection: evidence is suspect-controlled,
+    and `=cmd|' /C calc'!A1` in a display name executes when the export is
+    opened in Excel."""
+    if isinstance(value, str) and value[:1] in _CSV_INJECT:
+        return "'" + value
+    return value
+
+
+def safe_filename(name: str, fallback: str = "export.csv") -> str:
+    """Content-Disposition is a header: a quote or newline in the name breaks it
+    (Werkzeug raises) and a path separator invites a surprise."""
+    cleaned = re.sub(r'[^A-Za-z0-9._-]+', "_", str(name or "")).strip("._")
+    return cleaned or fallback
+
+
 def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str) -> Response:
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
@@ -143,12 +223,13 @@ def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str)
                 v = v.get("iso") or v.get("display") or json.dumps(v, default=str)
             elif isinstance(v, (list, tuple)):
                 v = "; ".join(str(x) for x in v)
-            out[c] = v if v is not None else ""
+            out[c] = csv_safe(v) if v is not None else ""
         writer.writerow(out)
     return Response(
         buf.getvalue(),
         mimetype="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition":
+                 f'attachment; filename="{safe_filename(filename)}"'},
     )
 
 
@@ -784,7 +865,7 @@ def page_audit():
 @app.route("/timeline")
 def page_timeline():
     case = _active()
-    limit = int(request.args.get("limit", 1500))
+    limit = _int_arg("limit", 1500)
     q = request.args.get("q", "")
     src = request.args.get("source", "")
     events = case.timeline(limit=limit)
@@ -796,7 +877,7 @@ def page_timeline():
 @app.route("/timeline/export.csv")
 def export_timeline_csv():
     case = _active()
-    rows = case.timeline(limit=int(request.args.get("limit", 5000)))
+    rows = case.timeline(limit=_int_arg("limit", 5000))
     rows = _filter_table(rows, q=request.args.get("q", ""), filters={"source": request.args.get("source", "")})
     cols = ["when_iso", "source", "kind", "title", "amount_inr", "link_id"]
     return _csv_response(rows, cols, "unified_timeline.csv")
@@ -821,6 +902,20 @@ def page_db_browser():
                            plists=case.data.get("plist_inventory", []))
 
 
+def _case_database_paths(case) -> Dict[str, str]:
+    """Realpath -> original path for every database belonging to THIS case.
+
+    Without this the console is an arbitrary-file SQLite reader: `?db=` accepts
+    any path on the workstation, including another investigation's evidence.
+    """
+    allowed: Dict[str, str] = {}
+    for entry in case.data.get("database_inventory", []) or []:
+        p = entry.get("path") if isinstance(entry, dict) else None
+        if p:
+            allowed[os.path.realpath(p)] = p
+    return allowed
+
+
 @app.route("/database-browser/sql", methods=["GET"])
 def page_db_sql():
     case = _active()
@@ -831,7 +926,9 @@ def page_db_sql():
     error = None
     if db_path and sql:
         sql_stripped = sql.strip().rstrip(";")
-        if not sql_stripped.upper().startswith(("SELECT", "PRAGMA", "EXPLAIN", "WITH")):
+        if os.path.realpath(db_path) not in _case_database_paths(case):
+            error = "That database is not part of this case."
+        elif not sql_stripped.upper().startswith(("SELECT", "PRAGMA", "EXPLAIN", "WITH")):
             error = "Only SELECT / PRAGMA / EXPLAIN / WITH queries are allowed."
         elif ";" in sql_stripped:
             error = "Multiple statements are not allowed."
@@ -839,7 +936,10 @@ def page_db_sql():
             try:
                 from .core import SQLiteReader
                 with SQLiteReader(db_path) as db:
-                    rows = db.query(sql_stripped + " LIMIT 1000")
+                    # Cap at fetch time. Appending " LIMIT 1000" to the
+                    # analyst's SQL is a syntax error for PRAGMA, for EXPLAIN,
+                    # and for any query that already carries its own LIMIT.
+                    rows = db.query(sql_stripped)[:1000]
                 if rows and "_error" in rows[0]:
                     error = rows[0]["_error"]
                 else:
@@ -970,7 +1070,9 @@ def api_file():
     if case.paths.group_shared:
         allowed_roots.append(os.path.realpath(case.paths.group_shared))
     allowed_roots.append(os.path.realpath(os.path.join(os.getcwd(), "exports")))
-    if not any(real.startswith(r) for r in allowed_roots):
+    # `startswith` matches siblings: an allowed root of /case/app also permits
+    # /case/app-EXTRA. commonpath compares whole path components.
+    if not any(os.path.commonpath([real, r]) == r for r in allowed_roots):
         abort(403)
     return send_file(real)
 
@@ -991,7 +1093,7 @@ def api_blob():
 
 @app.route("/api/timeline")
 def api_timeline():
-    return jsonify(_active().timeline(limit=int(request.args.get("limit", 5000))))
+    return jsonify(_active().timeline(limit=_int_arg("limit", 5000)))
 
 
 @app.route("/api/findings")
@@ -1020,7 +1122,13 @@ def _err_404(e):
 
 @app.errorhandler(500)
 def _err_500(e):
-    return render_template("error.html", code=500, message=str(e)), 500
+    # str(e) is the raw exception: filesystem paths, SQL text, evidence values.
+    # Log it for the analyst's console; show the page a generic message.
+    log.exception("Unhandled error serving %s", request.path)
+    return render_template(
+        "error.html", code=500,
+        message="Internal error. See the server console for details.",
+    ), 500
 
 
 # ---------------------------------------------------------------------------
