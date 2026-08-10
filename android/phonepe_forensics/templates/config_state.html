@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Config & Experiments — PhonePe Android Forensics{% endblock %}
+{% block heading %}Config & Experiments{% endblock %}
+{% block subheading %}Server-driven UI specs, feature flags, A/B test buckets active for the subject device.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Config keys</div><div class="mvalue">{{ config.summary.config_key_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Chimera responses</div><div class="mvalue">{{ config.summary.chimera_response_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Experiments</div><div class="mvalue">{{ config.summary.experiment_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Buckets</div><div class="mvalue">{{ config.summary.bucket_count or 0 }}</div></div>
+</div>
+
+{% if config.experiments %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">A/B Experiments active</div>
+  <table>
+    <thead><tr><th>Experiment ID</th><th>Activity</th><th>Summary</th><th>Type</th><th>State</th><th>Mode</th><th>Started</th><th>Ends</th></tr></thead>
+    <tbody>
+    {% for e in config.experiments %}
+      <tr>
+        <td class="mono small">{{ e.experiment_id }}</td>
+        <td class="mono small">{{ e.activity_id }}</td>
+        <td class="small">{{ e.summary }}</td>
+        <td>{{ e.type }}</td>
+        <td><span class="tag {{ (e.state or '')|lower }}">{{ e.state }}</span></td>
+        <td>{{ e.mode }}</td>
+        <td class="mono small">{{ e.started|ts }}</td>
+        <td class="mono small">{{ e.ends|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if config.buckets %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Buckets the user is in</div>
+  <table>
+    <thead><tr><th>Bucket ID</th><th>Name</th><th>Status</th><th>%</th><th>Type</th><th>Summary</th></tr></thead>
+    <tbody>
+    {% for b in config.buckets %}
+      <tr>
+        <td class="mono small">{{ b.bucket_id }}</td>
+        <td>{{ b.name }}</td>
+        <td>{{ b.status }}</td>
+        <td class="mono">{{ b.percentage }}</td>
+        <td>{{ b.type }}</td>
+        <td class="small">{{ b.summary }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if config.config_keys %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">ConfigManagerKeyStore ({{ config.config_keys|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter…" data-filter-input data-filter-target="#cfgTable">
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="cfgTable">
+    <thead><tr><th>Key</th><th>Org</th><th>Team</th><th>JSON?</th><th class="right">Size</th><th>Preview</th></tr></thead>
+    <tbody>
+    {% for c in config.config_keys %}
+      <tr>
+        <td class="mono small">{{ c.key }}</td>
+        <td>{{ c.org or '—' }}</td>
+        <td>{{ c.team or '—' }}</td>
+        <td>{{ c.is_json|yes_no }}</td>
+        <td class="right mono small">{{ c.value_size }}</td>
+        <td class="small mono">{{ c.value_preview }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% if config.chimera_responses %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Chimera Responses ({{ config.chimera_responses|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter key…" data-filter-input data-filter-target="#chmTable">
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+  <table id="chmTable">
+    <thead><tr><th>Key</th><th>Team</th><th>Org</th><th class="right">Version</th><th class="right">Size</th><th>Verified</th></tr></thead>
+    <tbody>
+    {% for c in config.chimera_responses %}
+      <tr>
+        <td class="mono small">{{ c.key_id }}</td>
+        <td>{{ c.team or '—' }}</td>
+        <td>{{ c.org or '—' }}</td>
+        <td class="right mono">{{ c.max_version }}</td>
+        <td class="right mono">{{ c.response_size }}</td>
+        <td>{{ c.verified or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

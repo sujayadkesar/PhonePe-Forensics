@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Mini-apps — PhonePe Android Forensics{% endblock %}
+{% block heading %}Mini-apps (Switch / Nirvana){% endblock %}
+{% block subheading %}Third-party services the user opened inside PhonePe — reveals merchants/services used.{% endblock %}
+
+{% block content %}
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Installed mini-apps</div><div class="mvalue">{{ miniapps.summary.miniapp_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Merchants</div><div class="mvalue">{{ miniapps.summary.merchants|count }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Mini-apps</div>
+  <div class="filter-bar"><input type="text" placeholder="Filter…" data-filter-input data-filter-target="#maTable"></div>
+  <table id="maTable">
+    <thead><tr><th>Merchant</th><th>App name</th><th>Type</th><th>Category</th><th>Version</th><th>Whitelisted domains</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for a in miniapps.apps %}
+      <tr>
+        <td><b>{{ a.merchant_name or a.name }}</b></td>
+        <td class="small">{{ a.app_id }}</td>
+        <td><span class="tag">{{ a.micro_app_type }}</span></td>
+        <td>{{ a.category }}</td>
+        <td class="mono small">v{{ a.version }}</td>
+        <td class="small mono">{{ (a.whitelisted_domains or [])|join(', ') }}</td>
+        <td class="mono small">{{ a.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

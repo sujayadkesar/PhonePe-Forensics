@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Transaction {{ txn.global_payment_id }} — PhonePe Android Forensics{% endblock %}
+{% block heading %}Transaction · {{ txn.global_payment_id }}{% endblock %}
+{% block subheading %}Decoded transaction evidence from phonepe_core.transaction_core.{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('page_transactions') }}" class="btn">← All Transactions</a>{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-title">Core</div>
+    <div class="kv">
+      <b>Direction</b><span><span class="tag {{ (txn.direction or '')|lower }}">{{ txn.direction }}</span></span>
+      <b>Amount</b><span class="amount-{% if txn.direction=='IN' %}pos{% elif txn.direction=='OUT' %}neg{% else %}meta{% endif %}">{{ txn.amount_inr|inr }}</span>
+      <b>State</b><span><span class="tag {{ (txn.state or '')|lower }}">{{ txn.state }}</span></span>
+      <b>Type</b><span class="mono">{{ txn.type }}</span>
+      <b>Created</b><span>{{ txn.created_at|ts }}</span>
+      <b>Updated</b><span>{{ txn.updated_at|ts }}</span>
+      <b>Embedded ID time</b><span class="mono" {% if txn.id_embedded_ts %}title="{{ txn.id_embedded_ts.tz_caveat }}"{% endif %}>
+        {{ txn.id_embedded_ts.embedded_wallclock if txn.id_embedded_ts else '—' }}
+        {% if txn.id_embedded_ts %}<span class="muted small">({{ txn.id_embedded_ts.tz_assumed }})</span>{% endif %}
+      </span>
+      <b>Global Payment ID</b><span class="mono">{{ txn.global_payment_id }}</span>
+      <b>Entity ID</b><span class="mono">{{ txn.entity_id }}</span>
+      <b>Response code</b><span>{{ txn.response_code or '—' }}</span>
+      <b>Transfer mode</b><span>{{ txn.transfer_mode or '—' }}</span>
+      <b>Context tag</b><span>{{ txn.context_tag or '—' }}</span>
+      <b>Category code</b><span class="mono">{{ txn.category_code or '—' }}</span>
+      <b>Internal txn</b><span>{{ txn.is_internal|yes_no }}</span>
+      <b>Dismissed</b><span>{{ txn.dismissed|yes_no }}</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Counterparty</div>
+    <div class="kv">
+      <b>Display name</b><span class="plain">{{ txn.counterparty or '—' }}</span>
+      <b>CBS name</b><span class="plain">{{ txn.counterparty_cbs_name or '—' }}</span>
+      <b>Phone</b><span class="mono">{{ txn.counterparty_phone or '—' }}</span>
+      <b>VPA</b><span class="mono">{{ txn.counterparty_vpa or '—' }}</span>
+      <b>User ID</b><span class="mono">{{ txn.counterparty_user_id or '—' }}</span>
+      <b>User type</b><span>{{ txn.counterparty_user_type or '—' }}</span>
+    </div>
+    <div class="divider"></div>
+    <div class="card-title">Self side</div>
+    <div class="kv">
+      <b>Account holder</b><span class="plain">{{ txn.self_account_holder or '—' }}</span>
+      <b>Account #</b><span class="mono">{{ txn.self_account_masked or '—' }}</span>
+      <b>VPA used</b><span class="mono">{{ txn.self_vpa or '—' }}</span>
+      <b>IFSC</b><span class="mono">{{ txn.self_ifsc or '—' }}</span>
+      <b>Instrument ID</b><span class="mono">{{ txn.instrument_id or '—' }}</span>
+      <b>UTR</b><span class="mono">{{ txn.utr or '—' }}</span>
+    </div>
+  </div>
+</div>
+
+{% if corroboration %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Cross-DB Corroboration ({{ corroboration.corroboration_score }} sources)</div>
+  <div class="row">
+    {% for s in corroboration.sources %}<span class="tag accent">{{ s }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if chat_messages %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Linked Chat Messages ({{ chat_messages|length }})</div>
+  <table>
+    <thead><tr><th>When</th><th>Type</th><th class="right">Amount</th><th>State</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for m in chat_messages %}
+      <tr>
+        <td class="mono small">{{ m.created_at|ts }}</td>
+        <td><span class="tag">{{ m.type }}</span></td>
+        <td class="right amount-pos">{{ m.amount_inr|inr if m.amount_inr is not none else '—' }}</td>
+        <td>{{ m.state or m.payment_state or '—' }}</td>
+        <td class="small">{{ (m.note or m.text_message or '')|truncate(80) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if txn.search_token %}
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Plain-text Search Token (forensic full-text)</div>
+    <button type="button" class="btn small" data-copy="#tx-search-token">⧉ Copy</button>
+  </div>
+  <pre class="code" id="tx-search-token">{{ txn.search_token }}</pre>
+</div>
+{% endif %}
+
+{% if txn.raw_data %}
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Decoded transaction payload (tstore_data)</div>
+    <button type="button" class="btn small" data-copy="#tx-zdata">⧉ Copy JSON</button>
+  </div>
+  <p class="muted small" style="margin:2px 0 8px">payment payload as published by the UPI gateway response</p>
+  <pre class="json-tree" id="tx-zdata">{{ txn.raw_data | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+
+{% if txn.raw_tags %}
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Flattened tag dict</div>
+    <button type="button" class="btn small" data-copy="#tx-ztags">⧉ Copy JSON</button>
+  </div>
+  <pre class="json-tree" id="tx-ztags">{{ txn.raw_tags | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Transaction attributes (key-value index)</div>
+  {% if txn.all_tags %}
+  <table>
+    <thead><tr><th>Key</th><th>Value</th></tr></thead>
+    <tbody>{% for k, v in txn.all_tags.items() %}<tr><td class="mono">{{ k }}</td><td class="mono">{{ v }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% else %}<p class="muted">No tag rows linked.</p>{% endif %}
+</div>
+
+{% endblock %}

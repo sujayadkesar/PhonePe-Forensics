@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Social Graph — PhonePe Android Forensics{% endblock %}
+{% block heading %}Social-Financial Graph{% endblock %}
+{% block subheading %}{{ graph.summary.total_nodes }} nodes · {{ graph.summary.with_transactions }} with transactions · {{ graph.summary.with_chat }} with chat history.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Total Nodes</div><div class="mvalue">{{ graph.summary.total_nodes }}</div></div>
+  <div class="metric"><div class="mlabel">With Transactions</div><div class="mvalue pos">{{ graph.summary.with_transactions }}</div></div>
+  <div class="metric"><div class="mlabel">With Chat</div><div class="mvalue">{{ graph.summary.with_chat }}</div></div>
+  <div class="metric"><div class="mlabel">Phone Index</div><div class="mvalue">{{ graph.summary.phone_index_size }}</div></div>
+  <div class="metric"><div class="mlabel">VPA Index</div><div class="mvalue">{{ graph.summary.vpa_index_size }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Counterparty Nodes (sorted by activity)</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search name, phone, VPA…"
+           data-filter-input data-filter-target="#sgTable" data-filter-counter="#sgCount">
+    <select data-filter-select data-filter-target="#sgTable" data-filter-column="1">
+      <option value="">Kind: any</option>
+      <option value="CONTACT">CONTACT (PhonePe)</option>
+      <option value="PHONEBOOK_ONLY">PHONEBOOK_ONLY</option>
+      <option value="TXN_DERIVED">TXN_DERIVED</option>
+      <option value="CHAT_DERIVED">CHAT_DERIVED</option>
+    </select>
+    <span class="muted small" id="sgCount" style="margin-left:auto">{{ graph.nodes|length }} / {{ graph.nodes|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow-y:auto">
+  <table id="sgTable">
+    <thead>
+      <tr>
+        <th style="width:44px"></th>
+        <th>Name</th>
+        <th>Kind</th>
+        <th>Phone</th>
+        <th>VPA</th>
+        <th class="right">Txn IN</th>
+        <th class="right">Txn OUT</th>
+        <th class="right">₹ IN</th>
+        <th class="right">₹ OUT</th>
+        <th class="right">Chat msg</th>
+        <th class="right">Chat pay</th>
+        <th>Sources</th>
+        <th>First Seen</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for n in graph.nodes %}
+      <tr>
+        <td>
+        </td>
+        <td><a href="{{ url_for('page_counterparty', q=n.name or n.phone or n.vpa) }}">{{ n.name or '—' }}</a></td>
+        <td><span class="tag">{{ n.kind }}</span></td>
+        <td class="mono small">{{ n.phone or '—' }}</td>
+        <td class="mono small">{{ n.vpa or '—' }}</td>
+        <td class="right mono">{{ n.txn_count_in }}</td>
+        <td class="right mono">{{ n.txn_count_out }}</td>
+        <td class="right amount-pos">{% if n.txn_total_in %}{{ n.txn_total_in|inr }}{% endif %}</td>
+        <td class="right amount-neg">{% if n.txn_total_out %}{{ n.txn_total_out|inr }}{% endif %}</td>
+        <td class="right mono">{{ n.chat_message_count }}</td>
+        <td class="right mono">{{ n.chat_payment_count }}</td>
+        <td><div class="row-tight">{% for s in n.evidence_sources %}<span class="tag">{{ s }}</span>{% endfor %}</div></td>
+        <td class="mono small">{{ n.first_seen_iso or '' }}</td>
+        <td class="mono small">{{ n.last_seen_iso or '' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

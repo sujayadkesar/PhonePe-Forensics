@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Audit & Lifecycle — PhonePe Android Forensics{% endblock %}
+{% block heading %}Audit & Lifecycle{% endblock %}
+{% block subheading %}Sync history, consent records, background tasks and on-device ML model state.{% endblock %}
+
+{% block content %}
+
+{% if evidence_warnings %}
+<div class="card" style="margin-bottom:18px;border-left:4px solid #f87171">
+  <div class="card-title">⚠ Evidence integrity warnings</div>
+  <ul style="margin:8px 0 0 18px">
+    {% for w in evidence_warnings %}<li class="mono small">{{ w }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom:18px">
+  <div class="card-title">Extraction health ({{ extraction_errors|length }} problem(s))</div>
+  {% if extraction_errors %}
+  <p class="muted small">Every module failure, degradation and schema gap seen while
+     parsing this acquisition. A view backed by one of these is incomplete, not empty.</p>
+  <table>
+    <thead><tr><th>Severity</th><th>Module / DB</th><th>Detail</th></tr></thead>
+    <tbody>
+      {% for e in extraction_errors %}
+      <tr>
+        <td><span class="tag {% if e.severity == 'failed' %}neg{% else %}med{% endif %}">{{ e.severity }}</span></td>
+        <td class="mono">{{ e.module }}</td>
+        <td class="small">{{ e.detail }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted small">Every extractor completed and every requested column was present.</p>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="card-title">Acquisition hash manifest ({{ manifest|length }} database(s))</div>
+  <p class="muted small">SHA-256 taken before any parsing, covering each database and its
+     <span class="mono">-wal</span>/<span class="mono">-shm</span> sidecars. Evidence is never
+     written to: databases carrying a WAL are recovered against a scratch copy, the rest are
+     opened <span class="mono">immutable</span> in place.</p>
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Database</th><th>SHA-256</th><th>Opened via</th><th>WAL</th><th>Sidecars</th></tr></thead>
+    <tbody>
+      {% for m in manifest %}
+      <tr>
+        <td class="mono small" title="{{ m.original }}">{{ m.original.split('/')[-1] }}</td>
+        <td class="mono small">{{ m.sha256 }}</td>
+        <td class="small">{{ m.opened_via }}</td>
+        <td class="small">
+          {% if m.wal_present %}
+            {% if m.wal_applied %}applied{% else %}<span class="tag neg">EXCLUDED</span>{% endif %}
+          {% else %}none{% endif %}
+        </td>
+        <td class="mono small">
+          {% for k, v in m.sidecar_hashes.items() %}{{ k }}={{ v[:16] }}…<br>{% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="muted small" style="margin-top:8px">
+    Evidence root: <span class="mono">{{ case_root }}</span>
+  </p>
+</div>
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Ledger syncs</div><div class="mvalue">{{ audit.summary.ledger_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">Central syncs</div><div class="mvalue">{{ audit.summary.central_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">BG sync items</div><div class="mvalue">{{ audit.summary.bg_sync_count }}</div></div>
+  <div class="metric"><div class="mlabel">Consents</div><div class="mvalue">{{ audit.summary.consent_count }}</div></div>
+</div>
+
+{# A "Consent Subject" card (user id / phone / device fingerprint) stood here reading
+   `audit.consent_user`, which no extractor sets and which has no Android source: the
+   consent database's only subject field is `subjectRefId`, already shown as
+   "Subject ref" in the table below and exported in consents.csv. Removed rather than
+   left as a panel that could never render — see STATE.md pass 4. #}
+
+{% if audit.consents %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Consent Acceptances
+    <a class="btn subtle" style="float:right" href="{{ url_for('export_consents_csv_route') }}">Export CSV</a>
+  </div>
+  <p class="muted small">
+    Merged from two separate stores — the standalone <span class="mono">consent</span> database
+    and <span class="mono">phonepe_core.consent</span>. The <b>Source</b> column names which
+    store each record came from.
+  </p>
+  <table>
+    <thead><tr><th>State</th><th>Accepted</th><th>Data type</th><th>Use case</th><th>Definition</th><th>End time</th><th>Source</th></tr></thead>
+    <tbody>
+    {% for c in audit.consents %}
+      <tr>
+        <td><span class="tag">{{ c.state }}</span></td>
+        <td>{% if c.accept_type %}<span class="tag {% if c.accept_type == 'ACCEPT' %}accent{% endif %}">{{ c.accept_type }}</span>{% else %}—{% endif %}</td>
+        <td>{{ c.destination }}</td>
+        <td class="mono small">{{ c.subject_id }}</td>
+        <td class="small">{{ c.definition or '—' }}</td>
+        <td class="mono small">{{ c.end_time|ts }}</td>
+        <td class="mono small">{{ c.source or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{# A "Consent Definitions" table stood here reading `audit.consent_definitions`, which
+   nothing sets and which has no separate source: the consent database holds exactly one
+   table (`consent`), and each row's `consentDefinition` is already carried as
+   `definition` on the consent records above. Removed as a panel that could never
+   render — see STATE.md pass 4. #}
+
+{% if audit.cassini_models %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">On-device ML Models (Cassini)</div>
+  <table>
+    {# "Checksum" was a column with no source: `model_data` has no checksum field.
+       Replaced with version and on-device directory, which it does have. #}
+    <thead><tr><th>Name</th><th>ID</th><th>Version</th><th>Local state</th><th>Server state</th>
+               <th>On-device path</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for m in audit.cassini_models %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td class="mono small">{{ m.id }}</td>
+        <td class="mono small">{{ m.version or '—' }}</td>
+        <td><span class="tag">{{ m.local_state }}</span></td>
+        <td>{{ m.server_state }}</td>
+        <td class="mono small">{{ m.directory_uri or '—' }}</td>
+        <td class="mono small">{{ m.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-title">Central Sync history</div>
+    <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>System</th><th>Key</th><th>Type</th><th>Status</th><th>Last attempt</th><th>Last completed</th></tr></thead>
+      <tbody>
+      {% for s in audit.central_sync %}
+        <tr>
+          <td>{{ s.system }}</td>
+          <td class="mono small">{{ s.key }}</td>
+          <td class="small">{{ s.type }}</td>
+          <td><span class="tag">{{ s.status }}</span></td>
+          <td class="mono small">{{ s.last_attempt|ts }}</td>
+          <td class="mono small">{{ s.last_completed|ts }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Background Sync items</div>
+    <table>
+      <thead><tr><th>Identifier</th><th>Last sync</th></tr></thead>
+      <tbody>
+      {% for s in audit.bg_sync_items %}
+        <tr><td class="mono small">{{ s.identifier }}</td><td class="mono small">{{ s.last_sync|ts }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="divider"></div>
+    <div class="card-title">Ledger Sync (Chronicle)</div>
+    <div class="tbl-wrap-scroll" style="max-height:36vh;overflow-y:auto">
+    <table>
+      <thead><tr><th>Ledger ID</th><th>Balance</th><th>Expense</th><th>Last sync</th></tr></thead>
+      <tbody>
+      {% for l in audit.ledger_sync %}
+        <tr>
+          <td class="mono small">{{ l.ledger_id|truncate(28) }}</td>
+          <td>{{ l.balance_status }}</td>
+          <td>{{ l.expense_status }}</td>
+          <td class="mono small">{{ l.last_balance_sync|ts }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

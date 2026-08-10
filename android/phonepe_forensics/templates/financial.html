@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Financial Services — PhonePe Android Forensics{% endblock %}
+{% block heading %}Financial Services{% endblock %}
+{% block subheading %}Rewards, mutual fund catalogue, vouchers, donations and offers.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Rewards</div><div class="mvalue">{{ financial.summary.rewards_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">MF Catalogue</div><div class="mvalue">{{ financial.summary.mf_catalogue_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Voucher Categories</div><div class="mvalue">{{ financial.summary.voucher_category_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Donation Providers</div><div class="mvalue">{{ financial.summary.donation_provider_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Offers</div><div class="mvalue">{{ financial.summary.offers_count or 0 }}</div></div>
+</div>
+
+{% if financial.rewards %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Rewards earned</div>
+  <table>
+    <thead><tr><th>Title</th><th>Type</th><th>State</th><th class="right">Amount</th><th>Created</th><th>Linked txn</th><th>Coupon</th></tr></thead>
+    <tbody>
+    {% for r in financial.rewards %}
+      <tr>
+        <td>{{ r.title or '—' }}</td>
+        <td><span class="tag">{{ r.type }}</span></td>
+        <td>{{ r.state }}</td>
+        <td class="right amount-pos">{{ r.amount_inr|inr if r.amount_inr is not none else '—' }}</td>
+        <td class="mono small">{{ r.created_at|ts }}</td>
+        <td class="mono small">{{ (r.linked_transaction or '')|truncate(20) }}</td>
+        <td class="mono small">{{ r.coupon_code or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if financial.donations %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Donation Providers ({{ financial.donations|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter…" data-filter-input data-filter-target="#donTable">
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:50vh;overflow-y:auto">
+  <table id="donTable">
+    <thead><tr><th>Name</th><th>Subname</th><th>Status</th><th>Active</th><th class="right">Min ₹</th><th>Created</th></tr></thead>
+    <tbody>
+    {% for d in financial.donations %}
+      <tr>
+        <td>{{ d.name or '—' }}</td>
+        <td class="small">{{ d.subname or '—' }}</td>
+        <td>{{ d.status or '—' }}</td>
+        <td>{{ d.active|yes_no }}</td>
+        <td class="right mono">{{ d.price_inr|inr if d.price_inr is not none else '—' }}</td>
+        <td class="mono small">{{ d.created_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% if financial.voucher_categories %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Voucher Categories</div>
+  <div class="row">
+    {% for v in financial.voucher_categories %}<span class="tag">{{ v.name }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if financial.offers %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Granting Offers</div>
+  <table>
+    <thead><tr><th>Title</th><th>Type</th><th>State</th><th>Action</th><th>Starts</th><th>Ends</th></tr></thead>
+    <tbody>
+    {% for o in financial.offers %}
+      <tr>
+        <td>{{ o.title or '—' }}</td>
+        <td>{{ o.type or '—' }}</td>
+        <td>{{ o.state or '—' }}</td>
+        <td>{{ o.action or '—' }}</td>
+        <td class="mono small">{{ o.starts|ts }}</td>
+        <td class="mono small">{{ o.ends|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if financial.mutual_funds %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Mutual Funds catalogue ({{ financial.mutual_funds|length }})</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter fund…" data-filter-input data-filter-target="#mfTable">
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="mfTable">
+    <thead><tr><th>AMC</th><th>Name</th><th>Category</th><th>Enabled</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for f in financial.mutual_funds[:1500] %}
+      <tr>
+        <td>{{ f.amc or '—' }}</td>
+        <td>{{ f.name or '—' }}</td>
+        <td>{{ f.category or '—' }}</td>
+        <td>{{ f.enabled|yes_no }}</td>
+        <td class="mono small">{{ f.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

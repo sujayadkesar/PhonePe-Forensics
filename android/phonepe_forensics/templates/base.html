@@ -3,25 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}PhonePe iOS Forensics{% endblock %}</title>
+<title>{% block title %}PhonePe Forensics{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 {# No remote assets. This is an offline forensic tool examining a subject's
-   financial and social history, so it must not reach a third party on every page
-   load: that discloses when and from where an examination is running, and on an
-   isolated workstation each page stalls on a DNS timeout instead. The font
-   stacks in app.css already fall back to Inter/JetBrains Mono if installed
-   locally, then to system faces. #}
+   financial and social history, so it must not reach a third party on every
+   page load — that leaks when and where an examination is running, and stalls
+   on an air-gapped workstation. The stylesheet's font stack already falls back
+   to system faces. #}
+<link rel="icon" href="data:,">
 </head>
-<body class="dark">
+<body class="dark{% if ui_platform %} platform-{{ ui_platform }}{% endif %}">
 <div class="layout">
 <aside class="sidebar">
-  <div class="brand">
+  <a href="{{ url_for('page_cases') }}" class="brand" style="text-decoration:none;color:inherit">
     <div class="brand-mark">PP</div>
     <div class="brand-text">
-      <div class="brand-title">PhonePe Forensics</div>
-      <div class="brand-sub">iOS Acquisition Analyser</div>
+      <div class="brand-title">PhonePe Forensics
+        <span class="plat-badge plat-android">Android</span>
+      </div>
+      <div class="brand-sub">Android Acquisition Analyser</div>
     </div>
-  </div>
+  </a>
 
   {% if case_loaded %}
   <div class="case-card">
@@ -63,15 +65,21 @@
 
     <div class="nav-section">Financial</div>
     <a href="{{ url_for('page_transactions') }}" class="nav-item">₹ Transactions</a>
-    <a href="{{ url_for('page_v2_mandates') }}" class="nav-item">⟳ Mandates · Refunds</a>
+    <a href="{{ url_for('page_ledger') }}" class="nav-item">⇄ Split / Bill Ledger</a>
     <a href="{{ url_for('page_financial') }}" class="nav-item">◊ Rewards / MF / Vouchers</a>
-    <a href="{{ url_for('page_travel') }}" class="nav-item">→ Travel Journeys</a>
+    <a href="{{ url_for('page_travel') }}" class="nav-item">→ User Journeys</a>
 
     <div class="nav-section">Social</div>
-    <a href="{{ url_for('page_contacts') }}" class="nav-item">○ Contacts (Sampark)</a>
-    <a href="{{ url_for('page_chat') }}" class="nav-item">⌬ Chat & Groups (Burble)</a>
+    <a href="{{ url_for('page_contacts') }}" class="nav-item">○ Contacts</a>
+    <a href="{{ url_for('page_chat') }}" class="nav-item">⌬ Chat & Groups</a>
     <a href="{{ url_for('page_social_graph') }}" class="nav-item">⌖ Social Graph</a>
     <a href="{{ url_for('page_notifications') }}" class="nav-item">▫ Push / PubSub</a>
+
+    {% if platform == 'android' %}
+    <div class="nav-section">Android Sources</div>
+    <a href="{{ url_for('page_sms') }}" class="nav-item">✉ SMS Inbox (Inference)</a>
+    <a href="{{ url_for('page_miniapps') }}" class="nav-item">▢ Mini-apps (Switch)</a>
+    {% endif %}
 
     <div class="nav-section">Behaviour</div>
     <a href="{{ url_for('page_analytics') }}" class="nav-item">▥ Analytics Events</a>
@@ -83,23 +91,30 @@
     <div class="nav-section">Media</div>
     <a href="{{ url_for('page_media') }}" class="nav-item">◳ QR & Backgrounds & DPs</a>
 
+    <div class="nav-section">Recovery</div>
+    {% if platform == 'android' %}
+    <a href="{{ url_for('page_deleted') }}" class="nav-item">⌦ Deleted Records</a>
+    {% endif %}
+
     <div class="nav-section">Raw Data</div>
-    <a href="{{ url_for('page_v2_raw_records') }}" class="nav-item">{ } Raw Records · Provenance</a>
+    {% if platform == 'android' %}
+    <a href="{{ url_for('page_raw_tables') }}" class="nav-item">{ } All Tables (raw)</a>
+    <a href="{{ url_for('page_prefs') }}" class="nav-item">⚙ Shared Prefs</a>
+    <a href="{{ url_for('page_files') }}" class="nav-item">▦ Files & DataStore</a>
+    <a href="{{ url_for('page_provenance') }}" class="nav-item">⛓ Provenance / Sources</a>
+    {% endif %}
     <a href="{{ url_for('page_db_browser') }}" class="nav-item">▢ Database Inventory</a>
     <a href="{{ url_for('page_db_sql') }}" class="nav-item">⏵ SQL Console</a>
 
     <div class="nav-section">Reports</div>
     <a href="{{ url_for('page_exports') }}" class="nav-item">↧ Exports</a>
     {% endif %}
-
-    <div class="nav-section">Reference</div>
-    <a href="{{ url_for('page_research') }}" class="nav-item">📖 Research Document</a>
   </nav>
 
   <div class="footer">
     <div>v1.0.0</div>
     <div class="muted">Read-only forensic tool</div>
-    <div class="credit-line">
+<div class="credit-line">
       Android &amp; launcher ·
       <a href="https://www.linkedin.com/in/mihir-choudhary/"
          target="_blank" rel="noopener"><b>Mihir Choudhary</b></a>
@@ -119,6 +134,51 @@
       <p class="muted">{% block subheading %}{% endblock %}</p>
     </div>
     <div class="topbar-actions">
+      {# Two independent controls: how a timestamp is written, and which clock
+         it is written in. They are separate questions — preferring day-first
+         dates says nothing about which jurisdiction you want to read them in.
+         Display only; the stored value is always UTC and is never rewritten. #}
+      {% if ts_formats %}
+      <details class="ts-picker">
+        <summary title="Date format">
+          📅 <span class="ts-current">{{ ts_formats[ts_format_key].label }}</span>
+        </summary>
+        <form method="post" action="{{ url_for('set_time_format') }}" class="ts-menu">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <div class="ts-menu-head">Date &amp; time format</div>
+          {% for key, f in ts_formats.items() %}
+            <button type="submit" name="ts_format" value="{{ key }}"
+                    class="ts-opt {% if key == ts_format_key %}is-active{% endif %}">
+              <span class="ts-opt-label">{{ f.label }}{% if key == ts_format_key %} ✓{% endif %}</span>
+              <span class="ts-opt-eg mono">{{ ts_format_examples[key] }}</span>
+              <span class="ts-opt-note">{{ f.note }}</span>
+            </button>
+          {% endfor %}
+        </form>
+      </details>
+
+      <details class="ts-picker">
+        <summary title="Timezone the times are shown in">
+          🌐 <span class="ts-current">{{ ts_zones[ts_zone_key].label }}</span>
+        </summary>
+        <form method="post" action="{{ url_for('set_time_format') }}" class="ts-menu">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <div class="ts-menu-head">Display timezone</div>
+          {% for key, z in ts_zones.items() %}
+            <button type="submit" name="ts_zone" value="{{ key }}"
+                    class="ts-opt {% if key == ts_zone_key %}is-active{% endif %}">
+              <span class="ts-opt-label">{{ z.label }}{% if key == ts_zone_key %} ✓{% endif %}</span>
+              <span class="ts-opt-eg mono">{{ ts_zone_examples[key] }}</span>
+              {% if z.note %}<span class="ts-opt-note">{{ z.note }}</span>{% endif %}
+            </button>
+          {% endfor %}
+          <div class="ts-menu-foot">
+            Values are stored in UTC and converted for display only. Every rendered
+            time carries its zone, and exports stay ISO-8601 UTC regardless.
+          </div>
+        </form>
+      </details>
+      {% endif %}
       {% block topbar_actions %}{% endblock %}
     </div>
   </header>
@@ -161,11 +221,72 @@ img.zoomable{cursor:zoom-in;}
 .btn.copied,button.copied{
   background:rgba(16,185,129,.2)!important;color:#10b981!important;
   border-color:rgba(16,185,129,.45)!important;}
+/* ── privacy / redaction toggle (OFF by default — nothing hidden) ──── */
+#privacy-toggle{position:fixed;right:18px;bottom:18px;z-index:9000;
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  padding:9px 14px;border-radius:24px;border:1px solid rgba(255,255,255,.14);
+  background:#15151f;color:#cbd5e1;font-size:12px;font-weight:600;
+  box-shadow:0 6px 20px rgba(0,0,0,.45);font-family:Inter,system-ui,sans-serif;}
+#privacy-toggle:hover{border-color:#5b4a9e;}
+#privacy-toggle .pt-dot{width:9px;height:9px;border-radius:50%;background:#10b981;}
+body.redacted #privacy-toggle{color:#fbbf24;border-color:rgba(245,158,11,.5);}
+body.redacted #privacy-toggle .pt-dot{background:#f59e0b;}
+/* when redaction is ON, blur ONLY PII (names, phones, accounts, VPAs, UTRs, device IDs,
+   tokens) + profile photos. Timestamps, amounts, types, states, counts are NOT blurred.
+   PII cells are tagged by .pii (added to PII table columns via JS + key fields directly). */
+body.redacted .pii{filter:blur(5px);transition:filter .08s;border-radius:3px;}
+body.redacted .pii:hover{filter:none;}
+body.redacted .dp img{filter:blur(9px);}
+body.redacted .dp:hover img{filter:none;}
+@media print{body.redacted .pii{filter:blur(6px)!important;}}
 </style>
 <div id="lightbox" class="lightbox" hidden>
   <img id="lightbox-img" alt="full size view">
   <div class="lightbox-cap" id="lightbox-cap">click anywhere or press Esc to close</div>
 </div>
+
+<!-- ── privacy / redaction toggle — OFF by default (all data visible) ── -->
+<button id="privacy-toggle" title="Redaction is OFF by default — all data is shown. Toggle to blur identifiers & photos for safe screenshots/sharing. Hover any blurred value to peek.">
+  <span class="pt-dot"></span><span class="pt-label">Showing all data</span>
+</button>
+<script>
+(function(){
+  var KEY='pp_redact', btn=document.getElementById('privacy-toggle'),
+      lbl=btn.querySelector('.pt-label');
+  function apply(on){
+    document.body.classList.toggle('redacted', on);
+    lbl.textContent = on ? 'Redacted — hover to peek' : 'Showing all data';
+  }
+  // default OFF: only redact if the user previously turned it on
+  apply(localStorage.getItem(KEY)==='1');
+  btn.addEventListener('click',function(){
+    var on=!document.body.classList.contains('redacted');
+    try{ localStorage.setItem(KEY, on?'1':'0'); }catch(_){}
+    apply(on);
+  });
+})();
+</script>
+<script>
+/* Tag PII table cells so redaction blurs ONLY sensitive columns. A column is PII if its header
+   matches a name/phone/account/VPA/UTR/contact/device pattern AND is not a safe column
+   (created/updated/time/amount/type/state/count/balance/give/receive…). Runs once on load. */
+(function(){
+  var PII=/(name|holder|\bmember|payer|counterpart|\bfrom\b|\bto\b|sender|receiver|phone|mobile|\bvpa\b|upi\s*id|account|a\/c|\butr\b|address|contact|subject|party|email|destination|device|token|members)/i;
+  var SAFE=/(created|updated|when|\btime|date|amount|\btype|state|status|\bdir\b|category|\bcount\b|size|version|score|rank|priority|stage|percent|balance|\bgive\b|\breceive\b|inr|qty|rows?|export|action\b)/i;
+  function tag(){
+    document.querySelectorAll('table').forEach(function(tbl){
+      var ths=tbl.querySelectorAll('thead th'); if(!ths.length) return;
+      var cols=[];
+      ths.forEach(function(th,i){var t=(th.textContent||'').trim(); if(t&&PII.test(t)&&!SAFE.test(t))cols.push(i);});
+      if(!cols.length) return;
+      tbl.querySelectorAll('tbody tr').forEach(function(tr){
+        for(var i=0;i<cols.length;i++){var td=tr.children[cols[i]]; if(td)td.classList.add('pii');}
+      });
+    });
+  }
+  if(document.readyState!=='loading') tag(); else document.addEventListener('DOMContentLoaded',tag);
+})();
+</script>
 
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script>

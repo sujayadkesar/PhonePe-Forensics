@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PhonePe Android Forensics{% endblock %}
+{% block heading %}Forensic Dashboard{% endblock %}
+{% block subheading %}Snapshot of identity, money flow, social graph & device activity for the active acquisition.{% endblock %}
+{% block topbar_actions %}
+<a href="{{ url_for('page_exports') }}" class="btn primary">↧ Export Evidence</a>
+{% endblock %}
+
+{% block content %}
+
+{% if dashboard.evidence_warnings %}
+<div class="card" style="margin-bottom:18px;border-left:4px solid #f87171">
+  <div class="card-title">⚠ Evidence integrity warnings</div>
+  <ul style="margin:8px 0 0 18px">
+    {% for w in dashboard.evidence_warnings %}<li class="mono small">{{ w }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if dashboard.extraction_errors %}
+<div class="card" style="margin-bottom:18px;border-left:4px solid #fbbf24">
+  <div class="card-title">
+    ⚠ {{ dashboard.extraction_errors|length }} extraction problem(s) — some views may be incomplete
+  </div>
+  <p class="muted small" style="margin:6px 0 0">
+    A blank page below may mean the data could not be read, not that it is absent.
+    Full detail on the <a href="{{ url_for('page_audit') }}">Audit</a> page.
+  </p>
+  <ul style="margin:8px 0 0 18px">
+    {% for e in dashboard.extraction_errors[:6] %}
+      <li class="small"><span class="tag med">{{ e.severity }}</span>
+        <span class="mono">{{ e.module }}</span> — {{ e.detail }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<section class="identity-hero">
+  <h2>SUBJECT IDENTITY</h2>
+  <div class="row" style="justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div>
+      <div class="name">{{ identity.registered_name or 'Unknown subject' }}</div>
+      <div class="upi">{{ identity.upi_id or '—' }}</div>
+      {% if transactions_summary.self_account_holders %}
+        <div class="muted small" style="margin-top:6px">
+          Bank holder: <span class="mono">{{ transactions_summary.self_account_holders|join(', ') }}</span>
+        </div>
+      {% endif %}
+      {% if transactions_summary.self_phones %}
+        <div class="muted small">Phone: <span class="mono">{{ transactions_summary.self_phones|join(', ') }}</span></div>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      {% if identity.location_hints %}
+        {% set loc = identity.location_hints[0] %}
+        <span class="tag accent">📍 {{ loc.state }} · {{ loc.pincode }}</span>
+        <span class="muted mono small">{{ loc.lat }}, {{ loc.lng or '?' }}</span>
+      {% endif %}
+      <span class="tag info">{{ dashboard.metrics.supported_banks }} banks indexed</span>
+    </div>
+  </div>
+</section>
+
+
+<div class="metric-grid">
+  <div class="metric accent">
+    <div class="mlabel">Transactions</div>
+    <div class="mvalue">{{ dashboard.metrics.transactions }}</div>
+    <div class="msub">
+      {{ dashboard.earliest_txn|ts }} → {{ dashboard.latest_txn|ts }}
+    </div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Total Received</div>
+    <div class="mvalue pos">{{ dashboard.metrics.transactions_in|inr }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Total Sent</div>
+    <div class="mvalue neg">{{ dashboard.metrics.transactions_out|inr }}</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Net Flow</div>
+    <div class="mvalue {% if (dashboard.metrics.transactions_in - dashboard.metrics.transactions_out) > 0 %}pos{% else %}neg{% endif %}">
+      {{ (dashboard.metrics.transactions_in - dashboard.metrics.transactions_out)|inr }}
+    </div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Chat Groups</div>
+    <div class="mvalue">{{ dashboard.metrics.groups }}</div>
+    <div class="msub">{{ dashboard.metrics.messages }} messages</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Phonebook</div>
+    <div class="mvalue">{{ dashboard.metrics.phonebook_contacts }}</div>
+    <div class="msub">{{ dashboard.metrics.phonepe_contacts }} on PhonePe</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Behavioral Events</div>
+    <div class="mvalue">{{ dashboard.metrics.kn_events }}</div>
+    <div class="msub">KN analytics queue</div>
+  </div>
+  <div class="metric">
+    <div class="mlabel">Findings</div>
+    <div class="mvalue {% if dashboard.findings_count %}neg{% endif %}">{{ dashboard.findings_count }}</div>
+    <div class="msub">heuristic flags</div>
+  </div>
+</div>
+
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Money Flow by Year</div>
+  {% set yearly_in = transactions_summary.yearly_received_inr or {} %}
+  {% set yearly_out = transactions_summary.yearly_sent_inr or {} %}
+  {% if yearly_in or yearly_out %}
+  <table>
+    <thead><tr><th>Year</th><th class="right">Received</th><th class="right">Sent</th><th class="right">Net</th></tr></thead>
+    <tbody>
+      {% set years = (yearly_in.keys()|list + yearly_out.keys()|list)|unique|list|sort %}
+      {% for y in years %}
+        {% set ri = yearly_in.get(y, 0) %}
+        {% set ro = yearly_out.get(y, 0) %}
+        <tr>
+          <td class="mono">{{ y }}</td>
+          <td class="right amount-pos" style="white-space:nowrap">{{ ri|inr }}</td>
+          <td class="right amount-neg" style="white-space:nowrap">{{ ro|inr }}</td>
+          <td class="right {% if ri-ro > 0 %}amount-pos{% else %}amount-neg{% endif %}" style="white-space:nowrap">{{ (ri-ro)|inr }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No transaction data.</p>{% endif %}
+</div>
+
+<div class="card" style="margin-top:18px">
+  {% set received = transactions_summary.top_counterparties_received %}
+  {% set sent = transactions_summary.top_counterparties_sent %}
+  {% if received or sent %}
+    <div class="card-title">Top Counterparties · ranked by total amount</div>
+    <div class="muted small" style="margin-bottom:10px">Grouped by stable identifier (PhonePe userId / phone / VPA) — not by name. Top 20 each side.</div>
+    <div class="cp-split">
+      <div>
+        <div class="cp-head" style="color:var(--success)">↓ Received from ({{ received|length }})</div>
+        {% if received %}
+        <table class="cp-table">
+          <thead><tr><th>#</th><th>Counterparty</th><th>Type</th><th class="right">Txns</th><th class="right">Total ₹</th></tr></thead>
+          <tbody>
+            {% for c in received[:20] %}
+              <tr>
+                <td class="mono muted">{{ loop.index }}</td>
+                <td>
+                  <a href="{{ url_for('page_counterparty', q=c.name) }}" title="{{ c.name }}">{{ c.name }}</a>
+                  {% set idline = [] %}
+                  {% for i in c.identifiers %}
+                    {% if i.startswith('ph:') %}{% set _ = idline.append(i[3:]) %}
+                    {% elif i.startswith('vpa:') %}{% set _ = idline.append(i[4:]) %}{% endif %}
+                  {% endfor %}
+                  {% if idline %}<div class="muted mono" style="font-size:10px">{{ idline|join(' · ') }}</div>{% endif %}
+                </td>
+                <td><span class="tag {% if c.kind == 'Merchant' %}accent{% else %}info{% endif %}" style="font-size:9px">{{ c.kind }}</span></td>
+                <td class="right mono">{{ c.count }}</td>
+                <td class="right amount-pos" style="white-space:nowrap">{{ c.amount_inr|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<p class="muted small">No incoming counterparties.</p>{% endif %}
+      </div>
+      <div>
+        <div class="cp-head" style="color:#f87171">↑ Sent to ({{ sent|length }})</div>
+        {% if sent %}
+        <table class="cp-table">
+          <thead><tr><th>#</th><th>Counterparty</th><th>Type</th><th class="right">Txns</th><th class="right">Total ₹</th></tr></thead>
+          <tbody>
+            {% for c in sent[:20] %}
+              <tr>
+                <td class="mono muted">{{ loop.index }}</td>
+                <td>
+                  <a href="{{ url_for('page_counterparty', q=c.name) }}" title="{{ c.name }}">{{ c.name }}</a>
+                  {% set idline = [] %}
+                  {% for i in c.identifiers %}
+                    {% if i.startswith('ph:') %}{% set _ = idline.append(i[3:]) %}
+                    {% elif i.startswith('vpa:') %}{% set _ = idline.append(i[4:]) %}{% endif %}
+                  {% endfor %}
+                  {% if idline %}<div class="muted mono" style="font-size:10px">{{ idline|join(' · ') }}</div>{% endif %}
+                </td>
+                <td><span class="tag {% if c.kind == 'Merchant' %}accent{% else %}info{% endif %}" style="font-size:9px">{{ c.kind }}</span></td>
+                <td class="right mono">{{ c.count }}</td>
+                <td class="right amount-neg" style="white-space:nowrap">{{ c.amount_inr|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<p class="muted small">No outgoing counterparties.</p>{% endif %}
+      </div>
+    </div>
+  {% else %}
+    <div class="card-title">Top Counterparties</div>
+    {% if dashboard.top_counterparties %}
+    <table>
+      <thead><tr><th>Name / Phone</th><th class="right">Txn count</th></tr></thead>
+      <tbody>
+        {% for name, count in dashboard.top_counterparties[:20] %}
+          <tr>
+            <td><a href="{{ url_for('page_counterparty', q=name) }}">{{ name }}</a></td>
+            <td class="right mono">{{ count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No counterparties yet.</p>{% endif %}
+  {% endif %}
+</div>
+
+<style>
+.cp-split { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media (max-width:1100px){ .cp-split { grid-template-columns:1fr; } }
+.cp-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; }
+.cp-table { width:100%; table-layout:auto; }
+.cp-table th, .cp-table td { padding:7px 9px; }
+.cp-table td:nth-child(2) a { white-space:normal; word-break:break-word; }
+.cp-table td:nth-child(2) { min-width:170px; }
+</style>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Recent Activity Timeline</div>
+    <a href="{{ url_for('page_timeline') }}" class="muted small">View all →</a>
+  </div>
+  <div class="timeline">
+    {% for ev in timeline[:30] %}
+      <div class="timeline-event" data-source="{{ ev.source }}">
+        <div class="timeline-time">{{ ev.when_iso }} · <span class="tag">{{ ev.source }}</span></div>
+        <div class="timeline-title">{{ ev.title }}</div>
+        {% if ev.detail and ev.detail|length > 0 %}
+          <div class="timeline-detail">
+            {% for k, v in ev.detail.items() if v %}
+              <span class="muted">{{ k }}:</span> <span class="mono">{{ v|string|truncate(80) }}</span>{% if not loop.last %} · {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if findings %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Suspicious signals (top {{ findings|length }} of {{ findings|length }})</div>
+  {% for f in findings[:6] %}
+    <div class="finding {{ f.severity }}">
+      <div class="finding-meta">{{ f.severity }} · {{ f.category }}</div>
+      <div class="finding-title">{{ f.title }}</div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

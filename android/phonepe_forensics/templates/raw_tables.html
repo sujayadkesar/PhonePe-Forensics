@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}All Tables (raw) — PhonePe Android Forensics{% endblock %}
+{% block heading %}All Tables — Full Coverage{% endblock %}
+{% block subheading %}Every readable SQLite table is inventoried and downloadable in full. Rows are read straight from the evidence on request. Nothing skipped except encrypted DBs (listed below).{% endblock %}
+
+{% block content %}
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Databases</div><div class="mvalue">{{ raw.summary.database_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Tables</div><div class="mvalue">{{ raw.summary.table_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Rows available</div><div class="mvalue">{{ raw.summary.row_total or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Also in curated views</div><div class="mvalue">{{ raw.summary.covered_by_dedicated_modules or 0 }}</div></div>
+</div>
+
+{% if encrypted and encrypted.encrypted %}
+<div class="card" style="margin-top:18px;border-color:rgba(248,113,113,0.4)">
+  <div class="card-title" style="color:#fca5a5">⚠ Encrypted databases — not decryptable offline</div>
+  <div class="muted small" style="margin-bottom:8px">SQLiteCrypt/SQLCipher; key is hardware-keystore-wrapped. Recorded for completeness (presence + hash).</div>
+  <table>
+    <thead><tr><th>Database</th><th>Size</th><th>Format</th><th>SHA-256</th></tr></thead>
+    <tbody>{% for e in encrypted.encrypted %}<tr><td class="mono">{{ e.name }}</td><td>{{ e.size }}</td><td>{{ e.format }}</td><td class="mono small">{{ e.sha256 }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endif %}
+
+{% for db, tables in raw.databases.items() %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">{{ db }}</div>
+  <table>
+    <thead><tr><th>Table</th><th>Rows</th><th>Columns</th><th></th><th>Export</th></tr></thead>
+    <tbody>
+    {% for t, info in tables.items() if t != '_error' %}
+      <tr>
+        <td class="mono small">{{ t }}</td>
+        <td>{{ info.row_count }}</td>
+        <td class="muted small">{{ (info.columns or [])|join(', ') }}</td>
+        <td>{% if info.covered_by_module %}<span class="tag small">curated view exists</span>{% endif %}</td>
+        <td>
+          {% if info.row_count %}
+            <a class="btn small" href="{{ url_for('page_raw_table_browse', db=db, table=t) }}">Browse</a>
+            <a class="btn small" href="{{ url_for('page_raw_table_csv', db=db, table=t) }}">CSV</a>
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% endblock %}

@@ -29,14 +29,30 @@ def _write_csv(path: str, fieldnames: List[str], rows: Iterable[Dict[str, Any]])
             writer.writerow({k: _stringify(r.get(k)) for k in fieldnames})
 
 
+_CSV_INJECT = ("=", "+", "-", "@", "\t", "\r")
+
+
+def csv_safe(value: str) -> str:
+    """Neutralise spreadsheet formula injection.
+
+    Evidence is suspect-controlled: a display name or chat note of
+    `=cmd|' /C calc'!A1` executes when the examiner opens the export in Excel. A
+    leading apostrophe makes the cell literal text without changing what is read.
+    The HTML report already escapes correctly; this is the CSV path.
+    """
+    if value[:1] in _CSV_INJECT:
+        return "'" + value
+    return value
+
+
 def _stringify(v: Any) -> str:
     if v is None:
         return ""
     if isinstance(v, dict):
-        return v.get("iso") or v.get("display") or json.dumps(v, default=str)
+        return csv_safe(v.get("iso") or v.get("display") or json.dumps(v, default=str))
     if isinstance(v, (list, tuple)):
-        return "; ".join(str(x) for x in v)
-    return str(v)
+        return csv_safe("; ".join(str(x) for x in v))
+    return csv_safe(str(v))
 
 
 def export_transactions_csv(case_data: Dict[str, Any], out_dir: str) -> str:

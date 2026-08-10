@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────────────────────
+#  PhonePe Android Forensics — .gitignore
+#  NEVER commit acquisition data, generated reports, or the case registry.
+#  These contain a real person's financial, social and identity PII.
+# ─────────────────────────────────────────────────────────────────────────
+
+# Case registry — stores subject name, UPI id, investigator, and the local
+# path to the acquisition. Created at runtime; must never be committed.
+.pp_forensics/
+
+# Raw Android acquisition / evidence (the subject's entire financial + social life)
+com.phonepe.app/
+data/data/
+*.db
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*-journal
+*.7z
+
+# Generated analysis output — every file here is full of the subject's PII
+phonepe_evidence/
+phonepe_analysis/
+exports/
+*_phonepe_evidence.html
+*.export.csv
+
+# Scratch / working files
+scratchpad/
+*.log
+
+# Per-session run logs. These quote real values out of the acquisition under
+# examination (transaction ids, amounts, counterparty counts) so they are working
+# notes only — STATE.md and CONTINUE.md are the committable summaries.
+# Session logs quote real subject values, so they stay out by default. Excluding
+# the *files* rather than the directory matters: git does not descend into an
+# excluded directory, so a negation inside one can never re-include anything —
+# and a cloned session is told to read the newest session log, which would then
+# never be there.
+notes/sessions/*
+!notes/sessions/2026-08-09.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+ENV/
+
+# Editors / OS / tooling
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+desktop.ini

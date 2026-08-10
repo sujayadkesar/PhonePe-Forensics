@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}PhonePe Forensics{% endblock %}</title>
+<style>
+/* Theme tokens copied from both analysers' app.css so the launcher is visually
+   continuous with whichever tool you land in. Kept inline: the launcher must not
+   depend on either tool's static files, which live in their own trees. */
+:root{
+  --bg-0:#06070d; --bg-1:#0c0e16; --bg-2:#111726; --bg-3:#18213a;
+  --border:#1e2638; --border-soft:#181f2e;
+  --text-1:#f3f4f6; --text-2:#cbd1de; --text-3:#8a91a4; --text-4:#5b6478;
+  --accent:#8b5cf6; --accent-2:#6d28d9; --accent-glow:rgba(139,92,246,.32);
+  --success:#34d399; --success-bg:rgba(52,211,153,.14);
+  --warn:#fbbf24; --info:#60a5fa; --danger:#f87171;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-0);color:var(--text-1);
+  font:14px/1.55 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+.wrap{max-width:960px;margin:0 auto;padding:44px 24px 72px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo{width:42px;height:42px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+h1{font-size:23px;margin:0;letter-spacing:-.2px}
+.sub{color:var(--text-3);font-size:13px;margin:2px 0 0}
+.lead{color:var(--text-2);margin:22px 0 30px;max-width:70ch}
+.card{background:var(--bg-1);border:1px solid var(--border);border-radius:13px;padding:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.pick{display:block;background:var(--bg-1);border:1px solid var(--border);
+  border-radius:13px;padding:22px;transition:.15s;color:inherit}
+.pick:hover{border-color:var(--accent);background:var(--bg-2);
+  box-shadow:0 0 0 3px var(--accent-glow);text-decoration:none;transform:translateY(-1px)}
+.pick h2{margin:0 0 6px;font-size:16px;color:var(--text-1)}
+.pick p{margin:0;color:var(--text-3);font-size:13px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;
+  font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.tag.ios{background:rgba(96,165,250,.16);color:var(--info)}
+.tag.android{background:var(--success-bg);color:var(--success)}
+.tag.muted{background:var(--bg-3);color:var(--text-3)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--text-3);font-size:11px;letter-spacing:.5px;
+  text-transform:uppercase;padding:9px 10px;border-bottom:1px solid var(--border)}
+td{padding:11px 10px;border-bottom:1px solid var(--border-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg-2)}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--text-3)} .small{font-size:12px}
+.btn{display:inline-block;padding:8px 15px;border-radius:9px;border:1px solid var(--border);
+  background:var(--bg-2);color:var(--text-1);font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--accent);text-decoration:none}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  border-color:transparent;font-weight:600}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.back{color:var(--text-3);font-size:13px}
+.note{background:var(--bg-2);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:12px 15px;color:var(--text-2);font-size:13px;margin:20px 0}
+.empty{text-align:center;padding:44px 20px;color:var(--text-3)}
+.credits{margin-top:38px;padding-top:16px;border-top:1px solid var(--border-soft);
+  display:flex;flex-wrap:wrap;gap:6px 26px;font-size:12px;color:var(--text-3)}
+.credits b{color:var(--text-2);font-weight:600}
+.credits a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">PP</div>
+    <div>
+      <h1>{% block heading %}PhonePe Forensics{% endblock %}</h1>
+      <p class="sub">{% block subheading %}iOS &amp; Android acquisition analyser{% endblock %}</p>
+    </div>
+  </div>
+  {% block content %}{% endblock %}
+
+  <footer class="credits">
+    <div>
+      <b>Android analyser &amp; launcher</b> —
+      <a href="https://www.linkedin.com/in/mihir-choudhary/" target="_blank" rel="noopener">Mihir Choudhary</a>
+    </div>
+    <div>
+      <b>iOS analyser</b> —
+      <a href="https://www.linkedin.com/in/sujay-adkesar-a90725224/" target="_blank" rel="noopener">Sujay Adkesar</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

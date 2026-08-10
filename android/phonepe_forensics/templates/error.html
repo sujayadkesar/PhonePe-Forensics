@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} — PhonePe Android Forensics{% endblock %}
+{% block heading %}Error {{ code }}{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <div class="empty-state-icon">⚠</div>
+  <h2 style="margin-bottom:6px">{{ code }}</h2>
+  <p class="muted">{{ message }}</p>
+  <p style="margin-top:18px"><a href="{{ url_for('page_dashboard') }}" class="btn">← Back to dashboard</a></p>
+</div>
+{% endblock %}

@@ -411,8 +411,13 @@ def build_social_graph(case_data: Dict[str, Any]) -> Dict[str, Any]:
             })
         if "Burble" not in node["evidence_sources"]:
             node["evidence_sources"].append("Burble")
-        node["chat_message_count"] = b["messages"]
-        node["chat_payment_count"] = b["payments"]
+        # `=` not `+=` meant that when two contacts share a display name — and
+        # name_to_node is a dict comprehension, so only the last one survives —
+        # one node ended up carrying a single bucket's count while the other
+        # showed zero. Accumulate so a collision over-counts visibly rather than
+        # silently discarding a thread.
+        node["chat_message_count"] = node.get("chat_message_count", 0) + b["messages"]
+        node["chat_payment_count"] = node.get("chat_payment_count", 0) + b["payments"]
         node["chat_payment_total_inr"] = round(b["amount"], 2)
 
     nodes_list = list(nodes.values())
@@ -524,7 +529,17 @@ def detect_suspicious_signals(case_data: Dict[str, Any]) -> List[Dict[str, Any]]
 
     # Failed/pending transactions
     txns = case_data.get("transactions", {}).get("transactions", [])
-    failed = [t for t in txns if t.get("state") in ("FAILED", "PENDING", "REJECTED")]
+    # PhonePe writes several failure words depending on the leg that failed, and
+    # a state the list does not name produces no finding at all — a failed
+    # payment that silently reads as unremarkable. Compared case-insensitively
+    # because the casing is not consistent across tables.
+    _FAILED_STATES = {
+        "FAILED", "FAILURE", "ERRORED", "ERROR", "REJECTED", "DECLINED",
+        "CANCELLED", "CANCELED", "TIMED_OUT", "EXPIRED",
+        "PENDING", "IN_PROGRESS", "INITIATED",
+    }
+    failed = [t for t in txns
+              if str(t.get("state") or "").strip().upper() in _FAILED_STATES]
     if failed:
         findings.append({
             "severity": "medium",

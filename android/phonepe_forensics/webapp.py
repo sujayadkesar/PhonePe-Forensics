@@ -1,5 +1,5 @@
 """
-PhonePe iOS Forensics — Web UI (multi-case)
+PhonePe Android Forensics — Web UI (multi-case)
 ===========================================
 Flask front-end. Cases are managed by `CaseManager` (see case_manager.py).
 At any time at most one case is "active" — that's the case the dashboard
@@ -17,9 +17,9 @@ import io
 import json
 import logging
 import os
-import re
 import secrets
 import sys
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
@@ -27,14 +27,16 @@ from jinja2 import Undefined
 
 from flask import (
     Flask, Response, abort, jsonify, redirect, render_template, request,
-    send_file, url_for, flash,
+    send_file, session, url_for, flash,
 )
 
 from .case import Case
 from .case_manager import manager
+from .reports import csv_safe, safe_filename
 from . import hunt
-from . import research_data
 
+
+log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # App
@@ -47,14 +49,21 @@ app.config["JSON_SORT_KEYS"] = False
 # edits only appear after a full server restart.
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
-# A shipped default is a known signing key: anyone can forge a session cookie for
-# a workstation that never set the env var. Fall back to a per-process random key
-# instead — sessions then end with the process, which for a local single-analyst
-# tool is the right trade.
+# A shipped default secret is a known signing key, so anyone can forge a session
+# cookie for a workstation that never set the env var. Fall back to a per-process
+# random key instead: sessions then end with the process, which for a local
+# single-analyst tool is the right trade.
 app.secret_key = os.environ.get("PP_FORENSICS_SECRET") or secrets.token_hex(32)
 
-log = logging.getLogger(__name__)
+# ── Android build ───────────────────────────────────────────────────────────
+# Fully-Android distribution: there is no platform picker and every case is an
+# Android acquisition. The flag is read by the routes/context-processor below.
+ANDROID_ONLY = True
 
+
+# ---------------------------------------------------------------------------
+# Request guards
+# ---------------------------------------------------------------------------
 
 @app.before_request
 def _guard_state_changing_requests():
@@ -62,17 +71,20 @@ def _guard_state_changing_requests():
 
     The server binds to localhost, but any page the analyst has open in the same
     browser can POST to it. Without this check a visited web page could delete
-    the case registry.
+    the case registry or pop the evidence-folder chooser on the workstation.
     """
     if request.method in ("GET", "HEAD", "OPTIONS"):
         return None
-    source = request.headers.get("Origin") or request.headers.get("Referer")
+    origin = request.headers.get("Origin")
+    referer = request.headers.get("Referer")
+    source = origin or referer
     if not source:
+        # No Origin on a same-origin form post from some older clients; a request
+        # with neither header cannot have come from a cross-site fetch.
         return None
-    parsed, here = urlsplit(source), urlsplit(request.host_url)
-    if (parsed.hostname, parsed.port) != (here.hostname, here.port):
-        log.warning("Rejected cross-origin %s %s from %s",
-                    request.method, request.path, source)
+    parsed = urlsplit(source)
+    if f"{parsed.hostname}:{parsed.port}" != f"{urlsplit(request.host_url).hostname}:{urlsplit(request.host_url).port}":
+        log.warning("Rejected cross-origin %s %s from %s", request.method, request.path, source)
         return jsonify({"ok": False, "error": "cross-origin request rejected"}), 403
     return None
 
@@ -80,6 +92,13 @@ def _guard_state_changing_requests():
 # ---------------------------------------------------------------------------
 # Helpers / filters
 # ---------------------------------------------------------------------------
+
+def _active() -> Case:
+    case = manager.get_active_case()
+    if case is None:
+        abort(503, description="No case is currently loaded.")
+    return case
+
 
 def _int_arg(name: str, default: int, minimum: int = 0, maximum: int = 1_000_000) -> int:
     """Read an integer query parameter without letting `?limit=abc` become a 500."""
@@ -91,13 +110,6 @@ def _int_arg(name: str, default: int, minimum: int = 0, maximum: int = 1_000_000
     except (TypeError, ValueError):
         return default
     return max(minimum, min(maximum, value))
-
-
-def _active() -> Case:
-    case = manager.get_active_case()
-    if case is None:
-        abort(503, description="No case is currently loaded.")
-    return case
 
 
 def _safe_get(d: Any, *path, default=None) -> Any:
@@ -121,30 +133,175 @@ def _filter_inr(value: Any) -> str:
     return f"₹ {v:,.2f}"
 
 
+# ---------------------------------------------------------------------------
+# Timestamp display preference — format and timezone, chosen independently
+# ---------------------------------------------------------------------------
+#
+# Presentation only. Every value is rendered from the record's `epoch_ms`, so
+# neither setting can change what the evidence says — only how this screen
+# writes it down. Exports ignore both and stay ISO-8601 UTC.
+#
+# Format and zone are separate because they are separate questions: preferring
+# day-first dates says nothing about which jurisdiction's clock you want to read
+# them in. Bundling them meant a combinatorial list that still missed most pairs.
+#
+# The zone abbreviation is appended by every format except the raw epoch. That
+# is not decoration — "07/03/2026 14:30" is indistinguishable between IST and
+# UTC, and the gap is 5 hours 30.
+
+TS_FORMATS: Dict[str, Dict[str, str]] = {
+    "iso":        {"label": "ISO-8601",          "pattern": "%Y-%m-%dT%H:%M:%S",
+                   "note": "Machine-sortable. Written with the offset, e.g. +05:30."},
+    "ymd":        {"label": "YYYY-MM-DD",        "pattern": "%Y-%m-%d %H:%M:%S",
+                   "note": "Sorts correctly as text; unambiguous worldwide."},
+    "dmy":        {"label": "DD/MM/YYYY",        "pattern": "%d/%m/%Y %H:%M:%S",
+                   "note": "Day-first, as used in India, the UK and most of Europe."},
+    "dMy":        {"label": "DD/MMM/YYYY",       "pattern": "%d/%b/%Y %H:%M:%S",
+                   "note": "Named month, so 07/03 can never be read as 3 July."},
+    "d_mon_y":    {"label": "DD MMM YYYY",       "pattern": "%d %b %Y, %H:%M:%S",
+                   "note": "Spaced and readable — reads well in a written report."},
+    "mon_d_y":    {"label": "MMM DD, YYYY",      "pattern": "%b %d, %Y, %I:%M:%S %p",
+                   "note": "Month-first with a named month, 12-hour clock."},
+    "mdy":        {"label": "MM/DD/YYYY",        "pattern": "%m/%d/%Y %I:%M:%S %p",
+                   "note": "Numeric month-first, US convention."},
+    "full":       {"label": "Weekday, DD MMM YYYY", "pattern": "%a, %d %b %Y, %H:%M:%S",
+                   "note": "Includes the day of week — useful for pattern-of-life."},
+    "date_only":  {"label": "Date only",         "pattern": "%d %b %Y",
+                   "note": "Drops the clock entirely. Use with care: two events on "
+                           "one day become indistinguishable."},
+    "epoch_ms":   {"label": "Unix epoch (ms)",   "pattern": "",
+                   "note": "The raw stored integer. Timezone does not apply."},
+}
+DEFAULT_TS_FORMAT = "iso"
+
+# Zones carry real rules, not fixed offsets, so historical DST is handled: a
+# 2026-03-07 event in New York renders EST, a July one EDT.
+TS_ZONES: Dict[str, Dict[str, str]] = {
+    "UTC":              {"label": "UTC", "note": "How every value is stored. The safe default."},
+    "Asia/Kolkata":     {"label": "India (IST, +5:30)", "note": ""},
+    "Asia/Dubai":       {"label": "Gulf (+4)", "note": ""},
+    "Asia/Singapore":   {"label": "Singapore (+8)", "note": ""},
+    "Europe/London":    {"label": "UK (GMT/BST)", "note": ""},
+    "America/New_York": {"label": "US Eastern (EST/EDT)", "note": ""},
+}
+DEFAULT_TS_ZONE = "UTC"
+
+
+def _ts_format_key() -> str:
+    key = session.get("ts_format")
+    return key if key in TS_FORMATS else DEFAULT_TS_FORMAT
+
+
+def _ts_zone_key() -> str:
+    key = session.get("ts_zone")
+    return key if key in TS_ZONES else DEFAULT_TS_ZONE
+
+
+def _zone(name: str):
+    try:
+        from zoneinfo import ZoneInfo
+        return ZoneInfo(name)
+    except Exception:
+        # No tzdata on this machine: fall back to UTC rather than guessing an
+        # offset, and the label below will still say UTC so nothing is implied.
+        return timezone.utc
+
+
+def _render_ts(epoch_ms: Any, fmt_key: str, zone_key: str) -> str:
+    if isinstance(epoch_ms, bool):
+        return ""
+    try:
+        ms = int(epoch_ms)
+    except (TypeError, ValueError):
+        return ""
+    if fmt_key == "epoch_ms":
+        return str(ms)
+    try:
+        dt = datetime.fromtimestamp(ms / 1000.0, tz=timezone.utc).astimezone(_zone(zone_key))
+    except (OverflowError, OSError, ValueError):
+        return ""
+    if fmt_key == "iso":
+        return dt.isoformat()
+    spec = TS_FORMATS.get(fmt_key) or TS_FORMATS[DEFAULT_TS_FORMAT]
+    out = dt.strftime(spec["pattern"])
+    # %Z is empty for some zones; fall back to the numeric offset so a rendered
+    # time is never left without one.
+    zlabel = dt.strftime("%Z") or dt.strftime("%z")
+    return f"{out} {zlabel}".strip()
+
+
 @app.template_filter("ts")
 def _filter_ts(value: Any) -> str:
+    fmt, zone = _ts_format_key(), _ts_zone_key()
     if isinstance(value, dict):
+        if value.get("epoch_ms") is not None:
+            return _render_ts(value["epoch_ms"], fmt, zone)
         return value.get("display") or value.get("iso") or ""
+    # Many views carry a pre-formatted `*_iso` string rather than the timestamp
+    # dict. Parse it back so the setting reaches those too — otherwise it would
+    # appear to work on some pages and silently do nothing on the timeline.
+    if isinstance(value, str) and value:
+        try:
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return value
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return _render_ts(int(dt.timestamp() * 1000), fmt, zone)
     return value or ""
+
+
+def _local_redirect(target: Optional[str], fallback_endpoint: str = "page_dashboard") -> str:
+    """Only ever redirect within this app.
+
+    `next` comes from the request and `Referer` from the browser, so neither may
+    be handed to redirect() unchecked — that is an open redirect, and on a tool
+    whose whole premise is that it never leaves the workstation, bouncing the
+    analyst to an external site is worth refusing outright. A bare path is the
+    only accepted shape: `//evil.example` is protocol-relative and would resolve
+    to another host, so a second leading slash disqualifies it too.
+    """
+    if target:
+        parts = urlsplit(target)
+        if not parts.scheme and not parts.netloc and target.startswith("/") \
+                and not target.startswith("//"):
+            return target
+    return url_for(fallback_endpoint)
+
+
+@app.route("/settings/time-format", methods=["POST"])
+def set_time_format():
+    """Either control posts here; each only sets the field it sent."""
+    fmt = request.form.get("ts_format")
+    if fmt in TS_FORMATS:
+        session["ts_format"] = fmt
+    zone = request.form.get("ts_zone")
+    if zone in TS_ZONES:
+        session["ts_zone"] = zone
+    return redirect(_local_redirect(request.form.get("next") or request.referrer))
 
 
 @app.template_filter("yes_no")
 def _filter_yes_no(value: Any) -> str:
     # Absent is not "No". A missing column or JSON key rendered as "No" states a
-    # negative fact the evidence does not hold. Undefined arrives here whenever a
-    # template reads a key the extractor never set, so catch it alongside None.
+    # negative fact the evidence does not hold — the same class of error as the
+    # hardcoded "on PhonePe: Yes" tile. Undefined arrives here whenever a template
+    # reads a key the extractor never set, so it must be caught alongside None.
     if value is None or isinstance(value, Undefined):
-        return "\u2014"
-    # shared_prefs XML and some JSON payloads store booleans as text, and every
-    # non-empty string is truthy — so "false" would otherwise read as Yes.
+        return "—"
+    # Sources are not uniformly typed: shared_prefs XML and some JSON payloads
+    # store booleans as the strings "true"/"false"/"0", and every non-empty string
+    # is truthy, so "false" would read as "Yes".
     if isinstance(value, str):
         v = value.strip().lower()
         if v in ("true", "yes", "1"):
             return "Yes"
         if v in ("false", "no", "0"):
             return "No"
+        # Empty is unknown, not false — same rule as core.tri_bool, so a value
+        # rendered here and a value stored in case.data cannot disagree.
         if not v:
-            return "\u2014"
+            return "—"
         return value
     return "Yes" if value else "No"
 
@@ -158,16 +315,32 @@ def _filter_count(value: Any) -> int:
 
 
 @app.context_processor
+def _inject_time_format():
+    """Available to every page so the choosers can live in the shared header."""
+    fmt, zone = _ts_format_key(), _ts_zone_key()
+    sample = 1772442000000        # a fixed instant, so the previews are comparable
+    return {
+        "ts_formats": TS_FORMATS, "ts_format_key": fmt,
+        "ts_zones": TS_ZONES, "ts_zone_key": zone,
+        # Rendered previews: each format shown in the chosen zone, each zone shown
+        # in the chosen format, so both menus preview what you would actually get.
+        "ts_format_examples": {k: _render_ts(sample, k, zone) for k in TS_FORMATS},
+        "ts_zone_examples": {z: _render_ts(sample, fmt, z) for z in TS_ZONES},
+    }
+
+
+@app.context_processor
 def _inject():
     case = manager.get_active_case()
     if case:
         ident = case.data.get("identity", {})
-        # Prefer v2 union count (TxnStore + Burble) when available, otherwise
-        # fall back to upstream extractor's count.
-        v2 = case.data.get("_v2") or {}
-        v2_total = (v2.get("coverage") or {}).get("combined_unique")
+        _plat = (case.data.get("_meta") or {}).get("platform", "android")
         return {
             "case_loaded": True,
+            "platform": _plat,
+            # ui_platform drives branding + theme; an active case always wins over
+            # the picker selection so the GUI matches the data being shown.
+            "ui_platform": _plat,
             "case_root": case.root,
             "containers": case.paths.summary(),
             "active_case_id": manager.active_id,
@@ -175,41 +348,32 @@ def _inject():
             "subject_name": ident.get("registered_name"),
             "subject_upi": ident.get("upi_id"),
             "nav_metrics": {
-                "transactions": v2_total if v2_total is not None else _safe_get(case.data, "transactions", "summary", "transaction_count", default=0),
+                "transactions": _safe_get(case.data, "transactions", "summary", "transaction_count", default=0),
                 "messages": _safe_get(case.data, "chat", "summary", "message_count", default=0),
                 "contacts": _safe_get(case.data, "contacts", "summary", "phonebook_total", default=0),
                 "findings": len(case.findings()),
             },
         }
+    # No active case: branding/theme follow the picker selection (session). In the
+    # standalone Android build there is no picker, so default the workspace to Android.
+    sel = session.get("platform") or ("android" if ANDROID_ONLY else None)
     return {
         "case_loaded": False,
+        "platform": sel or "android",
+        "ui_platform": sel,
         "active_case_id": None,
         "active_case_name": "",
     }
 
 
+@app.context_processor
+def _inject_flags():
+    return {"android_only": ANDROID_ONLY}
+
+
 # ---------------------------------------------------------------------------
 # CSV export helpers
 # ---------------------------------------------------------------------------
-
-_CSV_INJECT = ("=", "+", "-", "@", "\t", "\r")
-
-
-def csv_safe(value):
-    """Neutralise spreadsheet formula injection: evidence is suspect-controlled,
-    and `=cmd|' /C calc'!A1` in a display name executes when the export is
-    opened in Excel."""
-    if isinstance(value, str) and value[:1] in _CSV_INJECT:
-        return "'" + value
-    return value
-
-
-def safe_filename(name: str, fallback: str = "export.csv") -> str:
-    """Content-Disposition is a header: a quote or newline in the name breaks it
-    (Werkzeug raises) and a path separator invites a surprise."""
-    cleaned = re.sub(r'[^A-Za-z0-9._-]+', "_", str(name or "")).strip("._")
-    return cleaned or fallback
-
 
 def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str) -> Response:
     buf = io.StringIO()
@@ -223,29 +387,46 @@ def _csv_response(rows: List[Dict[str, Any]], columns: List[str], filename: str)
                 v = v.get("iso") or v.get("display") or json.dumps(v, default=str)
             elif isinstance(v, (list, tuple)):
                 v = "; ".join(str(x) for x in v)
-            out[c] = csv_safe(v) if v is not None else ""
+            out[c] = csv_safe(v if v is not None else "")
         writer.writerow(out)
     return Response(
         buf.getvalue(),
         # Werkzeug appends the charset itself, so naming it here produced
         # `text/csv; charset=utf-8; charset=utf-8` on every CSV export.
         mimetype="text/csv",
-        headers={"Content-Disposition":
-                 f'attachment; filename="{safe_filename(filename)}"'},
+        headers={"Content-Disposition": f'attachment; filename="{safe_filename(filename)}"'},
     )
+
+
+def _row_blob(row: Dict[str, Any]) -> str:
+    """Lower-cased searchable text for one row.
+
+    Scalars are stringified directly and only nested structures go through
+    json.dumps; serialising every row in full was the dominant cost of filtering
+    a large table, and most columns are scalars.
+    """
+    parts = []
+    for v in row.values():
+        if v is None:
+            continue
+        if isinstance(v, (dict, list, tuple, set)):
+            parts.append(json.dumps(v, default=str))
+        else:
+            parts.append(str(v))
+    return " ".join(parts).lower()
 
 
 def _filter_table(rows: List[Dict[str, Any]], q: str = "", filters: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     """Server-side table filter: full-text + per-column equals."""
-    if not q and not filters:
+    active_filters = {k: v for k, v in (filters or {}).items() if v}
+    if not q and not active_filters:
         return rows
     needle = q.lower().strip() if q else None
+    filters = active_filters
     out = []
     for r in rows:
-        if needle:
-            blob = json.dumps(r, default=str).lower()
-            if needle not in blob:
-                continue
+        if needle and needle not in _row_blob(r):
+            continue
         if filters:
             ok = True
             for k, v in filters.items():
@@ -265,33 +446,51 @@ def _filter_table(rows: List[Dict[str, Any]], q: str = "", filters: Optional[Dic
 # Case management
 # ---------------------------------------------------------------------------
 
+@app.route("/start")
+def page_start():
+    """No platform picker in the standalone Android build — go straight to cases."""
+    session["platform"] = "android"
+    return redirect(url_for("page_cases"))
+
+
+@app.route("/start/<platform>")
+def page_start_select(platform: str):
+    if platform not in ("ios", "android"):
+        abort(404)
+    if ANDROID_ONLY:
+        platform = "android"
+    session["platform"] = platform
+    # Entering a platform workspace de-activates the current case so the GUI
+    # (theme + filtered case list) follows the freshly-chosen platform rather
+    # than whatever case happened to be open. The case stays cached, so
+    # re-opening it from the filtered list is instant (no re-extraction).
+    manager.active_id = None
+    return redirect(url_for("page_cases"))
+
+
 @app.route("/cases")
 def page_cases():
-    cases = manager.list_cases()
-    return render_template("cases_list.html", cases=cases)
+    return render_template("cases_list.html", cases=manager.list_cases())
 
 
 @app.route("/cases/new", methods=["GET", "POST"])
 def page_case_new():
     if request.method == "POST":
         try:
-            mode = request.form.get("mode", "single_root")
             meta = manager.create_case(
                 name=request.form.get("name", ""),
-                mode=mode,
+                mode="single_root",
                 single_root=request.form.get("single_root") or None,
-                app_domain=request.form.get("app_domain") or None,
-                group_app=request.form.get("group_app") or None,
-                group_shared=request.form.get("group_shared") or None,
                 investigator=request.form.get("investigator") or None,
                 notes=request.form.get("notes") or None,
+                platform="android",
             )
             flash(f"Case '{meta['name']}' created. Click Process to extract evidence.", "ok")
             return redirect(url_for("page_case_detail", case_id=meta["id"]))
         except Exception as exc:
             flash(str(exc), "err")
-            return render_template("case_new.html", form=request.form)
-    return render_template("case_new.html", form={})
+            return render_template("case_new.html", form=request.form, new_platform="android")
+    return render_template("case_new.html", form={}, new_platform="android")
 
 
 @app.route("/cases/<case_id>")
@@ -339,16 +538,12 @@ def api_case_validate():
     if not os.path.isdir(path):
         return jsonify({"ok": False, "error": "not a directory"})
     listing = sorted(os.listdir(path))[:30]
-    has_app_domain = any(n == "AppDomain-com.phonepe.PhonePeApp" for n in listing)
-    has_group_app = any(n == "AppDomainGroup-group.com.phonepe.PhonePeApp" for n in listing)
-    has_group_shared = any(n == "AppDomainGroup-group.com.phonepe.shared" for n in listing)
+    # Android detection: the com.phonepe.app data dir (has databases/) or its parent.
+    looks_android = "databases" in listing or "com.phonepe.app" in listing
     return jsonify({
         "ok": True,
         "listing": listing,
-        "has_app_domain": has_app_domain,
-        "has_group_app": has_group_app,
-        "has_group_shared": has_group_shared,
-        "looks_like_single_root": has_app_domain,
+        "looks_like_android": looks_android,
     })
 
 
@@ -378,7 +573,10 @@ def api_browse_folder():
 @app.route("/")
 def page_dashboard():
     if manager.get_active_case() is None:
-        return redirect(url_for("page_cases"))
+        # No case loaded → Android build goes straight to the case list (no picker).
+        if ANDROID_ONLY:
+            return redirect(url_for("page_cases"))
+        return redirect(url_for("page_start"))
     case = _active()
     return render_template(
         "dashboard.html",
@@ -402,6 +600,142 @@ def page_identity():
     )
 
 
+# ---------------------------------------------------------------------------
+# Android-only views (rendered for android cases; backed by AndroidCase modules)
+# ---------------------------------------------------------------------------
+
+@app.route("/ledger")
+def page_ledger():
+    case = _active()
+    return render_template("ledger.html", ledger=case.data.get("ledger", {}))
+
+
+@app.route("/sms")
+def page_sms():
+    case = _active()
+    # SMS↔transaction corroboration (Android-specific analysis lives on AndroidCase)
+    corr = case.sms_corroboration() if hasattr(case, "sms_corroboration") else {}
+    return render_template("sms.html", sms=case.data.get("sms", {}), corr=corr)
+
+
+@app.route("/miniapps")
+def page_miniapps():
+    case = _active()
+    return render_template("miniapps.html", miniapps=case.data.get("miniapps", {}))
+
+
+@app.route("/raw-tables")
+def page_raw_tables():
+    case = _active()
+    return render_template("raw_tables.html", raw=case.data.get("raw_tables", {}),
+                           encrypted=case.data.get("encrypted_dbs", {}))
+
+
+RAW_TABLE_PAGE_SIZE = 500
+RAW_TABLE_CSV_CAP = 100_000
+
+
+def _load_raw_table(case: Case, db: str, table: str, offset: int, limit: int) -> Dict[str, Any]:
+    from phonepe_android.extractors_android import load_raw_table
+    return load_raw_table(case.paths, db, table, offset=offset, limit=limit)
+
+
+@app.route("/raw-tables/<db>/<table>")
+def page_raw_table_browse(db: str, table: str):
+    case = _active()
+    offset = _int_arg("offset", 0, maximum=RAW_TABLE_CSV_CAP * 100)
+    page = _load_raw_table(case, db, table, offset, RAW_TABLE_PAGE_SIZE)
+    if page.get("error"):
+        abort(404)
+    return render_template("raw_table_detail.html", page=page)
+
+
+@app.route("/raw-tables/<db>/<table>.csv")
+def page_raw_table_csv(db: str, table: str):
+    case = _active()
+    page = _load_raw_table(case, db, table, 0, RAW_TABLE_CSV_CAP)
+    if page.get("error"):
+        abort(404)
+    rows = page["rows"]
+    cols = page["columns"] or sorted({k for r in rows for k in r.keys()})
+    return _csv_response(rows, cols, f"{db}.{table}.csv")
+
+
+def _deleted_view(case: Case):
+    deleted = case.data.get("deleted_records", {}) or {}
+    records = deleted.get("records", [])
+    q = (request.args.get("q") or "").strip()
+    table_filter = request.args.get("table", "")
+    if table_filter:
+        records = [r for r in records
+                   if r.get("table") == table_filter
+                   or table_filter in (r.get("candidate_tables") or [])]
+    if q:
+        records = _filter_table(records, q=q)
+    tables = sorted({r.get("table") for r in deleted.get("records", []) if r.get("table")})
+    return deleted, records, tables, q, table_filter
+
+
+@app.route("/deleted")
+def page_deleted():
+    case = _active()
+    deleted, records, tables, q, table_filter = _deleted_view(case)
+    return render_template("deleted.html", deleted=deleted, records=records[:2000],
+                           tables=tables, q=q, table_filter=table_filter)
+
+
+@app.route("/deleted/export.csv")
+def export_deleted_csv():
+    case = _active()
+    _, records, _, _, _ = _deleted_view(case)
+    rows = []
+    for r in records:
+        row = {
+            "table": r.get("table") or "/".join(r.get("candidate_tables") or []),
+            "confidence": r.get("confidence"),
+            "extent_confidence": r.get("extent_confidence"),
+            "value_confidence": r.get("value_confidence"),
+            "implausible_columns": "; ".join(r.get("implausible_columns") or []),
+            "partial": r.get("partial"),
+            "truncated": r.get("truncated"),
+            "ambiguous": r.get("ambiguous"),
+            "pool": r.get("pool"),
+            "database": r.get("database"),
+            "source_file": r.get("source_file"),
+            "page": r.get("page"),
+            "file_offset": r.get("file_offset"),
+            "type_lost_for": "; ".join(r.get("lost_leading_columns") or []),
+        }
+        # Recovered values go in one column so a single CSV can carry rows from
+        # tables with different shapes without inventing a common schema.
+        row["recovered_values"] = json.dumps(r.get("row", {}), default=str)
+        rows.append(row)
+    cols = ["table", "confidence", "extent_confidence", "value_confidence",
+            "implausible_columns", "partial", "truncated", "ambiguous", "pool",
+            "database", "source_file", "page", "file_offset", "type_lost_for",
+            "recovered_values"]
+    return _csv_response(rows, cols, "recovered_deleted_records.csv")
+
+
+@app.route("/prefs")
+def page_prefs():
+    case = _active()
+    return render_template("prefs.html", prefs=case.data.get("shared_prefs", {}))
+
+
+@app.route("/files")
+def page_files():
+    case = _active()
+    return render_template("files.html", files=case.data.get("files", {}))
+
+
+@app.route("/provenance")
+def page_provenance():
+    _active()
+    from phonepe_android.provenance_android import get_provenance
+    return render_template("provenance.html", prov=get_provenance())
+
+
 def _filter_transactions(txns: List[Dict[str, Any]], args) -> Dict[str, Any]:
     """Rich server-side filter for transactions with date / amount range,
     text search, multi-select facets, and sort."""
@@ -418,11 +752,19 @@ def _filter_transactions(txns: List[Dict[str, Any]], args) -> Dict[str, Any]:
     sort = args.get("sort", "date_desc")  # date_desc, date_asc, amount_desc, amount_asc
 
     def _epoch_ms(dt_str: str, end_of_day: bool = False) -> Optional[int]:
+        """A typed date means that date on the clock the analyst is reading.
+
+        This used to hardcode UTC. Once the display zone became selectable that
+        was wrong by the zone's offset: with IST on screen, asking for the 7th
+        returned 05:30 on the 7th to 05:30 on the 8th, so events looked missing
+        at one end and stray at the other. The date is now anchored in the same
+        zone the table is rendered in.
+        """
         if not dt_str:
             return None
         try:
-            from datetime import datetime, timezone
-            dt = datetime.strptime(dt_str.strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            dt = datetime.strptime(dt_str.strip(), "%Y-%m-%d").replace(
+                tzinfo=_zone(_ts_zone_key()))
             if end_of_day:
                 dt = dt.replace(hour=23, minute=59, second=59, microsecond=999000)
             return int(dt.timestamp() * 1000)
@@ -456,6 +798,7 @@ def _filter_transactions(txns: List[Dict[str, Any]], args) -> Dict[str, Any]:
             cp_blob = " ".join(str(x) for x in (
                 t.get("counterparty"), t.get("counterparty_phone"),
                 t.get("counterparty_vpa"), t.get("counterparty_cbs_name"),
+                t.get("counterparty_resolved"), t.get("counterparty_phone_full"),
             ) if x).lower()
             if counterparty_needle not in cp_blob:
                 continue
@@ -543,9 +886,12 @@ def export_transactions_csv():
     res = _filter_transactions(txns, request.args)
     cols = [
         "created_at", "global_payment_id", "type", "state", "direction",
-        "amount_inr", "counterparty", "counterparty_phone", "counterparty_vpa",
+        "amount_inr", "counterparty", "counterparty_resolved",
+        "counterparty_resolved_source", "counterparty_phone_full",
+        "counterparty_phone", "counterparty_vpa",
         "counterparty_cbs_name", "self_account_holder", "self_account_masked",
-        "self_vpa", "self_ifsc", "utr", "transfer_mode", "category_code",
+        "self_vpa", "self_ifsc", "utr", "transfer_mode", "initiation_mode",
+        "upi_initiation_mode", "is_qr_scan", "is_intent", "category_code",
         "received_in_type", "merchant_name", "biller_name", "recharge_number",
         "note", "search_token",
     ]
@@ -558,7 +904,11 @@ def page_transaction_detail(txn_id: str):
     for t in case.data.get("transactions", {}).get("transactions", []):
         if t.get("global_payment_id") == txn_id or t.get("entity_id") == txn_id:
             corr = case.corroboration()
-            corr_entry = next((it for it in corr["items"] if it["txn_id"] in (t.get("global_payment_id"), t.get("entity_id"))), None)
+            # Match on the entry's full alias set: a payment's identifiers are all
+            # folded onto one entry, and txn_id is only the first of them.
+            wanted = {str(x) for x in (t.get("global_payment_id"), t.get("entity_id")) if x}
+            corr_entry = next((it for it in corr["items"]
+                               if wanted & set(it.get("aliases") or [it["txn_id"]])), None)
             related_chat = []
             for m in case.data.get("chat", {}).get("messages", []):
                 if t.get("global_payment_id") and m.get("transaction_id") == t.get("global_payment_id"):
@@ -567,15 +917,55 @@ def page_transaction_detail(txn_id: str):
     abort(404)
 
 
+def _contact_chat_map(case: Case) -> Dict[str, str]:
+    """Map a contact's connection_id → the chat group_id to open for them.
+
+    Chat members (topicMember) carry public_id (=connectionId) + group_id (=memberTopicId).
+    A contact's `connect_id` is that same connectionId, so we can deep-link the contact's
+    name straight to /chat/<group_id>. When a connection appears in several groups we prefer
+    the smallest (a 1:1 direct chat over a big group). Android-shaped data only."""
+    chat = case.data.get("chat", {})
+    members = chat.get("members", [])
+    if not members:
+        return {}
+    # group_id -> member_count (to prefer the most direct/1:1 chat)
+    gsize = {g.get("group_id"): (g.get("member_count") or 99)
+             for g in chat.get("groups", [])}
+    best: Dict[str, str] = {}
+    best_sz: Dict[str, int] = {}
+    for m in members:
+        if m.get("is_self"):
+            continue
+        cid, gid = m.get("public_id"), m.get("group_id")
+        if not cid or not gid:
+            continue
+        sz = gsize.get(gid, 99)
+        if cid not in best or sz < best_sz[cid]:
+            best[cid], best_sz[cid] = gid, sz
+    return best
+
+
 @app.route("/contacts")
 def page_contacts():
     case = _active()
     contacts = case.data.get("contacts", {})
+    platform = (case.data.get("_meta") or {}).get("platform", "android")
     q = request.args.get("q", "")
     if q:
         contacts = dict(contacts)
         contacts["cyclops_contacts"] = _filter_table(contacts.get("cyclops_contacts", []), q=q)
         contacts["phonebook_contacts"] = _filter_table(contacts.get("phonebook_contacts", []), q=q)
+    # Android: deep-link each contact's name to that person's chat thread.
+    if platform == "android":
+        cmap = _contact_chat_map(case)
+        if cmap:
+            contacts = dict(contacts)
+            for key in ("cyclops_contacts", "phonebook_contacts"):
+                rows = []
+                for c in contacts.get(key, []):
+                    gid = cmap.get(c.get("connect_id"))
+                    rows.append({**c, "chat_group_id": gid} if gid else c)
+                contacts[key] = rows
     return render_template("contacts.html", contacts=contacts, q=q)
 
 
@@ -671,7 +1061,10 @@ def export_chat_group_csv(group_id: str):
     cols = ["created_at", "type", "sender_name", "sender_phone_masked",
             "receiver_name", "amount_inr", "transaction_id", "utr", "state",
             "instrument", "note", "text_message"]
-    return _csv_response(msgs, cols, f"chat_thread_{group_id[:8]}.csv")
+    # group_id comes straight off the URL; unsanitised it can inject a newline or
+    # a quote into Content-Disposition, which Werkzeug refuses to serialise.
+    slug = safe_filename(group_id[:16], fallback="thread")
+    return _csv_response(msgs, cols, f"chat_thread_{slug}.csv")
 
 
 @app.route("/chat/<group_id>")
@@ -685,11 +1078,9 @@ def page_chat_group(group_id: str):
     msgs.sort(key=lambda m: (m.get("created_at") or {}).get("epoch_ms") or 0)
     members = [m for m in chat.get("members", []) if m.get("group_id") == group_id]
     self_name = case.data.get("identity", {}).get("registered_name", "")
-    # counterparty identity panel — built in enrich_case (group["v2_counterparty"]);
-    # present even for chat-only / empty groups via the connectid resolver.
     return render_template("chat_group.html", group=group, messages=msgs,
                            members=members, self_name=self_name,
-                           counterparty=group.get("v2_counterparty"))
+                           counterparty=None)
 
 
 @app.route("/notifications")
@@ -701,9 +1092,28 @@ def page_notifications():
     topics = notifs.get("topics", [])
     if q or sub:
         topics = _filter_table(topics, q=q, filters={"subsystem": sub})
+    # Delivered notification bodies (messageDataStore). Only the ones the user was
+    # actually shown are tabled; sync instructions are counted but not listed.
+    messages = [m for m in notifs.get("raw_messages", []) if m.get("is_notification")]
+    if q:
+        messages = _filter_table(messages, q=q)
+    messages.sort(key=lambda m: (m.get("created_at") or {}).get("epoch_ms") or 0,
+                  reverse=True)
     return render_template("notifications.html",
-                           notifications={**notifs, "topics_view": topics},
+                           notifications={**notifs, "topics_view": topics,
+                                          "messages_view": messages[:3000]},
                            q=q, sub=sub, total_topics=len(notifs.get("topics", [])))
+
+
+@app.route("/notifications/messages.csv")
+def export_notification_messages_csv():
+    case = _active()
+    rows = [m for m in case.data.get("notifications", {}).get("raw_messages", [])
+            if m.get("is_notification") or not request.args.get("shown_only")]
+    rows = _filter_table(rows, q=request.args.get("q", ""))
+    cols = ["created_at", "sent_at", "kind", "title", "subtitle", "body", "deeplink",
+            "template", "topic_id", "message_id", "expires_at"]
+    return _csv_response(rows, cols, "notification_messages.csv")
 
 
 @app.route("/notifications/export.csv")
@@ -861,25 +1271,49 @@ def export_webkit_domains_csv():
 
 @app.route("/audit")
 def page_audit():
-    return render_template("audit.html", audit=_active().data.get("audit", {}))
+    case = _active()
+    return render_template("audit.html",
+                           audit=case.data.get("audit", {}),
+                           extraction_errors=case.extraction_errors(),
+                           evidence_warnings=case.evidence_warnings(),
+                           manifest=case.evidence_manifest(),
+                           case_root=case.root)
+
+
+@app.route("/audit/consents.csv")
+def export_consents_csv_route():
+    case = _active()
+    rows = _filter_table(case.data.get("audit", {}).get("consents", []),
+                         q=request.args.get("q", ""))
+    cols = ["source", "destination", "accept_type", "state", "subject_id",
+            "subject_ref", "definition", "sync_state", "consent_id", "end_time"]
+    return _csv_response(rows, cols, "consents.csv")
 
 
 @app.route("/timeline")
 def page_timeline():
     case = _active()
-    limit = _int_arg("limit", 1500)
+    limit = _int_arg("limit", 5000, minimum=1)
     q = request.args.get("q", "")
     src = request.args.get("source", "")
-    events = case.timeline(limit=limit)
-    if q or src:
-        events = _filter_table(events, q=q, filters={"source": src})
-    return render_template("timeline.html", events=events, q=q, src=src, total=len(case.timeline(limit=limit)))
+    # The true total comes from the uncapped timeline, never from the capped slice.
+    # Reading `total` off the already-limited list reported the cap as the total, so
+    # the page claimed to show everything while silently dropping the oldest events
+    # — which is what happened as soon as decoded notifications pushed the event
+    # count past the default limit.
+    full = case.timeline(limit=999_999)
+    total = len(full)
+    events = _filter_table(full, q=q, filters={"source": src}) if (q or src) else full
+    matched = len(events)
+    return render_template("timeline.html", events=events[:limit], q=q, src=src,
+                           total=total, matched=matched, limit=limit,
+                           truncated=matched > limit)
 
 
 @app.route("/timeline/export.csv")
 def export_timeline_csv():
     case = _active()
-    rows = case.timeline(limit=_int_arg("limit", 5000))
+    rows = case.timeline(limit=_int_arg("limit", 5000, minimum=1))
     rows = _filter_table(rows, q=request.args.get("q", ""), filters={"source": request.args.get("source", "")})
     cols = ["when_iso", "source", "kind", "title", "amount_inr", "link_id"]
     return _csv_response(rows, cols, "unified_timeline.csv")
@@ -900,19 +1334,17 @@ def export_findings_csv():
 def page_db_browser():
     case = _active()
     return render_template("database_browser.html",
-                           inventory=case.data.get("database_inventory", []),
-                           plists=case.data.get("plist_inventory", []))
+                           inventory=case.data.get("database_inventory", []))
 
 
-def _case_database_paths(case) -> Dict[str, str]:
-    """Realpath -> original path for every database belonging to THIS case.
+SQL_ROW_LIMIT = 1000
 
-    Without this the console is an arbitrary-file SQLite reader: `?db=` accepts
-    any path on the workstation, including another investigation's evidence.
-    """
+
+def _case_database_paths(case: Case) -> Dict[str, str]:
+    """realpath → declared path for every database belonging to the active case."""
     allowed: Dict[str, str] = {}
     for entry in case.data.get("database_inventory", []) or []:
-        p = entry.get("path") if isinstance(entry, dict) else None
+        p = entry.get("path")
         if p:
             allowed[os.path.realpath(p)] = p
     return allowed
@@ -926,9 +1358,13 @@ def page_db_sql():
     result = None
     columns: List[str] = []
     error = None
+    truncated = False
     if db_path and sql:
+        allowed = _case_database_paths(case)
         sql_stripped = sql.strip().rstrip(";")
-        if os.path.realpath(db_path) not in _case_database_paths(case):
+        if os.path.realpath(db_path) not in allowed:
+            # Without this the console is an arbitrary-file SQLite reader: any
+            # path on the workstation, including another investigation's case.
             error = "That database is not part of this case."
         elif not sql_stripped.upper().startswith(("SELECT", "PRAGMA", "EXPLAIN", "WITH")):
             error = "Only SELECT / PRAGMA / EXPLAIN / WITH queries are allowed."
@@ -938,21 +1374,18 @@ def page_db_sql():
             try:
                 from .core import SQLiteReader
                 with SQLiteReader(db_path) as db:
-                    # Cap at fetch time. Appending " LIMIT 1000" to the
-                    # analyst's SQL is a syntax error for PRAGMA, for EXPLAIN,
-                    # and for any query that already carries its own LIMIT.
-                    rows = db.query(sql_stripped)[:1000]
-                if rows and "_error" in rows[0]:
-                    error = rows[0]["_error"]
-                else:
-                    result = rows[:1000]
-                    columns = list(result[0].keys()) if result else []
+                    # Row-capping happens at fetch time. Appending " LIMIT 1000"
+                    # to the analyst's SQL is a syntax error for PRAGMA, for
+                    # EXPLAIN, and for any query that already has its own LIMIT.
+                    result, columns, truncated = db.query_rows(
+                        sql_stripped, max_rows=SQL_ROW_LIMIT)
             except Exception as exc:
                 error = str(exc)
     return render_template("database_sql.html",
                            inventory=case.data.get("database_inventory", []),
-                           db_path=db_path, sql=sql,
-                           result=result, columns=columns, error=error)
+                           db_path=db_path, sql=sql, row_limit=SQL_ROW_LIMIT,
+                           result=result, columns=columns, error=error,
+                           truncated=truncated)
 
 
 @app.route("/counterparty")
@@ -973,8 +1406,7 @@ def page_hunt():
     query = request.args.get("q", "")
     result = None
     if query:
-        idx = hunt.materialise_indexes(case.data, case.timeline(), case.social_graph(), case.findings())
-        result = hunt.run_query(query, idx)
+        result = hunt.run_query(query, case.hunt_indexes())
     return render_template(
         "hunt.html",
         query=query,
@@ -989,8 +1421,7 @@ def export_hunt_csv():
     query = request.args.get("q", "")
     if not query:
         abort(400)
-    idx = hunt.materialise_indexes(case.data, case.timeline(), case.social_graph(), case.findings())
-    result = hunt.run_query(query, idx)
+    result = hunt.run_query(query, case.hunt_indexes())
     if result.get("error"):
         return _csv_response([], ["error"], "hunt_error.csv")
     cols = result["columns"] or list(result["rows"][0].keys()) if result["rows"] else ["_empty"]
@@ -1000,23 +1431,6 @@ def export_hunt_csv():
 # ---------------------------------------------------------------------------
 # Research document (in-app)
 # ---------------------------------------------------------------------------
-
-@app.route("/research")
-def page_research():
-    return render_template("research.html",
-                           sections=research_data.RESEARCH_SECTIONS,
-                           toc=[(s["slug"], s["title"]) for s in research_data.RESEARCH_SECTIONS])
-
-
-@app.route("/research/<slug>")
-def page_research_section(slug: str):
-    section = next((s for s in research_data.RESEARCH_SECTIONS if s["slug"] == slug), None)
-    if not section:
-        abort(404)
-    return render_template("research_section.html",
-                           section=section,
-                           toc=[(s["slug"], s["title"]) for s in research_data.RESEARCH_SECTIONS])
-
 
 # ---------------------------------------------------------------------------
 # Exports page
@@ -1049,7 +1463,8 @@ def _existing_exports() -> List[Dict[str, Any]]:
 @app.route("/api/export", methods=["POST"])
 def api_export():
     case = _active()
-    info = case.export_all(base_dir=os.path.join(os.getcwd(), "exports"))
+    info = case.export_all(base_dir=os.path.join(os.getcwd(), "exports"),
+                           meta=manager.get_meta(manager.active_id) or {})
     return jsonify({"ok": True, **info})
 
 
@@ -1065,18 +1480,29 @@ def api_file():
     case = _active()
     real = os.path.realpath(p)
     allowed_roots = [os.path.realpath(case.root)]
-    if case.paths.app_domain:
-        allowed_roots.append(os.path.realpath(case.paths.app_domain))
-    if case.paths.group_app:
-        allowed_roots.append(os.path.realpath(case.paths.group_app))
-    if case.paths.group_shared:
-        allowed_roots.append(os.path.realpath(case.paths.group_shared))
+    # getattr so this works regardless of the CasePaths shape (Android uses
+    # app_dir/databases_dir/…; the iOS-era app_domain/group_* may be absent).
+    for attr in ("app_dir", "databases_dir", "shared_prefs_dir", "files_dir",
+                 "webview_dir", "app_domain", "group_app", "group_shared"):
+        d = getattr(case.paths, attr, None)
+        if d:
+            allowed_roots.append(os.path.realpath(d))
     allowed_roots.append(os.path.realpath(os.path.join(os.getcwd(), "exports")))
-    # `startswith` matches siblings: an allowed root of /case/app also permits
-    # /case/app-EXTRA. commonpath compares whole path components.
-    if not any(os.path.commonpath([real, r]) == r for r in allowed_roots):
+    if not any(_is_within(real, r) for r in allowed_roots):
         abort(403)
     return send_file(real)
+
+
+def _is_within(path: str, root: str) -> bool:
+    """True when `path` is `root` or lives underneath it.
+
+    A prefix test is not containment: `/cases/acme` is a prefix of
+    `/cases/acme-OTHER`, so startswith() serves files from a sibling case.
+    """
+    try:
+        return os.path.commonpath([path, root]) == root
+    except ValueError:  # different drives on Windows
+        return False
 
 
 @app.route("/api/blob")
@@ -1095,7 +1521,7 @@ def api_blob():
 
 @app.route("/api/timeline")
 def api_timeline():
-    return jsonify(_active().timeline(limit=_int_arg("limit", 5000)))
+    return jsonify(_active().timeline(limit=_int_arg("limit", 5000, minimum=1)))
 
 
 @app.route("/api/findings")
@@ -1108,8 +1534,7 @@ def api_hunt():
     case = _active()
     payload = request.get_json(silent=True) or {}
     query = payload.get("q", "")
-    idx = hunt.materialise_indexes(case.data, case.timeline(), case.social_graph(), case.findings())
-    return jsonify(hunt.run_query(query, idx))
+    return jsonify(hunt.run_query(query, case.hunt_indexes()))
 
 
 @app.errorhandler(503)
@@ -1124,8 +1549,8 @@ def _err_404(e):
 
 @app.errorhandler(500)
 def _err_500(e):
-    # str(e) is the raw exception: filesystem paths, SQL text, evidence values.
-    # Log it for the analyst's console; show the page a generic message.
+    # str(e) here is the raw exception: filesystem paths, SQL text, evidence
+    # values. Log it for the analyst's console, show the page a generic message.
     log.exception("Unhandled error serving %s", request.path)
     return render_template(
         "error.html", code=500,
@@ -1133,281 +1558,12 @@ def _err_500(e):
     ), 500
 
 
-# ---------------------------------------------------------------------------
-# v2 routes (additive — coverage / classifier / TPAP / raw provenance)
-# ---------------------------------------------------------------------------
-
-@app.route("/v2/raw/<source>/<path:row_pk>")
-def page_raw_record(source: str, row_pk: str):
-    """Return the decoded JSON + forensic-provenance envelope for one record.
-
-    `source` is "txnstore" | "burble" | "mandate"; `row_pk` is either the
-    transaction primary_id or the message Z_PK depending on source.
-    """
-    case = _active()
-    v2 = case.data.get("_v2") or {}
-    result = v2.get("_reconcile_result")
-    if result is None:
-        return jsonify({"error": "v2 enrichment not available for this case"}), 404
-
-    payload = None
-    if source in ("txnstore", "payment"):
-        for p in result.payments:
-            if p.primary_id == row_pk or p.global_id == row_pk:
-                payload = {
-                    "kind": "payment",
-                    "provenance": p.provenance,
-                    "decoded": p.decoded_blob,
-                    "summary": {
-                        "primary_id": p.primary_id,
-                        "global_id": p.global_id,
-                        "amount_inr": p.amount_inr,
-                        "direction": p.direction,
-                        "state": p.state,
-                        "datetime_ist": p.datetime_ist,
-                        "counterparty_name": p.counterparty_name,
-                        "classification": p.classification,
-                        "data_source": p.data_source,
-                    },
-                }
-                break
-    elif source == "mandate":
-        for m in result.mandates:
-            if m["primary_id"] == row_pk:
-                payload = {
-                    "kind": "mandate_or_request",
-                    "provenance": m.get("provenance"),
-                    "decoded": m.get("decoded_blob"),
-                    "summary": {
-                        "primary_id": m["primary_id"],
-                        "entity_type": m["entity_type"],
-                        "name": m["name"],
-                        "amount_inr": m["amount_inr"],
-                        "datetime_ist": m["datetime_ist"],
-                    },
-                }
-                break
-    if payload is None:
-        return jsonify({"error": f"record not found: {source}/{row_pk}"}), 404
-    return jsonify(payload)
+# /avatar and /app-icon are gone. Android acquisitions store no local profile
+# photos keyed by phone (the contacts table holds remote URLs only) and no icon
+# assets ship with the tool, so both endpoints could only ever 404 — one request
+# per contact, per page load. The templates render initials directly instead.
 
 
-@app.route("/v2/avatar/<phone>")
-def page_v2_avatar(phone: str):
-    """Return the JPEG avatar bytes for the given phone (from SamparkV2)."""
-    from .v2.data_layer import load_avatars
-    case = manager.get_active_case()
-    if not case:
-        return abort(404)
-    avatars = load_avatars(case.root)
-    # last 10 digits
-    norm = "".join(c for c in str(phone) if c.isdigit())[-10:]
-    if not norm or norm not in avatars:
-        return abort(404)
-    return Response(avatars[norm], mimetype="image/jpeg")
-
-
-@app.route("/v2/app-icon/<icon_id>.png")
-def page_v2_app_icon(icon_id: str):
-    """Return a TPAP app icon PNG (PhonePe / GPay / Paytm / Cred / Amazon Pay)."""
-    from pathlib import Path
-    p = Path(__file__).parent / "v2" / "static" / "logos" / "apps" / f"{icon_id}.png"
-    if not p.exists():
-        return abort(404)
-    return Response(p.read_bytes(), mimetype="image/png")
-
-
-@app.route("/v2/coverage")
-def page_v2_coverage():
-    """JSON summary of the v2 enrichment coverage + retention banner."""
-    case = _active()
-    v2 = case.data.get("_v2") or {}
-    return jsonify(
-        {
-            "available": bool(v2),
-            "coverage": v2.get("coverage", {}),
-            "retention_days": v2.get("retention_days"),
-            "phonepe_psps": v2.get("phonepe_psps", []),
-            "tpap_map_size": v2.get("tpap_map_size", 0),
-            "qr_scan_count": v2.get("qr_scan_count", 0),
-            "intent_count": v2.get("intent_count", 0),
-            "refunds_count": len(v2.get("refunds", [])),
-            "failures_count": len(v2.get("failures", [])),
-            "mandates_count": v2.get("mandates_count", 0),
-            "source_db_hashes": v2.get("source_db_hashes", {}),
-            "owner_vpas": v2.get("owner_vpas", []),
-        }
-    )
-
-
-@app.route("/v2/export/evidence.html")
-def page_export_offline_html():
-    """Build the single-file offline HTML report and stream it as a download."""
-    import io
-    import tempfile
-    from pathlib import Path
-
-    from flask import send_file
-
-    case = _active()
-    from .v2_integration import render_offline_html
-
-    # NOTE: manager.get_active_case() returns a Case object, not a string —
-    # iterating it (below) raised TypeError and 500'd the route. Use the id.
-    case_id = manager.active_id or "case"
-    safe = "".join(c for c in str(case_id) if c.isalnum() or c in ("-", "_")) or "case"
-    tmp_dir = Path(tempfile.mkdtemp(prefix="phonepe_evidence_"))
-    out = tmp_dir / f"case_{safe}_phonepe_evidence.html"
-    render_offline_html(case, out)
-    return send_file(
-        out,
-        as_attachment=True,
-        download_name=f"case_{safe}_phonepe_evidence.html",
-        mimetype="text/html",
-    )
-
-
-@app.route("/v2/mandates")
-def page_v2_mandates():
-    case = _active()
-    v2 = case.data.get("_v2") or {}
-    return render_template(
-        "v2_mandates.html",
-        mandates=v2.get("mandates", []),
-        refunds=v2.get("refunds", []),
-    )
-
-
-@app.route("/v2/raw-records")
-def page_v2_raw_records():
-    case = _active()
-    v2 = case.data.get("_v2") or {}
-    result = v2.get("_reconcile_result")
-    rows: List[Dict[str, Any]] = []
-    if result is not None:
-        for p in result.payments:
-            rows.append(
-                {
-                    "kind": "payment",
-                    "source_db": p.provenance.get("source_db"),
-                    "source_table": p.provenance.get("source_table"),
-                    "source_row_pk": p.provenance.get("source_row_pk"),
-                    "id": p.primary_id,
-                    "datetime_ist": p.datetime_ist,
-                    "summary": f"{p.direction} ₹{p.amount_inr:.2f} {p.counterparty_name}",
-                    "url": f"/v2/raw/payment/{p.primary_id}",
-                }
-            )
-        for m in result.mandates:
-            rows.append(
-                {
-                    "kind": "mandate_or_request",
-                    "source_db": m["provenance"].get("source_db"),
-                    "source_table": m["provenance"].get("source_table"),
-                    "source_row_pk": m["provenance"].get("source_row_pk"),
-                    "id": m["primary_id"],
-                    "datetime_ist": m["datetime_ist"],
-                    "summary": f"{m['entity_type']} {m['name']} ₹{m['amount_inr']:.2f}",
-                    "url": f"/v2/raw/mandate/{m['primary_id']}",
-                }
-            )
-    return render_template("v2_raw_records.html", rows=rows)
-
-
-@app.route("/v2/counterparty/<path:cluster_id>")
-def page_v2_counterparty(cluster_id: str):
-    """Identifier-stable counterparty profile.
-
-    Unlike the upstream /counterparty?q=<name> route (substring name match —
-    which conflates two different people who share a name), this resolves the
-    EXACT identifier cluster assigned by resolve_counterparties(). Every payment
-    shown shares a userId / phone / VPA with this counterparty — never a name.
-    """
-    case = _active()
-    v2 = case.data.get("_v2") or {}
-    result = v2.get("_reconcile_result")
-    clusters = v2.get("clusters") or {}
-    if result is None:
-        return render_template("error.html", code=404,
-                               message="v2 enrichment not available for this case"), 404
-
-    cluster = clusters.get(cluster_id) or {}
-    payments = [p for p in result.payments if p.counterparty_cluster_id == cluster_id]
-    # Stale / aliased id: the URL may carry a `pmt:<primary_id>` that is no
-    # longer a cluster root — it merged into an identifier cluster once the
-    # counterparty resolved (connectid / phone). Re-point to the payment's
-    # CURRENT cluster so an old bookmark or deep link still resolves.
-    if not payments:
-        needle = cluster_id[4:] if cluster_id.startswith("pmt:") else cluster_id
-        for p in result.payments:
-            if needle and needle in (p.primary_id, p.global_id):
-                cluster_id = p.counterparty_cluster_id
-                cluster = clusters.get(cluster_id) or {}
-                payments = [
-                    q for q in result.payments
-                    if q.counterparty_cluster_id == cluster_id
-                ]
-                break
-    payments.sort(key=lambda p: p.timestamp_ms or 0, reverse=True)
-
-    # decompose identifiers into readable buckets
-    phones, vpas, user_ids, connect_ids = [], [], [], []
-    for ident in cluster.get("identifiers", []):
-        if ident.startswith("ph:"):
-            phones.append(ident[3:])
-        elif ident.startswith("vpa:"):
-            vpas.append(ident[4:])
-        elif ident.startswith("uid:"):
-            user_ids.append(ident[4:])
-        elif ident.startswith("cid:"):
-            connect_ids.append(ident[4:])
-
-    # Money totals count COMPLETED payments only — a FAILED payment carries an
-    # amount but no money moved, so summing it would inflate the figures.
-    def _completed(p):
-        return p.state == "COMPLETED"
-
-    total_recv = sum(p.amount_inr for p in payments if p.direction == "RECEIVED" and _completed(p))
-    total_sent = sum(p.amount_inr for p in payments if p.direction == "SENT" and _completed(p))
-    by_year: Dict[str, Dict[str, float]] = {}
-    for p in payments:
-        if not p.timestamp_ms or not _completed(p):
-            continue
-        from datetime import datetime, timezone
-        yr = str(datetime.fromtimestamp(p.timestamp_ms / 1000, tz=timezone.utc).year)
-        b = by_year.setdefault(yr, {"recv": 0.0, "sent": 0.0})
-        if p.direction == "RECEIVED":
-            b["recv"] += p.amount_inr
-        elif p.direction == "SENT":
-            b["sent"] += p.amount_inr
-
-    profile = {
-        "cluster_id": cluster_id,
-        "display_name": cluster.get("display_name", "(unknown)"),
-        "names_verified": cluster.get("names_verified", []),
-        "names_cbs": cluster.get("names_cbs", []),
-        "names_display": cluster.get("names_display", []),
-        "names_saved": cluster.get("names_saved", []),
-        "masked_phones": cluster.get("masked_phones", []),
-        "kinds": cluster.get("kinds", []),
-        "is_merchant": "MERCHANT" in cluster.get("kinds", []),
-        "phones": phones,
-        "vpas": vpas,
-        "user_ids": user_ids,
-        "connect_ids": connect_ids,
-        "identifiers": cluster.get("identifiers", []),
-        "payments": payments,
-        "total_received_inr": round(total_recv, 2),
-        "total_sent_inr": round(total_sent, 2),
-        "net_inr": round(total_recv - total_sent, 2),
-        "txn_count": len(payments),
-        "received_count": sum(1 for p in payments if p.direction == "RECEIVED"),
-        "sent_count": sum(1 for p in payments if p.direction == "SENT"),
-        "burble_only_count": sum(1 for p in payments if p.data_source == "burble_only"),
-        "txnstore_count": sum(1 for p in payments if p.data_source == "txnstore_full"),
-        "by_year": dict(sorted(by_year.items())),
-    }
-    return render_template("v2_counterparty.html", profile=profile)
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Split / Bill Ledger — PhonePe Android Forensics{% endblock %}
+{% block heading %}Split / Bill Ledger{% endblock %}
+{% block subheading %}PhonePe "Split" shared-expense ledgers — who paid, who owes, and settlement links.{% endblock %}
+
+{% block content %}
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Ledgers (groups)</div><div class="mvalue">{{ ledger.summary.ledger_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Expenses</div><div class="mvalue">{{ ledger.summary.expense_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Total split value</div><div class="mvalue">{{ ledger.summary.total_expense_inr|inr }}</div></div>
+  <div class="metric"><div class="mlabel">Settled (→ txn)</div><div class="mvalue">{{ ledger.summary.settled_expense_count or 0 }}</div></div>
+  <div class="metric"><div class="mlabel">Members w/ balance</div><div class="mvalue">{{ ledger.summary.members_with_balance or 0 }}</div></div>
+</div>
+
+{% if ledger.ledgers %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Ledger Groups</div>
+  <table>
+    <thead><tr><th>Ledger ID</th><th>Linked Chat Topic</th><th>Created</th><th>Magic Settle</th></tr></thead>
+    <tbody>
+    {% for g in ledger.ledgers %}
+      <tr><td class="mono small">{{ g.ledger_id }}</td><td class="mono small">{{ g.chat_topic_id }}</td>
+          <td class="mono small">{{ g.created_at|ts }}</td><td>{{ g.magic_settle|yes_no }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if ledger.my_net %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Subject's Net Position with Each Person</div>
+  <p class="muted small">
+    From <span class="mono">ledger_my_split.signed_amount</span> — the subject's own net
+    balance per counterparty. A <b>negative</b> stored amount means the subject owes that
+    person; positive means they owe the subject. The direction is spelled out below rather
+    than left to the sign, and it agrees with the per-member table underneath
+    (the subject's “to give” total equals the sum of what they owe here).
+  </p>
+  <table>
+    <thead><tr><th>Counterparty</th><th>Direction</th><th class="right">Amount</th></tr></thead>
+    <tbody>
+    {% for m in ledger.my_net %}
+      <tr>
+        <td>{{ m.counterparty }}</td>
+        <td>
+          {% if m.net_inr is not none and m.net_inr < 0 %}
+            <span class="badge-pill badge-warn">subject owes them</span>
+          {% elif m.net_inr %}
+            <span class="badge-pill badge-ok">they owe the subject</span>
+          {% else %}<span class="muted">settled</span>{% endif %}
+        </td>
+        <td class="right mono">{{ (m.net_inr|abs if m.net_inr is not none else 0)|inr }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Net Balances (per member)</div>
+  <p class="muted small">
+    <span class="mono">ledger_balance</span>, as the app stores it: <b>To give</b> is what that
+    member still has to pay into the ledger, <b>To receive</b> what is still owed to them — so
+    a non-zero “to receive” beside another member is money the subject's side owes.
+  </p>
+  <table>
+    <thead><tr><th>Member</th><th>To give</th><th>To receive</th></tr></thead>
+    <tbody>
+    {% for b in ledger.balances %}
+      <tr>
+        <td>{{ b.name }}{% if b.is_self %} <span class="tag">SELF</span>{% endif %}</td>
+        <td class="mono {% if b.to_give_inr %}badge-warn{% endif %}">{{ b.to_give_inr|inr }}</td>
+        <td class="mono">{{ b.to_receive_inr|inr }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Expenses ({{ ledger.expenses|count }})</div>
+  <div class="filter-bar"><input type="text" placeholder="Filter…" data-filter-input data-filter-target="#expTable"></div>
+  <div class="tbl-wrap-scroll" style="max-height:60vh;overflow-y:auto">
+  <table id="expTable">
+    <thead><tr><th>Created</th><th>Amount</th><th>Type</th><th>Payer</th><th>Members</th><th>State</th><th>Settlement Txn</th></tr></thead>
+    <tbody>
+    {% for e in ledger.expenses %}
+      <tr>
+        <td class="mono small">{{ e.created_at|ts }}</td>
+        <td class="mono">{{ e.amount_inr|inr }}</td>
+        <td><span class="tag">{{ e.type }}</span></td>
+        <td>{{ e.payer or '—' }}</td>
+        <td class="small">{% for m in e.members %}{{ m.name }}{% if m.is_payer %} (paid){% endif %}{% if m.is_self %}*{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+        <td><span class="tag {{ (e.state or '')|lower }}">{{ e.state }}</span></td>
+        <td class="mono small">{{ e.settlement_txn_id or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

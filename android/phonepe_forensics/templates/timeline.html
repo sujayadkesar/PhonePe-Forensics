@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}Timeline — PhonePe Android Forensics{% endblock %}
+{% block heading %}Unified Timeline{% endblock %}
+{% block subheading %}
+{% if truncated %}
+  Showing the most recent {{ events|length }} of
+  {% if matched != total %}{{ matched }} matching ({{ total }} total){% else %}{{ total }}{% endif %}
+  chronologically merged events — raise the cap with <span class="mono">?limit=</span>.
+{% else %}
+  {{ events|length }} chronologically merged events from every evidence database{% if matched != total %},
+  filtered from {{ total }}{% endif %}.
+{% endif %}
+{% endblock %}
+{% block topbar_actions %}
+<a href="?limit=500" class="btn subtle">Top 500</a>
+<a href="?limit=2000" class="btn subtle">Top 2000</a>
+<a href="?limit=10000" class="btn subtle">All</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="filter-bar">
+    <input type="text" id="tlSearch" placeholder="Filter by source / title / detail…" style="flex:1;min-width:180px">
+    <select id="tlSource">
+      <option value="">Source: any</option>
+      <option value="Transactions">Transactions</option>
+      <option value="Chat">Chat</option>
+      <option value="Notifications">Push topics</option>
+      <option value="Analytics">KN events</option>
+      <option value="Analytics-Pending">Analytics queue</option>
+      <option value="Auth-Events">Auth events</option>
+      <option value="Rewards">Rewards</option>
+      <option value="Sync">Sync activity</option>
+      <option value="Recommendations">Recommendations</option>
+      <option value="AppSearch">Search</option>
+      <option value="WebKit">WebKit</option>
+      <option value="Yatra">Travel</option>
+      <option value="Background">Background tasks</option>
+    </select>
+    {# Say which clock the range is read in — otherwise a range typed against an
+       IST table but evaluated in UTC looks like the filter is broken. #}
+    <span class="muted small" style="white-space:nowrap"
+          title="Times below are read in the display timezone">From
+      <b style="color:var(--accent)">{{ ts_zones[ts_zone_key].label }}</b>
+    </span>
+    <input type="datetime-local" id="tlFrom" style="min-width:0;width:185px">
+    <span class="muted small" style="white-space:nowrap">To</span>
+    <input type="datetime-local" id="tlTo" style="min-width:0;width:185px">
+    <button type="button" class="btn subtle" id="tlClearDates" style="white-space:nowrap;font-size:12px;padding:7px 11px">× Clear dates</button>
+    <span id="tlRangeErr" style="display:none;color:var(--danger);font-size:12px;white-space:nowrap">⚠ From is after To</span>
+    <select id="tlAmtOp">
+      <option value="">Amount: any</option>
+      <option value="gt">more than</option>
+      <option value="lt">less than</option>
+      <option value="eq">equal to</option>
+      <option value="between">between</option>
+    </select>
+    <input type="number" id="tlAmtA" placeholder="₹" min="0" step="0.01"
+           style="min-width:0;width:105px;display:none">
+    <span id="tlAmtAnd" class="muted small" style="display:none;white-space:nowrap">and</span>
+    <input type="number" id="tlAmtB" placeholder="₹" min="0" step="0.01"
+           style="min-width:0;width:105px;display:none">
+    <span class="muted small" id="tlCount" style="margin-left:auto;white-space:nowrap">{{ events|length }} / {{ events|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:74vh;overflow-y:auto">
+    <table id="tlTable">
+      <thead><tr><th>When</th><th>Source</th><th>Kind</th><th>Title</th><th class="right">Amount</th><th>Link</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+          {# data-epoch carries the machine value so the date filter below never
+             has to parse whatever format the user chose to display. #}
+          <tr data-amount="{{ e.amount_inr if e.amount_inr is not none else '' }}"
+              data-epoch="{{ e.when_ms if e.when_ms is not none else '' }}">
+            <td class="mono small">{{ e.when_iso|ts }}</td>
+            <td><span class="tag">{{ e.source }}</span></td>
+            <td class="mono small">{{ e.kind }}</td>
+            <td>{{ e.title }}</td>
+            <td class="right">{% if e.amount_inr %}<span class="amount-pos">{{ e.amount_inr|inr }}</span>{% endif %}</td>
+            <td class="mono small">
+              {% if e.link_id %}
+                {% if e.source == 'Transactions' %}
+                  <a href="{{ url_for('page_transaction_detail', txn_id=e.link_id) }}">{{ e.link_id|truncate(20) }}</a>
+                {% else %}
+                  {{ e.link_id|truncate(20) }}
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var table    = document.getElementById('tlTable');
+  var rows     = Array.from(table.querySelectorAll('tbody tr'));
+  var search   = document.getElementById('tlSearch');
+  var srcSel   = document.getElementById('tlSource');
+  var fromInp  = document.getElementById('tlFrom');
+  var toInp    = document.getElementById('tlTo');
+  var clearBtn = document.getElementById('tlClearDates');
+  var counter  = document.getElementById('tlCount');
+  var rangeErr = document.getElementById('tlRangeErr');
+  var amtOp    = document.getElementById('tlAmtOp');
+  var amtA     = document.getElementById('tlAmtA');
+  var amtAnd   = document.getElementById('tlAmtAnd');
+  var amtB     = document.getElementById('tlAmtB');
+  var total    = rows.length;
+
+  // The zone the table is currently rendered in, so typed filter values can be
+  // anchored to the same clock. Real zone rules, not a fixed offset: the offset
+  // on the date being filtered is what matters, and it changes across DST.
+  var DISPLAY_TZ = {{ ts_zone_key|tojson }};
+
+  function tzOffsetMs(utcMs) {
+    try {
+      var f = new Intl.DateTimeFormat('en-US', {
+        timeZone: DISPLAY_TZ, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      var p = {};
+      f.formatToParts(new Date(utcMs)).forEach(function (x) { p[x.type] = x.value; });
+      var asUTC = Date.UTC(+p.year, +p.month - 1, +p.day,
+                           (+p.hour) % 24, +p.minute, +p.second);
+      return asUTC - utcMs;
+    } catch (e) {
+      return 0;                      // no Intl / unknown zone: behave as UTC
+    }
+  }
+
+  // "2026-03-07T14:30" understood as wall-clock time in DISPLAY_TZ -> epoch ms.
+  // Applied twice because the offset itself depends on the instant, which the
+  // first pass only approximates — that second pass is what makes the hour
+  // either side of a DST change come out right.
+  function zonedToUtcMs(localValue) {
+    var naive = new Date(localValue + ':00Z').getTime();
+    if (isNaN(naive)) return null;
+    var ms = naive - tzOffsetMs(naive);
+    return naive - tzOffsetMs(ms);
+  }
+
+  // Precompute per-row data once at load.
+  // The timestamp comes from data-epoch, not from the cell text: the cell is
+  // rendered in whatever format the analyst picked (DD/MM/YYYY, IST, epoch…)
+  // and parsing that back would break the range filter the moment they switch.
+  var rowData = rows.map(function (r) {
+    var cells = r.querySelectorAll('td');
+    var ep    = r.getAttribute('data-epoch');
+    var raw   = r.getAttribute('data-amount');
+    return {
+      ms  : (ep !== null && ep !== '') ? parseInt(ep, 10) : NaN,
+      src : cells[1] ? cells[1].textContent.trim() : '',
+      text: r.textContent.toLowerCase(),
+      amt : (raw !== null && raw !== '') ? parseFloat(raw) : NaN
+    };
+  });
+
+  // Show/hide amount inputs based on selected operator.
+  function syncAmtInputs() {
+    var op = amtOp.value;
+    amtA.style.display   = (op !== '')        ? '' : 'none';
+    amtAnd.style.display = (op === 'between') ? '' : 'none';
+    amtB.style.display   = (op === 'between') ? '' : 'none';
+    if (op === '') { amtA.value = ''; amtB.value = ''; }
+    if (op !== 'between') amtB.value = '';
+  }
+
+  function applyFilters() {
+    var q   = search.value.trim().toLowerCase();
+    var src = srcSel.value;
+    var op  = amtOp.value;
+    var a   = amtA.value !== '' ? parseFloat(amtA.value) : null;
+    var b   = amtB.value !== '' ? parseFloat(amtB.value) : null;
+
+    // What the analyst types is a time on the clock they are reading, which is
+    // the selected display zone — not UTC. Forcing ':00Z' here was correct only
+    // while the table was always UTC; with IST selected it shifted every range
+    // by 5h30 and rows silently fell outside it.
+    var fromMs = fromInp.value ? zonedToUtcMs(fromInp.value) : null;
+    var toMs   = toInp.value   ? zonedToUtcMs(toInp.value) + 59000 : null;
+
+    rangeErr.style.display = (fromMs !== null && toMs !== null && fromMs > toMs) ? '' : 'none';
+
+    var shown = 0;
+    rows.forEach(function (r, i) {
+      var d  = rowData[i];
+      var ok = true;
+
+      if (q   && !d.text.includes(q))                         ok = false;
+      if (src && d.src !== src)                                ok = false;
+      if (fromMs !== null && (isNaN(d.ms) || d.ms < fromMs))  ok = false;
+      if (toMs   !== null && (isNaN(d.ms) || d.ms > toMs))    ok = false;
+
+      if (op) {
+        if (isNaN(d.amt)) {
+          ok = false;                                  // no amount - hide when filter is active
+        } else if (op === 'gt' && a !== null) {
+          if (d.amt <= a) ok = false;
+        } else if (op === 'lt' && a !== null) {
+          if (d.amt >= a) ok = false;
+        } else if (op === 'eq' && a !== null) {
+          if (Math.abs(d.amt - a) > 0.005) ok = false; // half-paisa tolerance for float precision
+        } else if (op === 'between' && a !== null && b !== null) {
+          var lo = Math.min(a, b), hi = Math.max(a, b); // order-independent
+          if (d.amt < lo || d.amt > hi) ok = false;
+        }
+      }
+
+      r.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+
+    counter.textContent = shown + ' / ' + total;
+  }
+
+  amtOp.addEventListener('change', function () { syncAmtInputs(); applyFilters(); });
+  amtA.addEventListener('input',   applyFilters);
+  amtB.addEventListener('input',   applyFilters);
+  search.addEventListener('input',   applyFilters);
+  srcSel.addEventListener('change',  applyFilters);
+  fromInp.addEventListener('change', applyFilters);
+  toInp.addEventListener('change',   applyFilters);
+
+  clearBtn.addEventListener('click', function () {
+    fromInp.value = '';
+    toInp.value   = '';
+    applyFilters();
+  });
+})();
+</script>
+{% endblock %}

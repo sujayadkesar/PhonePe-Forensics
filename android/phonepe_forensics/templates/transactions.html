@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}Transactions — PhonePe Android Forensics{% endblock %}
+{% block heading %}Transaction Ledger{% endblock %}
+{% block subheading %}{{ summary.transaction_count }} transactions reconstructed from <span class="mono">phonepe_core.transaction_core</span>. Click an ID for full BLOB-decoded detail.{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('export_transactions_csv') }}?{{ request.query_string.decode('utf-8') }}" class="btn">↧ Export filtered CSV</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Received</div><div class="mvalue pos">{{ summary.total_received_inr|inr }}</div><div class="msub">{{ summary.direction_breakdown.IN or 0 }} txn IN</div></div>
+  <div class="metric"><div class="mlabel">Sent</div><div class="mvalue neg">{{ summary.total_sent_inr|inr }}</div><div class="msub">{{ summary.direction_breakdown.OUT or 0 }} txn OUT</div></div>
+  <div class="metric"><div class="mlabel">Net Flow</div><div class="mvalue {% if summary.net_flow_inr > 0 %}pos{% else %}neg{% endif %}">{{ summary.net_flow_inr|inr }}</div></div>
+  <div class="metric"><div class="mlabel">Earliest</div><div class="mvalue" style="font-size:14px">{{ summary.earliest_txn|ts }}</div></div>
+  <div class="metric"><div class="mlabel">Latest</div><div class="mvalue" style="font-size:14px">{{ summary.latest_txn|ts }}</div></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-row">
+    <div class="card-title">Filters & Sort</div>
+    {% if filters.q or filters.direction or filters.state or filters.type or filters.instrument or filters.counterparty or filters.date_from or filters.date_to or filters.amount_min or filters.amount_max %}
+    <a href="{{ url_for('page_transactions') }}" class="btn subtle small">✕ Clear all</a>
+    {% endif %}
+  </div>
+
+  <form method="get" class="txn-filter-form">
+    <div class="filter-grid">
+      <div class="filter-cell wide">
+        <label class="filter-label">Free-text search</label>
+        <input type="text" name="q" value="{{ filters.q }}" placeholder="counterparty, ID, note, UTR, VPA, IFSC…">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Counterparty</label>
+        <input type="text" name="counterparty" value="{{ filters.counterparty }}" placeholder="name / phone / VPA">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Direction</label>
+        <select name="direction">
+          <option value="">Any</option>
+          <option value="IN"   {% if filters.direction=='IN' %}selected{% endif %}>IN (Received)</option>
+          <option value="OUT"  {% if filters.direction=='OUT' %}selected{% endif %}>OUT (Sent)</option>
+          <option value="META" {% if filters.direction=='META' %}selected{% endif %}>META</option>
+        </select>
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">State</label>
+        <select name="state">
+          <option value="">Any</option>
+          {% for s in states %}
+          <option value="{{ s }}" {% if filters.state==s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Type</label>
+        <select name="type">
+          <option value="">Any</option>
+          {% for t in types %}
+          <option value="{{ t }}" {% if filters.type==t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Instrument</label>
+        <select name="instrument">
+          <option value="">Any</option>
+          {% for i in instruments %}
+          <option value="{{ i }}" {% if filters.instrument==i %}selected{% endif %}>{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Date from
+          <span style="color:var(--accent)">({{ ts_zones[ts_zone_key].label }})</span>
+        </label>
+        <input type="date" name="date_from" value="{{ filters.date_from }}">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Date to</label>
+        <input type="date" name="date_to" value="{{ filters.date_to }}">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Amount ≥ (₹)</label>
+        <input type="number" step="0.01" min="0" name="amount_min" value="{{ filters.amount_min }}" placeholder="0">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Amount ≤ (₹)</label>
+        <input type="number" step="0.01" min="0" name="amount_max" value="{{ filters.amount_max }}" placeholder="∞">
+      </div>
+
+      <div class="filter-cell">
+        <label class="filter-label">Sort by</label>
+        <select name="sort">
+          <option value="date_desc"     {% if filters.sort=='date_desc' %}selected{% endif %}>Date · newest first</option>
+          <option value="date_asc"      {% if filters.sort=='date_asc' %}selected{% endif %}>Date · oldest first</option>
+          <option value="amount_desc"   {% if filters.sort=='amount_desc' %}selected{% endif %}>Amount · highest first</option>
+          <option value="amount_asc"    {% if filters.sort=='amount_asc' %}selected{% endif %}>Amount · lowest first</option>
+          <option value="counterparty"  {% if filters.sort=='counterparty' %}selected{% endif %}>Counterparty A→Z</option>
+        </select>
+      </div>
+
+      <div class="filter-cell filter-actions">
+        <button type="submit" class="btn primary" style="width:100%">Apply</button>
+      </div>
+    </div>
+
+    <div class="filter-quick-row">
+      <span class="muted small">Quick ranges:</span>
+      <a class="qchip" href="?{{ {'date_from': '', 'date_to': ''}|tojson }}#" onclick="setRange(0); return false">Today</a>
+      <a class="qchip" href="#" onclick="setRange(7); return false">Last 7 days</a>
+      <a class="qchip" href="#" onclick="setRange(30); return false">Last 30 days</a>
+      <a class="qchip" href="#" onclick="setRange(90); return false">Last 90 days</a>
+      <a class="qchip" href="#" onclick="setRange(365); return false">Last year</a>
+      <a class="qchip" href="#" onclick="setMonth('this'); return false">This month</a>
+      <a class="qchip" href="#" onclick="setMonth('last'); return false">Last month</a>
+      <span style="margin-left:14px" class="muted small">Quick amounts:</span>
+      <a class="qchip" href="#" onclick="setAmt(null, 100); return false">≤ ₹100</a>
+      <a class="qchip" href="#" onclick="setAmt(null, 500); return false">≤ ₹500</a>
+      <a class="qchip" href="#" onclick="setAmt(1000, null); return false">≥ ₹1k</a>
+      <a class="qchip" href="#" onclick="setAmt(5000, null); return false">≥ ₹5k</a>
+      <a class="qchip" href="#" onclick="setAmt(10000, null); return false">≥ ₹10k</a>
+      <a class="qchip" href="#" onclick="setAmt(100000, null); return false">≥ ₹1L</a>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <div class="card-row" style="margin-bottom:8px">
+    <div class="card-title">
+      Results: <span class="mono">{{ transactions|length }}</span>
+      <span class="muted small">/ {{ total_count }} total</span>
+    </div>
+    <div class="muted small">
+      <span class="amount-pos">Σ IN: {{ filtered_total_in|inr }}</span> ·
+      <span class="amount-neg">Σ OUT: {{ filtered_total_out|inr }}</span> ·
+      Net: {{ (filtered_total_in - filtered_total_out)|inr }}
+    </div>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:68vh">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Dir</th>
+        <th class="right">Amount</th>
+        <th>State</th>
+        <th>Counterparty</th>
+        <th>Phone / VPA</th>
+        <th>Instrument</th>
+        <th>UTR</th>
+        <th>Note</th>
+        <th>ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td class="mono small">{{ t.created_at|ts }}</td>
+        <td><span class="tag">{{ t.type }}</span></td>
+        <td><span class="tag {{ (t.direction or 'unknown')|lower }}">{{ t.direction }}</span></td>
+        <td class="right">
+          {% if t.amount_inr is not none %}
+            <span class="amount-{% if t.direction=='IN' %}pos{% elif t.direction=='OUT' %}neg{% else %}meta{% endif %}">{{ t.amount_inr|inr }}</span>
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td><span class="tag {{ (t.state or 'unknown')|lower }}">{{ t.state }}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div>
+              {% if t.counterparty_resolved %}
+                <div>
+                  {% for nm in (t.counterparty_resolved_names or [{'name': t.counterparty_resolved, 'source': none}]) %}
+                    <span>{{ nm.name }}</span>{% if nm.source %} <span class="resolved-src">· {{ nm.source }}</span>{% endif %}{% if not loop.last %}<br>{% endif %}
+                  {% endfor %}
+                  <span class="resolved-tag" title="Recovered by cross-table lookup ({{ t.counterparty_resolved_source }}); the source name was masked by PhonePe">↩ recovered</span>
+                </div>
+                <div class="muted small mono">{{ t.counterparty_phone_full or t.counterparty }}</div>
+              {% else %}
+                <div>{{ t.counterparty or '—' }}</div>
+              {% endif %}
+              {% if t.counterparty_cbs_name and t.counterparty_cbs_name != t.counterparty and t.counterparty_cbs_name != t.counterparty_resolved %}
+                <div class="muted small">CBS: {{ t.counterparty_cbs_name }}</div>
+              {% endif %}
+              {# A "Chat-only" tag keyed on `t.data_source == 'burble_only'` was here.
+                 Nothing in the codebase produces `data_source`, and by construction it
+                 cannot apply: this table lists `transaction_core` rows, so a payment
+                 known *only* from a chat card is not in it — those are reported by the
+                 `uncorroborated_transactions` finding instead. Removed because an absent
+                 tag reads as "no chat-only payments", which the page cannot know. #}
+              {# The guard must list every tag inside, not just classification: the QR and
+                 INTENT tags render for rows that carry no classification. A third tag
+                 keyed on `t.is_refund` was dropped — nothing sets it and no refund
+                 marker exists anywhere in this acquisition's transaction payloads, so
+                 it could only ever be absent, which reads as "no refunds". #}
+              {% if t.classification or t.is_qr_scan or t.is_intent %}
+                <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">
+                  {% if t.classification %}<span class="tag {% if t.classification == 'MERCHANT' %}accent{% elif t.classification == 'PEER_TO_PEER' %}info{% elif t.classification == 'MANDATE' %}med{% else %}{% endif %}" style="font-size:9px">{{ t.classification }}</span>{% endif %}
+                  {% if t.is_qr_scan %}<span class="tag med" style="font-size:9px">QR</span>{% endif %}
+                  {% if t.is_intent %}<span class="tag info" style="font-size:9px">INTENT</span>{% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td class="mono small">
+          {% if t.counterparty_phone %}{{ t.counterparty_phone }}<br>{% endif %}
+          {% if t.counterparty_vpa %}{{ t.counterparty_vpa }}{% endif %}
+          {# A counterparty "payment app" line stood here, reading `receiver_app` /
+             `sender_app` (and matching `_icon` keys) that nothing in the codebase sets.
+             Deliberately removed rather than implemented: naming the app means mapping
+             the VPA handle to a PSP (@ybl, @okaxis, @paytm …), and such a table is both
+             incomplete and easy to get wrong — @ybl is PhonePe-via-Yes-Bank, @okaxis is
+             Google-Pay-via-Axis — so a wrong app name would be a fabricated claim about
+             which app the counterparty used. The VPA itself is displayed directly above,
+             which is the evidence; the inference is the examiner's to make. #}
+        </td>
+        <td class="mono small">{{ t.received_in_type or t.transfer_mode or '—' }}</td>
+        <td class="mono small">{{ t.utr or '—' }}</td>
+        <td class="small">{{ (t.note or '')|truncate(50) }}</td>
+        <td class="mono small">
+          <a href="{{ url_for('page_transaction_detail', txn_id=t.global_payment_id or t.entity_id) }}">{{ (t.global_payment_id or t.entity_id or '')|truncate(20) }}</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="11" class="muted" style="text-align:center;padding:30px">No transactions match the current filters.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<style>
+.txn-filter-form .filter-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.txn-filter-form .filter-cell.wide { grid-column: span 2; }
+.txn-filter-form .filter-cell.filter-actions { display:flex; align-items:flex-end; }
+.filter-label {
+  display:block; font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--text-3); font-weight:700; margin-bottom:4px;
+}
+.txn-filter-form input, .txn-filter-form select {
+  width: 100%; background:var(--bg-2); border:1px solid var(--border);
+  color:var(--text-1); border-radius:6px; padding:8px 10px;
+  font-family:inherit; font-size:13px;
+}
+.txn-filter-form input:focus, .txn-filter-form select:focus {
+  outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow);
+}
+.filter-quick-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:8px; border-top:1px solid var(--border-soft); }
+.qchip {
+  background:var(--bg-2); border:1px solid var(--border); border-radius:999px;
+  padding:3px 10px; font-size:11px; color:var(--text-2); cursor:pointer;
+}
+.qchip:hover { background:var(--accent); color:white; border-color:var(--accent); }
+@media (max-width:1100px) {
+  .txn-filter-form .filter-grid { grid-template-columns: repeat(3, 1fr); }
+  .txn-filter-form .filter-cell.wide { grid-column: span 3; }
+}
+@media (max-width:700px) {
+  .txn-filter-form .filter-grid { grid-template-columns: repeat(2, 1fr); }
+  .txn-filter-form .filter-cell.wide { grid-column: span 2; }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const form = document.querySelector('.txn-filter-form');
+  if (!form) return;
+  const f = name => form.querySelector(`[name="${name}"]`);
+
+  const fmt = d => d.toISOString().slice(0, 10);
+
+  window.setRange = function(days) {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(from.getDate() - days);
+    f('date_from').value = fmt(from);
+    f('date_to').value = fmt(to);
+    form.submit();
+  };
+
+  window.setMonth = function(which) {
+    const now = new Date();
+    let from, to;
+    if (which === 'this') {
+      from = new Date(now.getFullYear(), now.getMonth(), 1);
+      to = now;
+    } else {
+      from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      to = new Date(now.getFullYear(), now.getMonth(), 0);
+    }
+    f('date_from').value = fmt(from);
+    f('date_to').value = fmt(to);
+    form.submit();
+  };
+
+  window.setAmt = function(min, max) {
+    f('amount_min').value = (min === null) ? '' : min;
+    f('amount_max').value = (max === null) ? '' : max;
+    form.submit();
+  };
+})();
+</script>
+{% endblock %}

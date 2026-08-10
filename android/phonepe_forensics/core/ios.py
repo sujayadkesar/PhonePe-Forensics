@@ -1,221 +1,28 @@
 """
-PhonePe iOS Forensics — Core Parsing Engine
-==========================================
-Handles low-level parsing primitives used by all forensic modules:
+PhonePe Forensics — iOS-only parsing primitives
+===============================================
+Apple container formats. None of this is reachable from an Android acquisition;
+it is kept separate so the Android build does not carry it and an upstream fix to
+either platform does not disturb the other.
 
-    sqlite_reader      WAL-aware read-only SQLite access
-    plist_reader       Apple plist (binary + XML)
-    BinaryCookieReader Apple Cookies.binarycookies
-    bplist_decode      NSKeyedArchiver bplist -> Python dict
-    decode_txn_id      PhonePe transaction ID -> embedded timestamp
-    Timestamp helpers  Unix-ms / Unix-s / Apple CoreData / ISO
-
-All parsers are defensive: they degrade gracefully on partial corruption,
-because forensic acquisitions frequently contain truncated or partially
-checkpointed databases.
+    read_plist / flatten_plist   Apple plist (binary + XML)
+    BinaryCookieReader           Library/Cookies/Cookies.binarycookies
+    decode_nskeyedarchiver       NSKeyedArchiver bplist -> Python structures
+    safe_decode_blob             best-effort BLOB decode (bplist / JSON / text)
+    CasePaths                    the three iOS AppDomain containers
 """
 from __future__ import annotations
 
-import hashlib
-import io
 import os
 import plistlib
-import re
-import sqlite3
 import struct
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Sequence
 
-# ---------------------------------------------------------------------------
-# Timestamp helpers
-# ---------------------------------------------------------------------------
-
-APPLE_EPOCH_OFFSET = 978_307_200          # seconds from Unix epoch to 2001-01-01
-NSDATE_REASONABLE_MIN = 100_000_000        # ~1973 in NSDate seconds
-NSDATE_REASONABLE_MAX = 2_000_000_000      # ~2033 in NSDate seconds
-
-# Sanity bounds on the final Unix-seconds value, applied after interpretation.
-# Without an upper bound, a value of 1e15 is read as milliseconds and rendered
-# as a year-33658 event that then sorts to the top of the timeline.
-TS_REASONABLE_MIN_S = 100_000_000          # 1973-03-03
-TS_REASONABLE_MAX_S = 4_102_444_800        # 2100-01-01
-
-
-def _to_dt(ts_seconds: float) -> datetime:
-    return datetime.fromtimestamp(ts_seconds, tz=timezone.utc)
-
-
-def normalize_timestamp(value: Any) -> Optional[Dict[str, Any]]:
-    """Best-effort timestamp interpreter.
-
-    PhonePe iOS data uses three formats interchangeably:
-        * Unix milliseconds  (~1.6e12 .. ~1.8e12)  — most SQLite columns
-        * Unix seconds float (~1.6e9  .. ~1.8e9)   — some columns and JSON
-        * Apple CoreData     (~6e8   .. ~9e8)      — when value < 1e10
-
-    Returns {epoch_ms, iso, source} or None on failure.
-    """
-    if value is None or value == 0:
-        return None
-    try:
-        v = float(value)
-    except (TypeError, ValueError):
-        return None
-    if v <= 0:
-        return None
-
-    # Unix milliseconds
-    if v > 1e12:
-        epoch_s = v / 1000.0
-        source = "unix_ms"
-    # Unix seconds (post-2001)
-    elif v > 1e9:
-        epoch_s = v
-        source = "unix_s"
-    # Apple CoreData (NSDate seconds since 2001-01-01)
-    elif NSDATE_REASONABLE_MIN < v < NSDATE_REASONABLE_MAX:
-        epoch_s = v + APPLE_EPOCH_OFFSET
-        source = "apple_coredata"
-    else:
-        return None
-
-    # A corrupt or misinterpreted column otherwise renders as a perfectly
-    # plausible-looking date in the year 33658. Anything outside the range a
-    # phone's data can legitimately fall in is rejected rather than displayed.
-    if not (TS_REASONABLE_MIN_S <= epoch_s <= TS_REASONABLE_MAX_S):
-        return None
-
-    try:
-        dt = _to_dt(epoch_s)
-    except (OSError, ValueError, OverflowError):
-        return None
-    return {
-        "epoch_ms": int(epoch_s * 1000),
-        # `iso` is real ISO-8601 with an explicit +00:00 offset, and `display`
-        # says UTC out loud. Every timestamp this tool emits is UTC, but saying
-        # so is what stops a report being read in local time — in IST that is a
-        # silent 5:30 error. The two fields were previously byte-identical and
-        # neither carried a zone.
-        "iso": dt.isoformat(),
-        "display": dt.strftime("%Y-%m-%d %H:%M:%S") + " UTC",
-        "source": source,
-    }
-
-
-def fmt_ts(value: Any) -> str:
-    norm = normalize_timestamp(value)
-    return norm["display"] if norm else ""
-
-
-# ---------------------------------------------------------------------------
-# Hashing
-# ---------------------------------------------------------------------------
-
-def hash_file(path: str, algo: str = "sha256", chunk: int = 65_536) -> str:
-    h = hashlib.new(algo)
-    try:
-        with open(path, "rb") as fh:
-            while True:
-                data = fh.read(chunk)
-                if not data:
-                    break
-                h.update(data)
-        return h.hexdigest()
-    except OSError:
-        return ""
-
-
-# ---------------------------------------------------------------------------
-# SQLite reader (WAL aware, read-only)
-# ---------------------------------------------------------------------------
-
-class SQLiteReader:
-    """Open SQLite databases read-only.
-
-    SQLite default behavior is to apply -wal contents on open. We rely on that
-    so that uncommitted-but-checkpointed transactions are visible. We never
-    write to the database; ``immutable=1`` would skip WAL, so we use ``mode=ro``
-    plus ``cache=private`` to avoid sharing connection state across threads.
-    """
-
-    def __init__(self, path: str):
-        self.path = path
-        # forward-slash uri form, stable across Windows & POSIX
-        uri = "file:" + path.replace("\\", "/").replace(" ", "%20") + "?mode=ro&cache=private"
-        self.conn = sqlite3.connect(uri, uri=True, check_same_thread=False)
-        self.conn.text_factory = lambda b: b.decode("utf-8", errors="replace") if isinstance(b, bytes) else b
-
-    def close(self):
-        try:
-            self.conn.close()
-        except sqlite3.Error:
-            pass
-
-    # context manager
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        self.close()
-
-    # ---- introspection ----
-    def tables(self) -> List[str]:
-        cur = self.conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
-        )
-        return [r[0] for r in cur.fetchall()]
-
-    def columns(self, table: str) -> List[str]:
-        cur = self.conn.execute(f'PRAGMA table_info("{table}")')
-        return [r[1] for r in cur.fetchall()]
-
-    def count(self, table: str) -> int:
-        try:
-            cur = self.conn.execute(f'SELECT COUNT(*) FROM "{table}"')
-            return int(cur.fetchone()[0])
-        except sqlite3.Error:
-            return -1
-
-    def has_table(self, table: str) -> bool:
-        cur = self.conn.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)
-        )
-        return cur.fetchone() is not None
-
-    # ---- queries ----
-    def query(self, sql: str, params: Sequence[Any] = ()) -> List[Dict[str, Any]]:
-        try:
-            cur = self.conn.execute(sql, params)
-            cols = [d[0] for d in cur.description] if cur.description else []
-            return [dict(zip(cols, row)) for row in cur.fetchall()]
-        except sqlite3.Error as exc:
-            return [{"_error": str(exc)}]
-
-    def iter_rows(self, table: str, columns: Optional[Sequence[str]] = None) -> Iterable[Dict[str, Any]]:
-        cols = columns or self.columns(table)
-        col_sql = ", ".join(f'"{c}"' for c in cols)
-        try:
-            cur = self.conn.execute(f'SELECT {col_sql} FROM "{table}"')
-            for row in cur:
-                yield dict(zip(cols, row))
-        except sqlite3.Error:
-            return
-
-    # ---- forensic stats ----
-    def deletion_signals(self) -> Dict[str, Any]:
-        try:
-            freelist = int(self.conn.execute("PRAGMA freelist_count").fetchone()[0])
-            page_count = int(self.conn.execute("PRAGMA page_count").fetchone()[0])
-        except sqlite3.Error:
-            return {}
-        ratio = (freelist / page_count) if page_count else 0.0
-        return {
-            "freelist_pages": freelist,
-            "total_pages": page_count,
-            "free_ratio": round(ratio, 4),
-            "deletion_intensity": "high" if ratio > 0.2 else "medium" if ratio > 0.05 else "low",
-        }
-
+from .common import (
+    APPLE_EPOCH_OFFSET, NSDATE_REASONABLE_MAX, NSDATE_REASONABLE_MIN,
+    _to_dt, find_files,
+)
 
 # ---------------------------------------------------------------------------
 # Plist reader (binary + XML)
@@ -452,93 +259,6 @@ def _try_json(text: str) -> Any:
     if text[0] in "{[":
         return json.loads(text)
     return text
-
-
-# ---------------------------------------------------------------------------
-# PhonePe transaction ID decoder
-# ---------------------------------------------------------------------------
-
-# PhonePe iOS transaction IDs follow the pattern T<YY><MM><DD><HH><MM><SS><digits>
-#   T<YYMMDD><HHMMSS><server-seq+node>  e.g. the leading 12 digits decode to a
-#   UTC timestamp; the trailing digits are an opaque server sequence + node id.
-# Group IDs use a different scheme: GP<32 hex chars>
-# Refund IDs prefix: R<TXN-ID>
-_TXN_ID_RX = re.compile(r"^[TR]?(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\d+$")
-
-
-def decode_txn_id(txn_id: Optional[str]) -> Optional[Dict[str, Any]]:
-    if not txn_id or not isinstance(txn_id, str):
-        return None
-    m = _TXN_ID_RX.match(txn_id.strip())
-    if not m:
-        return None
-    yy, mm, dd, hh, mn, ss = (int(g) for g in m.groups())
-    year = 2000 + yy if yy < 70 else 1900 + yy
-    try:
-        dt = datetime(year, mm, dd, hh, mn, ss, tzinfo=timezone.utc)
-    except ValueError:
-        return None
-    return {
-        "embedded_iso": dt.strftime("%Y-%m-%d %H:%M:%S"),
-        "embedded_epoch_ms": int(dt.timestamp() * 1000),
-        "year": year,
-        "month": mm,
-        "day": dd,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Generic helpers
-# ---------------------------------------------------------------------------
-
-def safe_int(v: Any, default: int = 0) -> int:
-    # bool is an int subclass, so a True in an amount or timestamp column would
-    # otherwise read as the value 1 — i.e. 0.01 in a paise column. A boolean is
-    # not a number here; treat it as absent.
-    if isinstance(v, bool):
-        return default
-    try:
-        return int(v)
-    except (TypeError, ValueError):
-        return default
-
-
-def safe_float(v: Any, default: float = 0.0) -> float:
-    try:
-        return float(v)
-    except (TypeError, ValueError):
-        return default
-
-
-def amount_to_rupees(paise: Any) -> Optional[float]:
-    """PhonePe stores amounts in paise (1/100 INR) as integers."""
-    n = safe_int(paise, default=-1)
-    if n < 0:
-        return None
-    return round(n / 100.0, 2)
-
-
-def first_match(rx_pattern: str, text: str) -> Optional[str]:
-    m = re.search(rx_pattern, text)
-    return m.group(1) if m else None
-
-
-def find_files(root: str, suffixes: Sequence[str]) -> List[str]:
-    out: List[str] = []
-    for r, _, files in os.walk(root):
-        for f in files:
-            for s in suffixes:
-                if f.endswith(s):
-                    out.append(os.path.join(r, f))
-                    break
-    return out
-
-
-def file_size(path: str) -> int:
-    try:
-        return os.path.getsize(path)
-    except OSError:
-        return 0
 
 
 # ---------------------------------------------------------------------------

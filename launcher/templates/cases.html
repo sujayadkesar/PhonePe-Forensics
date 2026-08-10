@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block heading %}Parsed cases{% endblock %}
+{% block subheading %}{{ total }} case{{ '' if total == 1 else 's' }} across both analysers{% endblock %}
+{% block content %}
+<div class="bar">
+  <a class="back" href="{{ url_for('home') }}">&larr; Launcher</a>
+  <span style="margin-left:auto"></span>
+  <a class="btn {{ '' if active_filter else 'primary' }}" href="{{ url_for('cases') }}">All</a>
+  {% for t in tools %}
+    <a class="btn {{ 'primary' if active_filter == t.key else '' }}"
+       href="{{ url_for('cases', platform=t.key) }}">{{ t.label }}</a>
+  {% endfor %}
+</div>
+
+{% if cases %}
+<div class="card" style="padding:6px 8px">
+  <table>
+    <thead><tr>
+      <th style="width:88px">Platform</th><th>Case</th><th>Evidence root</th>
+      <th style="width:104px">Status</th><th style="width:120px"></th>
+    </tr></thead>
+    <tbody>
+    {% for c in cases %}
+      <tr>
+        <td><span class="tag {{ c.platform }}">{{ c.platform_label }}</span></td>
+        <td>
+          <div style="font-weight:600">{{ c.name }}</div>
+          {% if c.investigator %}<div class="small muted">{{ c.investigator }}</div>{% endif %}
+          {% if c.notes %}<div class="small muted">{{ c.notes|truncate(90) }}</div>{% endif %}
+        </td>
+        <td class="mono muted small">{{ c.root or '—' }}</td>
+        <td>
+          <span class="tag {{ 'muted' if c.status != 'loaded' else c.platform }}">{{ c.status or '—' }}</span>
+        </td>
+        <td style="text-align:right">
+          <a class="btn" href="{{ url_for('open_tool', key=c.platform, to='/cases/' ~ c.id) }}">Open</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="note">
+  Each analyser keeps its own case registry, so this list is the two of them merged and
+  tagged. Opening a case hands you to the analyser that parsed it.
+</div>
+{% else %}
+<div class="card empty">
+  <p>No cases have been parsed yet.</p>
+  <p><a class="btn primary" href="{{ url_for('parse_pick') }}">Parse an extraction</a></p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}New Case — PhonePe Android Forensics{% endblock %}
+{% block heading %}Create New Case{% endblock %}
+{% block subheading %}Register a PhonePe Android acquisition for forensic analysis. Point the analyser at the extracted <span class="mono">com.phonepe.app</span> data directory.{% endblock %}
+
+{% block content %}
+
+<div class="wizard-wrap">
+
+  <!-- ---- guidance ---- -->
+  <div class="card" style="margin-bottom:20px;border-left:3px solid var(--accent)">
+    <div class="card-title" style="margin-bottom:10px">📂 Where to find the evidence folder</div>
+    <p class="muted small" style="margin-bottom:10px">
+      A full-filesystem / rooted Android extraction stores everything under one private
+      app-data directory. Point the analyser at:
+    </p>
+    <div class="guide-paths">
+      <div class="guide-path">
+        <div class="guide-path-name">com.phonepe.app</div>
+        <div class="muted small">The PhonePe package data dir. Contains <span class="mono">databases/</span> (Room SQLite —
+          <span class="mono">phonepe_core</span> holds transactions, chat, contacts, ledger), <span class="mono">shared_prefs/</span>,
+          <span class="mono">files/</span> and <span class="mono">app_webview/</span>.</div>
+        <div class="muted small mono" style="margin-top:2px">Typical location: data/data/com.phonepe.app/  (or /data/user/0/com.phonepe.app/)</div>
+      </div>
+    </div>
+    <p class="muted small" style="margin-top:10px">
+      <b>Tip:</b> Select the folder literally named <span class="mono">com.phonepe.app</span> (the one that
+      contains a <span class="mono">databases</span> sub-folder). 3 databases are SQLCipher-encrypted and are
+      recorded as present-but-not-decryptable; everything else is parsed.
+    </p>
+  </div>
+
+  <!-- ---- form ---- -->
+  <form method="post" action="{{ url_for('page_case_new') }}" id="new-case-form">
+    <input type="hidden" name="platform" value="android">
+    <input type="hidden" name="mode" value="single_root">
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px">Case Details</div>
+
+      <div class="form-row">
+        <label class="form-label">Case Name <span class="req">*</span></label>
+        <input class="form-input" type="text" name="name" value="{{ form.get('name','') }}"
+               placeholder="e.g. Suresh Kumar — FIR 123/2025" required>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Investigator (optional)</label>
+        <input class="form-input" type="text" name="investigator" value="{{ form.get('investigator','') }}"
+               placeholder="Your name / badge number">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-input" name="notes" rows="2"
+                  placeholder="Case reference, court file number, device serial...">{{ form.get('notes','') }}</textarea>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title" style="margin-bottom:16px">Evidence Folder</div>
+      <div class="form-row">
+        <label class="form-label">PhonePe app data directory (the <span class="mono">com.phonepe.app</span> folder)</label>
+        <div class="path-row">
+          <input class="form-input mono path-input" type="text" name="single_root"
+                 id="inp-single_root"
+                 value="{{ form.get('single_root','') }}"
+                 placeholder="e.g. C:\Evidence\Case123\...\data\data\com.phonepe.app">
+          <button type="button" class="btn" onclick="browseFolder('single_root')">Browse…</button>
+          <button type="button" class="btn" onclick="validatePath('single_root')">Validate</button>
+        </div>
+        <div id="hint-single_root" class="path-hint muted small"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+      <button type="submit" class="btn primary" style="min-width:160px">Create Case →</button>
+      <a href="{{ url_for('page_cases') }}" class="btn">Cancel</a>
+      <span class="muted small">Case is registered immediately. You will process evidence on the next screen.</span>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function browseFolder(field) {
+  const inp = document.getElementById('inp-' + field);
+  const hint = document.getElementById('hint-' + field);
+  if (hint) { hint.textContent = 'Opening folder picker…'; hint.style.color = 'var(--text-3)'; }
+  try {
+    const initial = inp && inp.value.trim() ? inp.value.trim() : '';
+    const r = await fetch('/cases/browse-folder', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({initial})
+    });
+    const d = await r.json();
+    if (d.cancelled) { if (hint) hint.textContent = ''; return; }
+    if (!d.ok) { if (hint) { hint.textContent = '✗ ' + d.error; hint.style.color = 'var(--danger)'; } return; }
+    if (inp) inp.value = d.path;
+    if (hint) hint.textContent = '';
+    validatePath(field);
+  } catch(e) {
+    if (hint) { hint.textContent = 'Browse failed: ' + e; hint.style.color = 'var(--danger)'; }
+  }
+}
+
+async function validatePath(field) {
+  const inp = document.getElementById('inp-' + field);
+  const hint = document.getElementById('hint-' + field);
+  if (!inp || !inp.value.trim()) { hint.textContent = 'Enter a path first.'; return; }
+  hint.textContent = 'Checking...';
+  try {
+    const r = await fetch('/cases/browse-test', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: inp.value.trim()})
+    });
+    const d = await r.json();
+    if (!d.ok) { hint.textContent = '✗ ' + d.error; hint.style.color = 'var(--danger)'; return; }
+    let msg = '✓ Directory found.';
+    let good = true;
+    if (d.looks_like_android) { msg += '  com.phonepe.app data dir detected ✓'; }
+    else { msg += '  ⚠ No databases/ or com.phonepe.app found — point at the com.phonepe.app folder.'; good = false; }
+    const preview = d.listing && d.listing.slice(0,6).join(', ') + (d.listing.length > 6 ? '…' : '');
+    if (preview) msg += `  Contents: ${preview}`;
+    hint.textContent = msg;
+    hint.style.color = good ? 'var(--success)' : 'var(--warn)';
+  } catch(e) {
+    hint.textContent = 'Validation request failed: ' + e;
+    hint.style.color = 'var(--danger)';
+  }
+}
+</script>
+{% endblock %}

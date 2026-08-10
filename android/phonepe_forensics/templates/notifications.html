@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Push / PubSub — PhonePe Android Forensics{% endblock %}
+{% block heading %}Push & PubSub Topics{% endblock %}
+{% block subheading %}{{ notifications.summary.topic_count }} topics tracked by Bullhorn (PhonePe's real-time pub-sub),
+{{ notifications.summary.stored_message_count or 0 }} delivered messages retained, of which
+{{ notifications.summary.notification_count or 0 }} are notifications the user was actually shown.{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Topics</div><div class="mvalue">{{ notifications.summary.topic_count }}</div></div>
+  <div class="metric"><div class="mlabel">Delivered messages</div><div class="mvalue">{{ notifications.summary.stored_message_count or 0 }}</div><div class="msub">messageDataStore</div></div>
+  <div class="metric"><div class="mlabel">Shown to user</div><div class="mvalue">{{ notifications.summary.notification_count or 0 }}</div><div class="msub">title/body present</div></div>
+  {% for k, v in (notifications.summary.subsystem_breakdown or {}).items() %}
+    <div class="metric"><div class="mlabel">{{ k }}</div><div class="mvalue">{{ v }}</div><div class="msub">subsystem</div></div>
+  {% endfor %}
+</div>
+
+{% if notifications.messages_view %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">Delivered notifications</div>
+  <p class="muted small">
+    Decoded from <span class="mono">BullhornDatabase.messageDataStore</span> — each row's payload is
+    base64-encoded JSON holding the template the user saw. Machine chatter (catalogue/localisation
+    sync instructions) is excluded from this table; the counts above include it.
+    {% if notifications.summary.earliest_message %}
+      Retained range {{ notifications.summary.earliest_message[:10] }} →
+      {{ notifications.summary.latest_message[:10] }}.
+    {% endif %}
+  </p>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search title, deeplink, topic…"
+           data-filter-input data-filter-target="#msgTable" data-filter-counter="#msgCount">
+    <span class="muted small" id="msgCount" style="margin-left:auto">{{ notifications.messages_view|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow-y:auto">
+  <table id="msgTable">
+    <thead><tr><th>Received</th><th>Title</th><th>Subtitle</th><th>Deeplink</th><th>Template</th><th>Topic</th></tr></thead>
+    <tbody>
+    {% for m in notifications.messages_view %}
+      <tr>
+        <td class="mono small">{{ m.created_at|ts }}</td>
+        <td class="small">{{ m.title or m.body or '—' }}</td>
+        <td class="small muted">{{ m.subtitle or '—' }}</td>
+        <td class="mono small">{{ (m.deeplink or '—')|truncate(70) }}</td>
+        <td class="small">{{ m.template or '—' }}</td>
+        <td class="mono small">{{ (m.topic_id or '—')|truncate(28) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">All Topics</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Search topic ID, subsystem…"
+           data-filter-input data-filter-target="#topicTable" data-filter-counter="#topicCount">
+    <span class="muted small" id="topicCount" style="margin-left:auto">{{ notifications.topics|length }} / {{ notifications.topics|length }}</span>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow-y:auto">
+  <table id="topicTable">
+    <thead><tr><th>Topic ID</th><th>Subsystem</th><th>Subscription</th><th>Storage</th><th class="right" title="Rows in the message operation log">Op log</th><th class="right" title="Delivered payloads retained for this topic">Delivered</th><th>Last sync</th><th>Created</th></tr></thead>
+    <tbody>
+    {% for t in notifications.topics %}
+      <tr>
+        <td class="mono small">{{ t.topic_id|truncate(40) }}</td>
+        <td><span class="tag">{{ t.subsystem }}</span></td>
+        <td>{{ t.subscription_status or '—' }}</td>
+        <td>{{ t.storage_type or '—' }}</td>
+        <td class="right mono">{{ t.raw_message_count }}</td>
+        <td class="right mono">{{ t.stored_message_count or 0 }}</td>
+        <td class="mono small">{{ t.last_sync|ts }}</td>
+        <td class="mono small">{{ t.created_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

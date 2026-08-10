@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Exports — PhonePe Android Forensics{% endblock %}
+{% block heading %}Evidence Exports{% endblock %}
+{% block subheading %}Generate deliverable artifacts: case_master.json, per-evidence CSVs, social graph, unified timeline, and a self-contained HTML evidence report.{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <p>One-click bundle: writes everything to <span class="mono">./exports/&lt;case_name&gt;/</span></p>
+  <button class="btn primary" data-export>↧ Export now</button>
+</div>
+
+{% if existing %}
+{% for e in existing %}
+<div class="card" style="margin-top:18px">
+  <div class="card-title">{{ e.case }}</div>
+  <p class="muted small">{{ e.dir }}</p>
+  <table>
+    <thead><tr><th>File</th><th class="right">Size (B)</th><th>Path</th></tr></thead>
+    <tbody>
+    {% for f in e.files %}
+      <tr>
+        <td class="mono">{{ f.name }}</td>
+        <td class="right mono">{{ f.size }}</td>
+        <td class="mono small">{{ f.path }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state"><p class="muted">No exports yet. Click "Export now" above.</p></div>
+{% endif %}
+
+{% endblock %}

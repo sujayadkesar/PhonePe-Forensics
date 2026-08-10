@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Travel Journeys — PhonePe Android Forensics{% endblock %}
+{% block heading %}{% if platform == 'android' %}User Journeys (Yatra){% else %}Travel Journeys (Yatra){% endif %}{% endblock %}
+{% block subheading %}{% if platform == 'android' %}PhonePe internal onboarding/feature-journey funnels — <b>not</b> travel bookings. {{ travel.summary.journey_count }} journeys.{% else %}{{ travel.summary.journey_count }} journeys · {{ travel.summary.action_count }} actions configured.{% endif %}{% endblock %}
+
+{% block content %}
+
+<div class="metric-grid">
+  <div class="metric"><div class="mlabel">Journeys</div><div class="mvalue">{{ travel.summary.journey_count }}</div></div>
+  <div class="metric"><div class="mlabel">Actions</div><div class="mvalue">{{ travel.summary.action_count }}</div></div>
+  {% for k, v in (travel.summary.state_breakdown or {}).items() %}
+    <div class="metric"><div class="mlabel">{{ k }}</div><div class="mvalue">{{ v }}</div><div class="msub">state</div></div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="card-title">All Journeys</div>
+  <div class="filter-bar">
+    <input type="text" placeholder="Filter…" data-filter-input data-filter-target="#jTable">
+    <select data-filter-select data-filter-target="#jTable" data-filter-column="3">
+      <option value="">State: any</option>
+      <option value="ACTIVE">ACTIVE</option>
+      <option value="SUSPENDED">SUSPENDED</option>
+    </select>
+  </div>
+  <div class="tbl-wrap-scroll" style="max-height:70vh;overflow-y:auto">
+  <table id="jTable">
+    <thead><tr><th>Name</th><th>Type</th><th>Namespace</th><th>State</th><th>Description</th><th>Created</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for j in travel.journeys %}
+      <tr>
+        <td>{{ j.name }}</td>
+        <td><span class="tag">{{ j.type }}</span></td>
+        <td>{{ j.namespace }}</td>
+        <td><span class="tag {{ (j.state or '')|lower }}">{{ j.state }}</span></td>
+        <td class="small">{{ j.description }}</td>
+        <td class="mono small">{{ j.created_at|ts }}</td>
+        <td class="mono small">{{ j.updated_at|ts }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}
